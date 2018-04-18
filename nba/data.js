@@ -1,6 +1,6 @@
 var rounds = [
   {
-    round: 'First Round',
+    name: 'First Round',
     startDate: '2018-04-14',
     endDate: '2018-04-29',
     matchups: [
@@ -44,7 +44,7 @@ var rounds = [
     ]
   },
   {
-    round: 'First Round',
+    name: 'Second Round',
     startDate: '2018-04-14',
     endDate: '2018-04-29',
     matchups: [

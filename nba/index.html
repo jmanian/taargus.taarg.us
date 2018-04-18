@@ -20,18 +20,21 @@
 
     <!-- round table -->
     <script type="text/x-template" id="round-template">
-      <table class='table table-bordered table-sm'>
-        <thead>
-          <tr>
-            <th scope='col' v-for='i in duration'>
-              4/0{{ i }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <n-matchup v-for='matchup in round.matchups' :matchup='matchup' :duration='duration' :startDate='startDate' :key='matchup.id'></n-matchup>
-        </tbody>
-      </table>
+      <div>
+        <h3>{{ round.name }}</h3>
+        <table class='table table-bordered table-sm'>
+          <thead>
+            <tr>
+              <th scope='col' v-for='i in duration'>
+                4/0{{ i }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <n-matchup v-for='matchup in round.matchups' :matchup='matchup' :duration='duration' :startDate='startDate' :key='matchup.id'></n-matchup>
+          </tbody>
+        </table>
+      </div>
     </script>
 
     <!-- root element -->
