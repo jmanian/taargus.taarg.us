@@ -5,7 +5,40 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   </head>
   <body>
+
+    <!-- game grid cells -->
+    <script type="text/x-template" id="game-template">
+      <td>{{ content }}</td>
+    </script>
+
+    <!-- matchup grid rows -->
+    <script type="text/x-template" id="matchup-template">
+      <tr>
+        <n-game v-for='(day, index) in days' :game='day' :key='String(matchup.id) + String(index)'></n-game>
+      </tr>
+    </script>
+
+    <!-- round table -->
+    <script type="text/x-template" id="round-template">
+      <table class='table table-bordered table-sm'>
+        <thead>
+          <tr>
+            <th scope='col' v-for='i in duration'>
+              4/0{{ i }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <n-matchup v-for='matchup in round.matchups' :matchup='matchup' :duration='duration' :startDate='startDate' :key='matchup.id'></n-matchup>
+        </tbody>
+      </table>
+    </script>
+
+    <!-- root element -->
     <div id="app">
+      <div class='container'>
+        <n-round v-for='round in rounds' :round='round' :key='round.id'></n-round>
+      </div>
     </div>
     <script src="data.js"></script>
     <script src="main.js"></script>

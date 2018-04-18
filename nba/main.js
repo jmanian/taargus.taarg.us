@@ -5,6 +5,7 @@ function datediff(first, second) {
 }
 
 var NGame = {
+  template: '#game-template',
   props: ['game'],
   computed: {
     content: function () {
@@ -14,11 +15,11 @@ var NGame = {
         return '...'
       }
     }
-  },
-  template: '<td>{{ content }}</td>'
+  }
 }
 
 var NMatchup = {
+  template: '#matchup-template',
   props: ['matchup', 'duration', 'startDate'],
   components: {
     'n-game': NGame
@@ -34,11 +35,11 @@ var NMatchup = {
       }
       return d
     }
-  },
-  template: "<tr><n-game v-for='(day, index) in days' :game='day' :key='String(matchup.id) + String(index)'></n-game></tr>"
+  }
 }
 
 var NRound = {
+  template: '#round-template',
   props: ['round'],
   components: {
     'n-matchup': NMatchup
@@ -47,8 +48,7 @@ var NRound = {
     startDate: function() { return new Date(this.round.startDate) },
     endDate: function() { return new Date(this.round.endDate) },
     duration: function () { return datediff(this.startDate, this.endDate) }
-  },
-  template: "<table class='table table-bordered table-sm'><thead><tr><th scope='col' v-for='i in duration'>4/0{{ i }}</th></tr></thead><tbody><n-matchup v-for='matchup in round.matchups' :matchup='matchup' :duration='duration' :startDate='startDate' :key='matchup.id'></n-matchup></tbody></table>"
+  }
 }
 
 new Vue({
@@ -60,6 +60,5 @@ new Vue({
     return {
       rounds: rounds
     }
-  },
-  template: "<div class='container'><n-round v-for='round in rounds' :round='round' :key='round.id'></n-round></div>"
+  }
 })
