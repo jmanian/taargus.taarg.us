@@ -16,6 +16,9 @@ var NGame = {
     hasGame: function () {
       return this.game != undefined
     },
+    scheduled: function () {
+      return this.game.time != undefined
+    },
     played: function () {
       return this.game.winner != undefined
     },
@@ -26,12 +29,16 @@ var NGame = {
     content: function () {
       if (this.played) {
         return this.game.winner.toUpperCase()
-      } else {
+      } else if (this.scheduled) {
         return this.game.time
+      } else {
+        return 'TBD'
       }
     },
     hover: function () {
-      return [this.game.time, 'pm', this.game.network].join(' ')
+      if (this.scheduled) {
+        return [this.game.time, 'pm', this.game.network].join(' ')
+      }
     }
   }
 }
@@ -63,9 +70,19 @@ var NRound = {
     'n-matchup': NMatchup
   },
   computed: {
-    startDate: function() { return new Date(this.round.startDate) },
-    endDate: function() { return new Date(this.round.endDate) },
-    duration: function () { return datediff(this.startDate, this.endDate) }
+    startDate: function() { return new Date(this.round.startDate + ' 00:00:00 EDT -4') },
+    endDate: function() { return new Date(this.round.endDate + ' 00:00:00 EDT -4') },
+    duration: function () { return datediff(this.startDate, this.endDate) + 1 },
+    dateLabels: function () {
+      var labels = Array(this.duration)
+      var date = new Date(this.startDate.getTime())
+      var days = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa']
+      for (var i = 0; i < this.duration; i++) {
+        labels[i] = days[date.getDay()] + ' ' + String(date.getMonth() + 1) + '/' + String(date.getDate())
+        date.setDate(date.getDate() + 1)
+      }
+      return labels
+    }
   }
 }
 
