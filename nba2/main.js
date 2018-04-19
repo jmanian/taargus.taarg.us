@@ -36,7 +36,7 @@ var NGame = {
       } else if (this.scheduled) {
         return this.game.time
       } else if (this.matchupFinished) {
-        return '.'
+        return '–'
       } else if (this.game.number <= this.minGames) {
         return 'TBD'
       } else {
