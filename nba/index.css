@@ -1,0 +1,53 @@
+body {
+    margin: 1em 5em;
+    font-size: 14pt;
+    max-width: 800px;
+}
+
+p {
+    text-align: justify;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    font-weight: bold;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+strong {
+    font-size: 1.5em;
+}
+
+.header {
+    font-size: 1.5em;
+}
+
+.artifact {
+    float: left;
+    width: 100%;
+}
+.date {
+    float: left;
+    margin-top: 1.5em;
+    font-size: 0.8em;
+    width: 70px;
+}
+.text {
+    float: left;
+    max-width: 530px;
+}
+.center {
+    text-align: center;
+}
+
+#isometric {
+    background: url('images/smokestack-syzygy.jpg');
+    border: solid 2px black;
+}
+
+#Phi {
+    display: inline-block;
+}
