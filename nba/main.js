@@ -4,16 +4,34 @@ function datediff(first, second) {
     return Math.round((second-first)/(1000*60*60*24));
 }
 
+// enable all tooltips
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
 var NGame = {
   template: '#game-template',
-  props: ['game'],
+  props: ['game', 'favorite', 'underdog'],
   computed: {
+    hasGame: function () {
+      return this.game != undefined
+    },
+    played: function () {
+      return this.game.winner != undefined
+    },
+    badgeClass: function () {
+      var suffix = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'dark'][this.game.number-1]
+      return 'badge-' + suffix
+    },
     content: function () {
-      if (this.game) {
-        return this.game.number
+      if (this.played) {
+        return this.game.winner.toUpperCase()
       } else {
-        return '...'
+        return this.game.time
       }
+    },
+    hover: function () {
+      return [this.game.time, 'pm', this.game.network].join(' ')
     }
   }
 }
