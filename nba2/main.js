@@ -31,7 +31,6 @@ var NGame = {
       return 'badge-' + suffix
     },
     content: function () {
-      console.log(this.game.number)
       if (this.played) {
         return this.game.winner.toUpperCase()
       } else if (this.scheduled) {
