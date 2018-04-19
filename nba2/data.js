@@ -311,7 +311,7 @@ var rounds = [
           {
             date: '2018-04-22',
             time: '8:30',
-            network: 'TND'
+            network: 'TNT'
           },
           {
             date: '2018-04-25'
