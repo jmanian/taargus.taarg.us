@@ -9,3 +9,8 @@ th {
 td {
   text-align: center;
 }
+
+.badge {
+  width: 42px;
+  font-size: 10pt;
+}

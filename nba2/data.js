@@ -327,18 +327,3 @@ var rounds = [
     ]
   }
 ]
-
-function matchupKey(matchup) {
-  return matchup.games.map(g => g.date).join()
-}
-
-for (i = 0; i < rounds.length; i++) {
-  round = rounds[i]
-  round.matchups.sort(function(a, b) {
-    var keyA = matchupKey(a)
-    var keyB = matchupKey(b)
-    if (keyA < keyB) return -1
-    if (keyA > keyB) return 1
-    return 0
-  })
-}

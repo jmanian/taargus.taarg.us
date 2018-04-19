@@ -7,19 +7,19 @@
   </head>
   <body>
 
-    <!-- game grid cells -->
+    <!-- game cells -->
     <script type="text/x-template" id="game-template">
       <td>
         <span class="badge badge-primary" data-toggle="tooltip" :title="hover" :class="badgeClass" v-if='hasGame'>{{ content }}</span>
       </td>
     </script>
 
-    <!-- matchup grid rows -->
+    <!-- matchup rows -->
     <script type="text/x-template" id="matchup-template">
       <tr>
         <th>{{ matchup.favorite.toUpperCase() }}</th>
         <th>{{ matchup.underdog.toUpperCase() }}</th>
-        <n-game v-for='(day, index) in days' :game='day' :favorite='matchup.favorite' :underdog='matchup.underdog' :key='String(matchup.id) + String(index)'></n-game>
+        <n-game v-for='(day, index) in days' :game='day' :favorite='matchup.favorite' :underdog='matchup.underdog' :matchupFinished='finished' :minGames='minGames' :key='String(matchup.id) + String(index)'></n-game>
       </tr>
     </script>
 
@@ -32,7 +32,9 @@
             <tr>
               <th></th><th></th>
               <th scope='col' v-for='dateLabel in dateLabels'>
-                {{ dateLabel }}
+                {{ dateLabel[0] }}
+                <br>
+                {{ dateLabel[1] }}
               </th>
             </tr>
           </thead>
