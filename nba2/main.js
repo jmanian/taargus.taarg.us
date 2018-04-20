@@ -10,15 +10,18 @@ function matchupKey(matchup) {
 
 // enable all popovers
 $(function () {
-  $('[data-toggle="popover"]').popover()
+  $('[data-toggle="tooltip"]').tooltip()
 })
 
 var NGame = {
   template: '#game-template',
   props: ['game', 'favorite', 'underdog', 'matchupFinished', 'minGames'],
   computed: {
+    isWeekend: function () {
+      return this.game == 'weekend'
+    },
     hasGame: function () {
-      return this.game != undefined
+      return this.game != undefined && !this.isWeekend
     },
     scheduled: function () {
       return this.game.time != undefined
@@ -26,8 +29,16 @@ var NGame = {
     played: function () {
       return this.game.winner != undefined
     },
+    upset: function () {
+      if (this.played) {
+        if ([3, 4, 6].indexOf(this.game.number) > -1) {
+          return this.game.winner == this.favorite
+        } else {
+          return this.game.winner == this.underdog
+        }
+      }
+    },
     badgeClass: function () {
-      var suffix = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'dark'][this.game.number-1]
       return 'game' + this.game.number
     },
     content: function () {
@@ -53,13 +64,22 @@ var NGame = {
 
 var NMatchup = {
   template: '#matchup-template',
-  props: ['matchup', 'duration', 'startDate'],
+  props: ['matchup', 'duration', 'startDate', 'weekends'],
   components: {
     'n-game': NGame
   },
   computed: {
+    teamsLabel: function () {
+      return this.matchup.favorite.toUpperCase() + ' v ' + this.matchup.underdog.toUpperCase()
+    },
+    teamsHover: function () {
+      return this.matchup.conference + ' ' + this.matchup.fseed + ' v ' + this.matchup.useed
+    },
     days: function () {
       var d = Array(this.duration)
+      for (var i = 0; i < this.weekends.length; i++) {
+        d[this.weekends[i]] = 'weekend'
+      }
       for (var i = 0; i < this.matchup.games.length; i++) {
         game = this.matchup.games[i]
         game['number'] = i + 1
@@ -115,11 +135,22 @@ var NRound = {
       var labels = Array(this.duration)
       var date = new Date(this.startDate.getTime())
       var days = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa']
+      var today = new Date()
       for (var i = 0; i < this.duration; i++) {
-        labels[i] = [days[date.getDay()], String(date.getMonth() + 1) + '/' + String(date.getDate())]
+        var isWeekend = date.getDay() == 0 || date.getDay() == 6
+        var isToday = today.getFullYear() == date.getFullYear() && today.getMonth() == date.getMonth() && today.getDate() == date.getDate()
+        labels[i] = [days[date.getDay()], String(date.getMonth() + 1) + '/' + String(date.getDate()), isToday, isWeekend]
         date.setDate(date.getDate() + 1)
       }
       return labels
+    },
+    weekends: function () {
+      var indexes = []
+      for (i = 0; i < this.dateLabels.length; i++) {
+        dateLabel = this.dateLabels[i]
+        if (dateLabel[3]) indexes.push(i)
+      }
+      return indexes
     }
   }
 }

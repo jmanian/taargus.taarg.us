@@ -11,18 +11,17 @@
 
     <!-- game cells -->
     <script type="text/x-template" id="game-template">
-      <td user-select="none" data-toggle="popover" :data-content="hover" data-trigger="hover" data-placement="top" :class="badgeClass" v-if='hasGame'>
+      <td user-select="none" data-toggle="tooltip" :title="hover" :class="[badgeClass, {upset: upset}]" v-if='hasGame'>
         {{ content }}
       </td>
-      <td v-else>
+      <td v-else :class='{ weekend: isWeekend }'>
       </td>
     </script>
 
     <!-- matchup rows -->
     <script type="text/x-template" id="matchup-template">
       <tr>
-        <th>{{ matchup.favorite.toUpperCase() }}</th>
-        <th>{{ matchup.underdog.toUpperCase() }}</th>
+        <td data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ teamsLabel }}</td>
         <n-game v-for='(day, index) in days' :game='day' :favorite='matchup.favorite' :underdog='matchup.underdog' :matchupFinished='finished' :minGames='minGames' :key='String(matchup.id) + String(index)'></n-game>
       </tr>
     </script>
@@ -34,16 +33,16 @@
         <table class='table table-bordered table-sm'>
           <thead>
             <tr>
-              <th></th><th></th>
-              <th scope='col' v-for='dateLabel in dateLabels'>
+              <td class='team'></td>
+              <td class='date' scope='col' :class='{ today: dateLabel[2], weekend: dateLabel[3] }' v-for='dateLabel in dateLabels'>
                 {{ dateLabel[0] }}
                 <br>
                 {{ dateLabel[1] }}
-              </th>
+              </td>
             </tr>
           </thead>
           <tbody>
-            <n-matchup v-for='matchup in round.matchups' :matchup='matchup' :duration='duration' :startDate='startDate' :key='matchup.id'></n-matchup>
+            <n-matchup v-for='matchup in round.matchups' :matchup='matchup' :duration='duration' :startDate='startDate' :weekends='weekends' :key='matchup.id'></n-matchup>
           </tbody>
         </table>
       </div>
