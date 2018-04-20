@@ -66,7 +66,8 @@ var rounds = [
           {
             date: '2018-04-19',
             time: '9:30',
-            network: 'TNT'
+            network: 'TNT',
+            winner: 'gsw'
           },
           {
             date: '2018-04-22',
@@ -106,7 +107,8 @@ var rounds = [
           {
             date: '2018-04-19',
             time: '9:00',
-            network: 'NBA TV'
+            network: 'NBA TV',
+            winner: 'nop'
           },
           {
             date: '2018-04-21',
