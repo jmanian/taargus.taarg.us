@@ -11,8 +11,10 @@
 
     <!-- game cells -->
     <script type="text/x-template" id="game-template">
-      <td>
-        <span class="badge badge-primary" data-toggle="tooltip" :title="hover" :class="badgeClass" v-if='hasGame'>{{ content }}</span>
+      <td user-select="none" data-toggle="popover" :data-content="hover" data-trigger="hover" data-placement="top" :class="badgeClass" v-if='hasGame'>
+        {{ content }}
+      </td>
+      <td v-else>
       </td>
     </script>
 
@@ -50,6 +52,8 @@
     <!-- root element -->
     <div id="app">
       <div class='container'>
+        <h1>NBA Playoffs Bullshit</h1>
+        <h2>2018</h2>
         <n-round v-for='round in rounds' :round='round' :key='round.id'></n-round>
       </div>
     </div>

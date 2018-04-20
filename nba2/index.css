@@ -1,13 +1,58 @@
 body {
   font-family: Helvetica Neue, Arial, sans-serif;
+  background-image: url(http://a.espncdn.com/photo/2018/0315/r341625_1296x729_16-9.jpg);
+  background-repeat: repeat;
+}
+
+h3 {
+  padding-bottom: 20px;
 }
 
 th {
   text-align: center;
+  cursor: default;
+  user-select: none;
 }
 
 td {
   text-align: center;
+  cursor: default;
+  user-select: none;
+}
+
+td.game1 {
+  background-color: #CC821D;
+  border-color: #CC821D;
+}
+
+td.game2 {
+  background-color: #998263;
+  border-color: #998263;
+}
+
+td.game3 {
+  background-color: #FF753E;
+  border-color: #FF753E;
+}
+
+td.game4 {
+  background-color: #7EFFC5;
+  border-color: #7EFFC5;
+}
+
+td.game5 {
+  background-color: #1DCC4C;
+  border-color: #1DCC4C;
+}
+
+td.game6 {
+  background-color: #CC821D;
+  border-color: #CC821D;
+}
+
+td.game7 {
+  background-color: #998263;
+  border-color: #998263;
 }
 
 .badge {

@@ -8,9 +8,9 @@ function matchupKey(matchup) {
   return matchup.games.map(g => g.date).join()
 }
 
-// enable all tooltips
+// enable all popovers
 $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
+  $('[data-toggle="popover"]').popover()
 })
 
 var NGame = {
@@ -28,7 +28,7 @@ var NGame = {
     },
     badgeClass: function () {
       var suffix = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'dark'][this.game.number-1]
-      return 'badge-' + suffix
+      return 'game' + this.game.number
     },
     content: function () {
       if (this.played) {
