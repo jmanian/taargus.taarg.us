@@ -86,8 +86,7 @@ var NMatchup = {
       return this.fwins == 4 || this.uwins == 4
     },
     minGames: function () {
-      var minMoreGames = 4 - Math.max(this.fwins, this.uwins)
-      return this.fwins + this.uwins + minMoreGames
+      return Math.min(this.fwins, this.uwins) + 4
     }
   }
 }
