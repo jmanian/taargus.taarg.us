@@ -78,3 +78,13 @@ td.game.game6 {
 td.game.game7 {
   background-color: #5BBA8B;
 }
+
+p {
+  padding-top: 30px;
+}
+
+a {
+  font-style: italic;
+  font-weight: bold;
+  color: black;
+}
