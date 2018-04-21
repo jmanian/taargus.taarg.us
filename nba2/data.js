@@ -229,7 +229,8 @@ var rounds = [
           {
             date: '2018-04-20',
             time: '9:30',
-            network: 'ESPN'
+            network: 'ESPN',
+            winner: 'mil'
           },
           {
             date: '2018-04-22',
