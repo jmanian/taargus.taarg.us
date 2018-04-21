@@ -3,75 +3,65 @@
   <head>
     <meta charset="utf-8"/>
     <title>NBA Playoffs Schedule Diagrams</title>
-    <style>
-      body {
-        background: #FFFFFF;
-      }
-      iframe {
-        /*border: 3px black solid;*/
-        border-top: 1px black solid;
-        border-left: 1px black solid;
-        border-bottom: white;
-        border-right: white;
-        overflow: hidden;
-      }
-      #image {
-        text-align: center;
-      }
-    </style>
-    <link rel="stylesheet" type="text/css" href="normalize.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
     <link rel="stylesheet" type="text/css" href="index.css" />
   </head>
   <body>
-    <h1>NBA Playoffs Schedule Diagrams</h1>
-    <h2>2018</h2>
-    <h3>Round 1</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=1621385074&amp;single=true&amp;range=B2:T13&amp;widget=false&amp;headers=false&amp;chrome=false&amp;widget=true" height="320" width="972"></iframe/>
-    <h2>2017</h2>
-    <h3>The Finals</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=1896785608&amp;single=true&amp;range=B32:V36&amp;widget=false&amp;headers=false&amp;chrome=false&amp;widget=true" height="130" width="1072"></iframe/>
-    <h3>Round 3</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=1896785608&amp;single=true&amp;range=B24:T29&amp;widget=false&amp;headers=false&amp;chrome=false&amp;widget=true" height="172" width="972"></iframe/>
-    <h3>Round 2</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=1896785608&amp;single=true&amp;range=B15:T22&amp;widget=false&amp;headers=false&amp;chrome=false&amp;widget=true" height="220" width="972"></iframe/>
-    <h3>Round 1</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=1896785608&amp;single=true&amp;range=B2:T13&amp;widget=false&amp;headers=false&amp;chrome=false&amp;widget=true" height="320" width="972"></iframe/>
-    <h2>2016</h2>
-    <h3>The Finals</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=672341&amp;single=true&amp;range=B32:V36&amp;widget=false&amp;headers=false&amp;chrome=false&amp;widget=true" height="130" width="1072"></iframe/>
-    <h3>Round 3</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=672341&amp;single=true&amp;range=B24:S29&amp;widget=false&amp;headers=false&amp;chrome=false&amp;widget=true" height="172" width="920"></iframe/>
-    <h3>Round 2</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=672341&amp;single=true&amp;range=B15:u22&amp;widget=false&amp;headers=false&amp;chrome=false&amp;widget=true" height="220" width="1024"></iframe/>
-    <h3>Round 1</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=672341&amp;single=true&amp;range=B2:T13&amp;widget=false&amp;headers=false&amp;chrome=false&amp;widget=true" height="320" width="972"></iframe/>
-    <h2>2015</h2>
-    <h3>The Finals</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=0&amp;single=true&amp;range=B32:T34&amp;widget=false&amp;headers=false&amp;chrome=false" height="91" width="972"></iframe>
-    <h3>Round 3</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=0&amp;single=true&amp;range=B24:R29&amp;widget=false&amp;headers=false&amp;chrome=false" height="162" width="872"></iframe>
-    <h3>Round 2</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=0&amp;single=true&amp;range=B15:T22&amp;widget=false&amp;headers=false&amp;chrome=false" height="218" width="972"></iframe>
-    <h3>Round 1</h3>
-    <iframe src="https://docs.google.com/spreadsheets/d/1AlAFH2q5fQkx73hMD_5WEaj3--W1sfYGUqf8iqw-r4o/pubhtml?gid=0&amp;single=true&amp;range=B2:T13&amp;widget=false&amp;headers=false&amp;chrome=false" height="320" width="972"></iframe>
-    <h2>2014</h2>
-    <h3>The Finals</h3>
-    The Spurs beat the heat in 5 games.
-    <h3>Round 3</h3>
-    <img src="2014-3.png"/>
-    <h3>Round 2</h3>
-    <img src="2014-2.png"/>
-    <h3>Round 1</h3>
-    <img src="2014-1.png"/>
-    <h2>2013</h2>
-    <h3>The Finals</h3>
-    <img src="2013-4.png"/>
-    <h3>Round 3</h3>
-    <img src="2013-3.png"/>
-    <h3>Round 2</h3>
-    <img src="2013-2.png"/>
-    <h3>Round 1</h3>
-    <img src="2013-1.png"/>
-    <em>by Jeff Manian</em>
+
+    <!-- game cells -->
+    <script type="text/x-template" id="game-template">
+      <td class='game' user-select="none" data-toggle="tooltip" :title="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
+        {{ content }}
+      </td>
+      <td v-else :class='{ weekend: isWeekend }'>
+      </td>
+    </script>
+
+    <!-- matchup rows -->
+    <script type="text/x-template" id="matchup-template">
+      <tr>
+        <td class='team' data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ matchup.favorite.toUpperCase() }}</td>
+        <td class='v' data-toggle="tooltip" data-placement='left' :title="teamsHover">—</td>
+        <td class='team' data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ matchup.underdog.toUpperCase() }}</td>
+        <n-game v-for='(day, index) in days' :game='day' :favorite='matchup.favorite' :underdog='matchup.underdog' :matchupFinished='finished' :minGames='minGames' :key='String(matchup.id) + String(index)'></n-game>
+      </tr>
+    </script>
+
+    <!-- round table -->
+    <script type="text/x-template" id="round-template">
+      <div>
+        <h3>{{ round.name }}</h3>
+        <table>
+          <thead>
+            <tr>
+              <td class='team'></td><td class='v'></td><td class='team'></td>
+              <td class='date' scope='col' :class='{ today: dateLabel[2], weekend: dateLabel[3] }' v-for='dateLabel in dateLabels'>
+                {{ dateLabel[0] }}
+                <br>
+                {{ dateLabel[1] }}
+              </td>
+            </tr>
+          </thead>
+          <tbody>
+            <n-matchup v-for='matchup in round.matchups' :matchup='matchup' :duration='duration' :startDate='startDate' :weekends='weekends' :key='matchup.id'></n-matchup>
+          </tbody>
+        </table>
+      </div>
+    </script>
+
+    <!-- root element -->
+    <div id="app">
+      <div class='container'>
+        <h1>NBA Playoffs Schedules</h1>
+        <h2>2018</h2>
+        <n-round v-for='round in rounds' :round='round' :key='round.id'></n-round>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+    <script src="data.js"></script>
+    <script src="main.js"></script>
   </body>
 </html>
