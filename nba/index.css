@@ -20,6 +20,8 @@ td {
   text-align: center;
   cursor: default;
   user-select: none;
+  font-family: monospace;
+  font-size: 12pt;
 }
 
 td.team {
@@ -28,6 +30,14 @@ td.team {
 
 td.v {
   width: 5px;
+}
+
+td.score {
+  width: 30px;
+  font-style: italic;
+  font-size: 10pt;
+  white-space: nowrap;
+  font-family: monospace;
 }
 
 td.date {

@@ -74,6 +74,15 @@ var NMatchup = {
     'n-game': NGame
   },
   computed: {
+    favoriteLabel: function () {
+      return this.matchup.favorite.toUpperCase()
+    },
+    underdogLabel: function () {
+      return this.matchup.underdog.toUpperCase()
+    },
+    scoreLabel: function () {
+      return String(this.fwins) + "–" + String(this.uwins)
+    },
     teamsHover: function () {
       return this.matchup.conference + ' ' + this.matchup.fseed + ' v ' + this.matchup.useed
     },
