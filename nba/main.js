@@ -1,6 +1,8 @@
 function datediff(first, second) {
     // Take the difference between the dates and divide by milliseconds per day.
     // Round to nearest whole number to deal with DST.
+    console.log(first)
+    console.log(second)
     return Math.round((second-first)/(1000*60*60*24));
 }
 
@@ -85,7 +87,7 @@ var NMatchup = {
       for (var i = 0; i < this.matchup.games.length; i++) {
         game = this.matchup.games[i]
         game['number'] = i + 1
-        day = datediff(this.startDate, new Date(game.date + ' 12:00:00 EDT -4'))
+        day = datediff(this.startDate, new Date(game.date + 'T12:00:00-04:00'))
         d[day] = game
       }
       return d
@@ -130,10 +132,11 @@ var NRound = {
     })
   },
   computed: {
-    startDate: function () { return new Date(this.round.startDate + ' 12:00:00 EDT -4') },
-    endDate: function () { return new Date(this.round.endDate + ' 12:00:00 EDT -4') },
+    startDate: function () { return new Date(this.round.startDate + 'T12:00:00-04:00') },
+    endDate: function () { return new Date(this.round.endDate + 'T12:00:00-04:00') },
     duration: function () { return datediff(this.startDate, this.endDate) + 1 },
     dateLabels: function () {
+      console.log(this.duration)
       var labels = Array(this.duration)
       var date = new Date(this.startDate.getTime())
       var days = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa']
