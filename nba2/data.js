@@ -188,7 +188,8 @@ var rounds = [
           {
             date: '2018-04-20',
             time: '8:00',
-            network: 'ESPN2'
+            network: 'ESPN2',
+            winner: 'was'
           },
           {
             date: '2018-04-22',
@@ -309,7 +310,8 @@ var rounds = [
           {
             date: '2018-04-20',
             time: '7:00',
-            network: 'ESPN'
+            network: 'ESPN',
+            winner: 'ind'
           },
           {
             date: '2018-04-22',
