@@ -2,20 +2,36 @@ body {
   font-family: Helvetica Neue, Arial, sans-serif;
 }
 
-h3 {
-  padding-bottom: 20px;
+h1, h2, h3 {
+  font-weight: bold;
+  padding-bottom: 16px;
 }
 
 table {
   table-layout: fixed;
+  border: 2px solid black;
+}
+
+thead {
+  border-bottom: 1px solid black;
+}
+
+td {
+  text-align: center;
+  cursor: default;
+  user-select: none;
 }
 
 td.team {
-  width: 100px;
+  width: 46px;
+}
+
+td.v {
+  width: 5px;
 }
 
 td.date {
-  /*width: 55px;*/
+  width: 52px;
 }
 
 td.date.today {
@@ -24,56 +40,41 @@ td.date.today {
 }
 
 td.weekend {
-  background-color: #CCCCCC;
+  background-color: #D5D5D5;
 }
 
-td {
-  text-align: center;
-  cursor: default;
-  user-select: none;
-  /*width: 55px;*/
+td.game {
+  font-size: 10pt;
 }
 
-td.upset {
+td.game.upset {
   font-weight: bold;
 }
 
-td.game1 {
+td.game.game1 {
   background-color: #E47D75;
-  border-color: #E47D75;
 }
 
-td.game2 {
+td.game.game2 {
   background-color: #EC9A73;
-  border-color: #EC9A73;
 }
 
-td.game3 {
+td.game.game3 {
   background-color: #F5B771;
-  border-color: #F5B771;
 }
 
-td.game4 {
+td.game.game4 {
   background-color: #FED56F;
-  border-color: #FED56F;
 }
 
-td.game5 {
+td.game.game5 {
   background-color: #C8CD76;
-  border-color: #C8CD76;
 }
 
-td.game6 {
+td.game.game6 {
   background-color: #91C480;
-  border-color: #91C480;
 }
 
-td.game7 {
+td.game.game7 {
   background-color: #5BBA8B;
-  border-color: #5BBA8B;
-}
-
-.badge {
-  width: 42px;
-  font-size: 10pt;
 }

@@ -11,7 +11,7 @@
 
     <!-- game cells -->
     <script type="text/x-template" id="game-template">
-      <td user-select="none" data-toggle="tooltip" :title="hover" :class="[badgeClass, {upset: upset}]" v-if='hasGame'>
+      <td class='game' user-select="none" data-toggle="tooltip" :title="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
         {{ content }}
       </td>
       <td v-else :class='{ weekend: isWeekend }'>
@@ -21,7 +21,9 @@
     <!-- matchup rows -->
     <script type="text/x-template" id="matchup-template">
       <tr>
-        <td data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ teamsLabel }}</td>
+        <td class='team' data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ matchup.favorite.toUpperCase() }}</td>
+        <td class='v' data-toggle="tooltip" data-placement='left' :title="teamsHover">—</td>
+        <td class='team' data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ matchup.underdog.toUpperCase() }}</td>
         <n-game v-for='(day, index) in days' :game='day' :favorite='matchup.favorite' :underdog='matchup.underdog' :matchupFinished='finished' :minGames='minGames' :key='String(matchup.id) + String(index)'></n-game>
       </tr>
     </script>
@@ -30,10 +32,10 @@
     <script type="text/x-template" id="round-template">
       <div>
         <h3>{{ round.name }}</h3>
-        <table class='table table-bordered table-sm'>
+        <table>
           <thead>
             <tr>
-              <td class='team'></td>
+              <td class='team'></td><td class='v'></td><td class='team'></td>
               <td class='date' scope='col' :class='{ today: dateLabel[2], weekend: dateLabel[3] }' v-for='dateLabel in dateLabels'>
                 {{ dateLabel[0] }}
                 <br>
@@ -51,7 +53,7 @@
     <!-- root element -->
     <div id="app">
       <div class='container'>
-        <h1>NBA Playoffs Bullshit</h1>
+        <h1>NBA Playoffs Schedules</h1>
         <h2>2018</h2>
         <n-round v-for='round in rounds' :round='round' :key='round.id'></n-round>
       </div>

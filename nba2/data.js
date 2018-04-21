@@ -1,6 +1,6 @@
 var rounds = [
   {
-    name: 'First Round',
+    name: 'Round 1',
     startDate: '2018-04-14',
     endDate: '2018-04-29',
     matchups: [

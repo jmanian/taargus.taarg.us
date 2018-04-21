@@ -26,6 +26,9 @@ var NGame = {
     scheduled: function () {
       return this.game.time != undefined
     },
+    necessary: function () {
+      return this.game.number <= this.minGames
+    },
     played: function () {
       return this.game.winner != undefined
     },
@@ -38,7 +41,7 @@ var NGame = {
         }
       }
     },
-    badgeClass: function () {
+    gameClass: function () {
       return 'game' + this.game.number
     },
     content: function () {
@@ -48,7 +51,7 @@ var NGame = {
         return this.game.time
       } else if (this.matchupFinished) {
         return '–'
-      } else if (this.game.number <= this.minGames) {
+      } else if (this.necessary) {
         return 'TBD'
       } else {
         return '?'
@@ -57,6 +60,8 @@ var NGame = {
     hover: function () {
       if (this.scheduled) {
         return [this.game.time, 'pm', this.game.network].join(' ')
+      } else if (!this.necessary) {
+        return ['if necessary']
       }
     }
   }
@@ -69,9 +74,6 @@ var NMatchup = {
     'n-game': NGame
   },
   computed: {
-    teamsLabel: function () {
-      return this.matchup.favorite.toUpperCase() + ' v ' + this.matchup.underdog.toUpperCase()
-    },
     teamsHover: function () {
       return this.matchup.conference + ' ' + this.matchup.fseed + ' v ' + this.matchup.useed
     },
