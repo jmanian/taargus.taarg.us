@@ -244,7 +244,8 @@ var rounds = [
           {
             date: '2018-04-22',
             time: '1:00',
-            network: 'ABC'
+            network: 'ABC',
+            winner: 'mil'
           },
           {
             date: '2018-04-24'
