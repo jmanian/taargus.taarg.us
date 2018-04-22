@@ -75,7 +75,8 @@ var rounds = [
           {
             date: '2018-04-22',
             time: '3:30',
-            network: 'ABC'
+            network: 'ABC',
+            winner: 'sas'
           },
           {
             date: '2018-04-24'
