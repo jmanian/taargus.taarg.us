@@ -35,7 +35,9 @@ var rounds = [
             network: 'TNT'
           },
           {
-            date: '2018-04-25'
+            date: '2018-04-25',
+            time: '9:30',
+            network: 'TNT'
           },
           {
             date: '2018-04-27'
@@ -159,7 +161,9 @@ var rounds = [
             network: 'TNT'
           },
           {
-            date: '2018-04-25'
+            date: '2018-04-25',
+            time: '9:30',
+            network: 'NBA TV'
           },
           {
             date: '2018-04-27'
@@ -200,7 +204,9 @@ var rounds = [
             network: 'TNT'
           },
           {
-            date: '2018-04-25'
+            date: '2018-04-25',
+            time: '7:00',
+            network: 'NBA TV'
           },
           {
             date: '2018-04-27'
@@ -324,7 +330,9 @@ var rounds = [
             network: 'TNT'
           },
           {
-            date: '2018-04-25'
+            date: '2018-04-25',
+            time: '7:00',
+            network: 'TNT'
           },
           {
             date: '2018-04-27'
