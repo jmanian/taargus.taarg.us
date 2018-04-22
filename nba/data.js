@@ -113,7 +113,8 @@ var rounds = [
           {
             date: '2018-04-21',
             time: '5:00',
-            network: 'TNT'
+            network: 'TNT',
+            winner: 'nop'
           },
           {
             date: '2018-04-24'
