@@ -113,6 +113,12 @@ var NMatchup = {
       }
       return count
     },
+    fwon: function () {
+      return this.fwins == 4
+    },
+    uwon: function () {
+      return this.uwins == 4
+    },
     finished: function () {
       return this.fwins == 4 || this.uwins == 4
     },

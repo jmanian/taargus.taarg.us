@@ -27,6 +27,14 @@ td.team {
   width: 44px;
 }
 
+td.team.winner {
+  font-weight: bold;
+}
+
+td.team.loser {
+  font-style: italic;
+}
+
 td.v {
   width: 5px;
 }

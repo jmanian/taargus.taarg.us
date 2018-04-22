@@ -21,9 +21,9 @@
     <!-- matchup rows -->
     <script type="text/x-template" id="matchup-template">
       <tr>
-        <td class='team' data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ favoriteLabel }}</td>
+        <td class='team' :class='{ winner: fwon, loser: uwon }' data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ favoriteLabel }}</td>
         <td class='v' data-toggle="tooltip" data-placement='left' :title="teamsHover">—</td>
-        <td class='team' data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ underdogLabel }}</td>
+        <td class='team' :class='{ winner: uwon, loser: fwon }' data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ underdogLabel }}</td>
         <td class='score'>{{ scoreLabel }} </td>
         <n-game v-for='(day, index) in days' :game='day' :favorite='matchup.favorite' :underdog='matchup.underdog' :matchupFinished='finished' :minGames='minGames' :key='String(matchup.id) + String(index)'></n-game>
       </tr>
