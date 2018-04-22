@@ -61,7 +61,7 @@ var NGame = {
       if (this.scheduled) {
         return [this.game.time, 'pm', this.game.network].join(' ')
       } else if (!this.necessary) {
-        return ['if necessary']
+        return ['If Needed']
       }
     }
   }
