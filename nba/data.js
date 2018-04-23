@@ -1,3 +1,21 @@
+var data
+
+(function($) {
+  $.ajax({
+    dataType: 'JSON',
+    url: 'https://data.nba.net/10s/prod/v1/2017/playoffsBracket.json',
+    // url: 'https://data.nba.net/prod/v1/2017/teams.json',
+    // url: 'https://data.nba.net/prod/v2/20180425/scoreboard.json',
+    // url: 'https://stats.nba.com/stats/scoreboard/?leagueId=00&gameDate=04%2F24%2F2018&dayOffset=0',
+    crossDomain: true,
+    success: function(d) {
+      // data = json
+      console.log(d)
+    }
+  })
+})(jQuery);
+console.log(data)
+
 var rounds = [
   {
     name: 'Round 1',
