@@ -79,7 +79,9 @@ var rounds = [
             winner: 'sas'
           },
           {
-            date: '2018-04-24'
+            date: '2018-04-24',
+            time: '10:30',
+            network: 'TNT'
           },
           {
             date: '2018-04-26'
@@ -250,7 +252,9 @@ var rounds = [
             winner: 'mil'
           },
           {
-            date: '2018-04-24'
+            date: '2018-04-24',
+            time: '7:00',
+            network: 'NBA TV'
           },
           {
             date: '2018-04-26'
@@ -292,7 +296,9 @@ var rounds = [
             winner: 'phi'
           },
           {
-            date: '2018-04-24'
+            date: '2018-04-24',
+            time: '8:00',
+            network: 'TNT'
           },
           {
             date: '2018-04-26'
