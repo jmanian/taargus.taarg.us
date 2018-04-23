@@ -60,7 +60,7 @@ var NGame = {
     hover: function () {
       if (this.scheduled) {
         return [this.game.time, 'pm', this.game.network].join(' ')
-      } else if (!this.necessary) {
+      } else if (!this.necessary && !this.matchupFinished) {
         return ['If Needed']
       }
     }
