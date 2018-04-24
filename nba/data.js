@@ -1,19 +1,32 @@
 var data
 
-(function($) {
-  $.ajax({
-    dataType: 'JSON',
-    url: 'https://data.nba.net/10s/prod/v1/2017/playoffsBracket.json',
-    // url: 'https://data.nba.net/prod/v1/2017/teams.json',
-    // url: 'https://data.nba.net/prod/v2/20180425/scoreboard.json',
-    // url: 'https://stats.nba.com/stats/scoreboard/?leagueId=00&gameDate=04%2F24%2F2018&dayOffset=0',
-    crossDomain: true,
-    success: function(d) {
-      // data = json
-      console.log(d)
+var xhr = new XMLHttpRequest();
+xhr.open('GET', 'https://data.nba.net/10s/prod/v1/2017/playoffsBracket.json');
+xhr.onload = function() {
+    if (xhr.status === 200) {
+        console.log(xhr)
     }
-  })
-})(jQuery);
+    else {
+        alert('Request failed.  Returned status of ' + xhr.status);
+    }
+};
+xhr.send();
+
+// (function($) {
+//   $.ajax({
+//     dataType: 'JSON',
+//     url: 'https://data.nba.net/10s/prod/v1/2017/playoffsBracket.json',
+//     // url: 'https://data.nba.net/prod/v1/2017/teams.json',
+//     // url: 'https://data.nba.net/prod/v2/20180425/scoreboard.json',
+//     // url: 'https://stats.nba.com/stats/scoreboard/?leagueId=00&gameDate=04%2F24%2F2018&dayOffset=0',
+//     // url: 'http://stats.nba.com/js/data/widgets/scores_sidebar.json',
+//     crossDomain: true,
+//     success: function(d) {
+//       // data = json
+//       console.log(d)
+//     }
+//   })
+// })(jQuery);
 console.log(data)
 
 var rounds = [
