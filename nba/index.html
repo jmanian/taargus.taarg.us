@@ -12,7 +12,7 @@
 
     <!-- game cells -->
     <script type="text/x-template" id="game-template">
-      <td class='game' user-select="none" data-toggle="tooltip" :title="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
+      <td class='game' user-select="none" v-tooltip:top="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
         {{ content }}
       </td>
       <td v-else :class='{ weekend: isWeekend }'>
@@ -22,9 +22,9 @@
     <!-- matchup rows -->
     <script type="text/x-template" id="matchup-template">
       <tr>
-        <td class='team' :class='{ winner: fwon, loser: uwon }' data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ favoriteLabel }}</td>
-        <td class='v' data-toggle="tooltip" data-placement='left' :title="teamsHover">—</td>
-        <td class='team' :class='{ winner: uwon, loser: fwon }' data-toggle="tooltip" data-placement='left' :title="teamsHover">{{ underdogLabel }}</td>
+        <td class='team' :class='{ winner: fwon, loser: uwon }' v-tooltip:left="teamsHover">{{ favoriteLabel }}</td>
+        <td class='v' v-tooltip:left="teamsHover">—</td>
+        <td class='team' :class='{ winner: uwon, loser: fwon }' v-tooltip:left="teamsHover">{{ underdogLabel }}</td>
         <td class='score'>{{ scoreLabel }} </td>
         <n-game v-for='(day, index) in days' :game='day' :favorite='matchup.favorite' :underdog='matchup.underdog' :matchupFinished='finished' :minGames='minGames' :key='String(matchup.id) + String(index)'></n-game>
       </tr>
@@ -33,7 +33,7 @@
     <!-- round table -->
     <script type="text/x-template" id="round-template">
       <div>
-        <h3>{{ round.name }}</h3>
+        <h3>{{ roundName }}</h3>
         <table>
           <thead>
             <tr>
@@ -57,13 +57,14 @@
       <div class='container'>
         <h1>NBA Playoffs Schedules</h1>
         <h2>2018</h2>
-        <n-round v-for='round in rounds' :round='round' :key='round.id'></n-round>
+        <n-round v-for='(round, index) in rounds' :round='round' :number='index' :key='round.id'></n-round>
         <p class='link'><a href='archive'>older schedules >></a></p>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
     <script src="data.js"></script>
+    <script src="fetch.js"></script>
     <script src="main.js"></script>
   </body>
 </html>

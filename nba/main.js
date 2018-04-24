@@ -8,9 +8,16 @@ function matchupKey(matchup) {
   return matchup.games.map(g => g.date).join()
 }
 
-// enable all popovers
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
+// enables tooltips in a way that allows them to update as data changes
+Vue.directive('tooltip', function(el, binding) {
+  if (binding.value == undefined) {
+    $(el).tooltip('dispose')
+  } else {
+    $(el).tooltip({
+      title: binding.value,
+      placement: binding.arg,
+    })
+  }
 })
 
 var NGame = {
@@ -24,13 +31,13 @@ var NGame = {
       return this.game != undefined && !this.isWeekend
     },
     scheduled: function () {
-      return this.game.time != undefined
+      return this.game.time != null
     },
     necessary: function () {
       return this.game.number <= this.minGames
     },
     played: function () {
-      return this.game.winner != undefined
+      return this.game.winner != null
     },
     upset: function () {
       if (this.played) {
@@ -61,7 +68,7 @@ var NGame = {
       if (this.scheduled) {
         return [this.game.time, 'pm', this.game.network].join(' ')
       } else if (!this.necessary && !this.matchupFinished) {
-        return ['If Needed']
+        return 'If Needed'
       }
     }
   }
@@ -130,7 +137,7 @@ var NMatchup = {
 
 var NRound = {
   template: '#round-template',
-  props: ['round'],
+  props: ['round', 'number'],
   components: {
     'n-matchup': NMatchup
   },
@@ -145,6 +152,13 @@ var NRound = {
     })
   },
   computed: {
+    roundName: function () {
+      if (this.number < 3) {
+        return 'Round ' + String(this.number + 1)
+      } else {
+        return 'Finals'
+      }
+    },
     startDate: function () { return new Date(this.round.startDate + 'T12:00:00-04:00') },
     endDate: function () { return new Date(this.round.endDate + 'T12:00:00-04:00') },
     duration: function () { return datediff(this.startDate, this.endDate) + 1 },
@@ -177,9 +191,12 @@ new Vue({
   components: {
     'n-round': NRound
   },
-  data() {
-    return {
-      rounds: rounds
-    }
-  }
+  data: {
+    rounds: rounds
+  },
+  updated: function () {
+  this.$nextTick(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+  })
+}
 })
