@@ -20,11 +20,26 @@ while (date < endDate) {
       }
       var broadcaster = game.watch.broadcast.broadcasters.national[0]
       if (broadcaster != undefined) g.network = broadcaster.shortName
-      if (game.vTeam.score != '' && game.hTeam.score != '') {
-        if (Number(game.vTeam.score) > Number(game.hTeam.score)) {
-          g.winner = game.vTeam.triCode
+      if (game.statusNum > 1) { // game started
+        var vscore = Number(game.vTeam.score)
+        var hscore = Number(game.hTeam.score)
+        var n = game.playoffs.gameNumInSeries
+        if (n == '3' || n == '4' || n == '6') {
+          g.fscore = vscore
+          g.uscore = hscore
         } else {
-          g.winner = game.hTeam.triCode
+          g.fscore = hscore
+          g.uscore = vscore
+        }
+        if (game.statusNum == 2) { // game ongoing
+          g.clock = game.clock
+          g.quarter = game.period.current
+        } else if (game.statusNum == 3) { // game finished
+          if (vscore > hscore) {
+            g.winner = game.vTeam.triCode
+          } else {
+            g.winner = game.hTeam.triCode
+          }
         }
       }
     })

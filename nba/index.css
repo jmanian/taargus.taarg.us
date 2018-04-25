@@ -16,11 +16,16 @@ thead {
   border-bottom: 1px solid black;
 }
 
+tr:not(.no-hover):hover {
+  background-color: rgb(227, 227, 255)
+}
+
 td {
   text-align: center;
   cursor: default;
   user-select: none;
   font-size: 12pt;
+  white-space: nowrap;
 }
 
 td.team {
@@ -43,11 +48,11 @@ td.score {
   width: 30px;
   font-style: italic;
   font-size: 10pt;
-  white-space: nowrap;
 }
 
 td.date {
   width: 52px;
+  min-width: 40px;
 }
 
 td.date.today {
@@ -56,7 +61,7 @@ td.date.today {
 }
 
 td.weekend {
-  background-color: #D5D5D5;
+  background-color: rgba(200, 200, 255, 0.5);
 }
 
 td.game {
@@ -103,4 +108,8 @@ a {
   font-style: italic;
   font-weight: bold;
   color: black;
+}
+
+.tooltip-inner {
+  white-space: pre-wrap;
 }

@@ -9,16 +9,26 @@ function matchupKey(matchup) {
 }
 
 // enables tooltips in a way that allows them to update as data changes
-Vue.directive('tooltip', function(el, binding) {
-  if (binding.value == undefined) {
+Vue.directive('tooltip', {
+  bind: addTooltip,
+  inserted: addTooltip,
+  update: addTooltip,
+  componentUpdated: addTooltip,
+  unbind (el, binding) {
+    $(el).tooltip('dispose');
+  }
+})
+
+function addTooltip(el, binding) {
+  $(el).tooltip('dispose')
+  if (binding.value != undefined) {
     $(el).tooltip('dispose')
-  } else {
     $(el).tooltip({
       title: binding.value,
       placement: binding.arg,
     })
   }
-})
+}
 
 var NGame = {
   template: '#game-template',
@@ -36,8 +46,24 @@ var NGame = {
     necessary: function () {
       return this.game.number <= this.minGames
     },
+    begun: function () {
+      return this.game.fscore != null && this.game.uscore != null
+    },
+    ongoing: function () {
+      return this.game.clock != null && this.game.quarter != null
+    },
     played: function () {
       return this.game.winner != null
+    },
+    scoreLabel: function () {
+      return this.game.fscore + '–' + this.game.uscore
+    },
+    timeAndNetwork: function () {
+      return [this.game.time, 'pm', this.game.network].join(' ')
+    },
+    gameClock: function () {
+      var ordinal = {1: '1st', 2: '2nd', 3: '3rd', 4: '4th'}[this.game.quarter]
+      return this.game.clock + ' in the ' + ordinal
     },
     upset: function () {
       if (this.played) {
@@ -54,6 +80,8 @@ var NGame = {
     content: function () {
       if (this.played) {
         return this.game.winner.toUpperCase()
+      } else if (this.begun) {
+        return this.scoreLabel
       } else if (this.scheduled) {
         return this.game.time
       } else if (this.matchupFinished) {
@@ -65,8 +93,12 @@ var NGame = {
       }
     },
     hover: function () {
-      if (this.scheduled) {
-        return [this.game.time, 'pm', this.game.network].join(' ')
+      if (this.played) {
+        return [this.timeAndNetwork, this.scoreLabel].join('\n')
+      } else if (this.ongoing) {
+        return [this.timeAndNetwork, this.gameClock].join("\n")
+      } else if (this.scheduled) {
+        return this.timeAndNetwork
       } else if (!this.necessary && !this.matchupFinished) {
         return 'If Needed'
       }

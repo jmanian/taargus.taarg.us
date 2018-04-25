@@ -1,3 +1,16 @@
+function g(date) {
+  return {
+    date: date,
+    time: null,
+    network: null,
+    winner: null,
+    fscore: null,
+    uscore: null,
+    clock: null,
+    quarter: null
+  }
+}
+
 var rounds = [
   {
     startDate: '2018-04-14',
@@ -11,48 +24,13 @@ var rounds = [
         fseed: null,
         useed: null,
         games: [
-          {
-            date: '2018-04-15',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-18',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-21',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-23',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-25',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-27',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-29',
-            time: null,
-            network: null,
-            winner: null
-          },
+          g('2018-04-15'),
+          g('2018-04-18'),
+          g('2018-04-21'),
+          g('2018-04-23'),
+          g('2018-04-25'),
+          g('2018-04-27'),
+          g('2018-04-29'),
         ]
       },
       {
@@ -63,48 +41,13 @@ var rounds = [
         fseed: null,
         useed: null,
         games: [
-          {
-            date: '2018-04-14',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-16',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-19',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-22',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-24',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-26',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-28',
-            time: null,
-            network: null,
-            winner: null
-          },
+          g('2018-04-14'),
+          g('2018-04-16'),
+          g('2018-04-19'),
+          g('2018-04-22'),
+          g('2018-04-24'),
+          g('2018-04-26'),
+          g('2018-04-28'),
         ]
       },
       {
@@ -115,48 +58,13 @@ var rounds = [
         fseed: null,
         useed: null,
         games: [
-          {
-            date: '2018-04-14',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-17',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-19',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-21',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-24',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-26',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-28',
-            time: null,
-            network: null,
-            winner: null
-          },
+          g('2018-04-14'),
+          g('2018-04-17'),
+          g('2018-04-19'),
+          g('2018-04-21'),
+          g('2018-04-24'),
+          g('2018-04-26'),
+          g('2018-04-28'),
         ]
       },
       {
@@ -167,48 +75,13 @@ var rounds = [
         fseed: null,
         useed: null,
         games: [
-          {
-            date: '2018-04-15',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-18',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-21',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-23',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-25',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-27',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-29',
-            time: null,
-            network: null,
-            winner: null
-          },
+          g('2018-04-15'),
+          g('2018-04-18'),
+          g('2018-04-21'),
+          g('2018-04-23'),
+          g('2018-04-25'),
+          g('2018-04-27'),
+          g('2018-04-29'),
         ]
       },
       {
@@ -219,48 +92,13 @@ var rounds = [
         fseed: null,
         useed: null,
         games: [
-          {
-            date: '2018-04-14',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-17',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-20',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-22',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-25',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-27',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-29',
-            time: null,
-            network: null,
-            winner: null
-          },
+          g('2018-04-14'),
+          g('2018-04-17'),
+          g('2018-04-20'),
+          g('2018-04-22'),
+          g('2018-04-25'),
+          g('2018-04-27'),
+          g('2018-04-29'),
         ]
       },
       {
@@ -271,48 +109,13 @@ var rounds = [
         fseed: null,
         useed: null,
         games: [
-          {
-            date: '2018-04-15',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-17',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-20',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-22',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-24',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-26',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-28',
-            time: null,
-            network: null,
-            winner: null
-          },
+          g('2018-04-15'),
+          g('2018-04-17'),
+          g('2018-04-20'),
+          g('2018-04-22'),
+          g('2018-04-24'),
+          g('2018-04-26'),
+          g('2018-04-28'),
         ]
       },
       {
@@ -323,48 +126,13 @@ var rounds = [
         fseed: null,
         useed: null,
         games: [
-          {
-            date: '2018-04-14',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-16',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-19',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-21',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-24',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-26',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-28',
-            time: null,
-            network: null,
-            winner: null
-          },
+          g('2018-04-14'),
+          g('2018-04-16'),
+          g('2018-04-19'),
+          g('2018-04-21'),
+          g('2018-04-24'),
+          g('2018-04-26'),
+          g('2018-04-28'),
         ]
       },
       {
@@ -375,48 +143,13 @@ var rounds = [
         fseed: null,
         useed: null,
         games: [
-          {
-            date: '2018-04-15',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-18',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-20',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-22',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-25',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-27',
-            time: null,
-            network: null,
-            winner: null
-          },
-          {
-            date: '2018-04-29',
-            time: null,
-            network: null,
-            winner: null
-          },
+          g('2018-04-15'),
+          g('2018-04-18'),
+          g('2018-04-20'),
+          g('2018-04-22'),
+          g('2018-04-25'),
+          g('2018-04-27'),
+          g('2018-04-29'),
         ]
       }
     ]
