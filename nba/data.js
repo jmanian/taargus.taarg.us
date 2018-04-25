@@ -1,358 +1,155 @@
+function g(date) {
+  return {
+    date: date,
+    time: null,
+    network: null,
+    winner: null,
+    fscore: null,
+    uscore: null,
+    clock: null,
+    quarter: null
+  }
+}
+
 var rounds = [
   {
-    name: 'Round 1',
     startDate: '2018-04-14',
     endDate: '2018-04-29',
     matchups: [
       {
-        conference: 'west',
-        favorite: 'hou',
-        underdog: 'min',
-        fseed: 1,
-        useed: 8,
+        id: '10',
+        conference: 'West',
+        favorite: 'HOU',
+        underdog: 'MIN',
+        fseed: null,
+        useed: null,
         games: [
-          {
-            date: '2018-04-15',
-            time: '9:00',
-            network: 'TNT',
-            winner: 'hou'
-          },
-          {
-            date: '2018-04-18',
-            time: '9:30',
-            network: 'TNT',
-            winner: 'hou'
-          },
-          {
-            date: '2018-04-21',
-            time: '7:30',
-            network: 'ESPN',
-            winner: 'min'
-          },
-          {
-            date: '2018-04-23',
-            time: '8:00',
-            network: 'TNT',
-            winner: 'hou'
-          },
-          {
-            date: '2018-04-25',
-            time: '9:30',
-            network: 'TNT'
-          },
-          {
-            date: '2018-04-27'
-          },
-          {
-            date: '2018-04-29'
-          },
+          g('2018-04-15'),
+          g('2018-04-18'),
+          g('2018-04-21'),
+          g('2018-04-23'),
+          g('2018-04-25'),
+          g('2018-04-27'),
+          g('2018-04-29'),
         ]
       },
       {
-        conference: 'west',
-        favorite: 'gsw',
-        underdog: 'sas',
-        fseed: 2,
-        useed: 7,
+        id: '13',
+        conference: 'West',
+        favorite: 'GSW',
+        underdog: 'SAS',
+        fseed: null,
+        useed: null,
         games: [
-          {
-            date: '2018-04-14',
-            time: '3:00',
-            network: 'ABC',
-            winner: 'gsw'
-          },
-          {
-            date: '2018-04-16',
-            time: '10:30',
-            network: 'TNT',
-            winner: 'gsw'
-          },
-          {
-            date: '2018-04-19',
-            time: '9:30',
-            network: 'TNT',
-            winner: 'gsw'
-          },
-          {
-            date: '2018-04-22',
-            time: '3:30',
-            network: 'ABC',
-            winner: 'sas'
-          },
-          {
-            date: '2018-04-24',
-            time: '10:30',
-            network: 'TNT'
-          },
-          {
-            date: '2018-04-26'
-          },
-          {
-            date: '2018-04-28'
-          },
+          g('2018-04-14'),
+          g('2018-04-16'),
+          g('2018-04-19'),
+          g('2018-04-22'),
+          g('2018-04-24'),
+          g('2018-04-26'),
+          g('2018-04-28'),
         ]
       },
       {
-        conference: 'west',
-        favorite: 'por',
-        underdog: 'nop',
-        fseed: 3,
-        useed: 6,
+        id: '12',
+        conference: 'West',
+        favorite: 'POR',
+        underdog: 'NOP',
+        fseed: null,
+        useed: null,
         games: [
-          {
-            date: '2018-04-14',
-            time: '10:30',
-            network: 'ESPN',
-            winner: 'nop'
-          },
-          {
-            date: '2018-04-17',
-            time: '10:30',
-            network: 'TNT',
-            winner: 'nop'
-          },
-          {
-            date: '2018-04-19',
-            time: '9:00',
-            network: 'NBA TV',
-            winner: 'nop'
-          },
-          {
-            date: '2018-04-21',
-            time: '5:00',
-            network: 'TNT',
-            winner: 'nop'
-          },
-          {
-            date: '2018-04-24'
-          },
-          {
-            date: '2018-04-26'
-          },
-          {
-            date: '2018-04-28'
-          },
+          g('2018-04-14'),
+          g('2018-04-17'),
+          g('2018-04-19'),
+          g('2018-04-21'),
+          g('2018-04-24'),
+          g('2018-04-26'),
+          g('2018-04-28'),
         ]
       },
       {
-        conference: 'west',
-        favorite: 'okc',
-        underdog: 'uta',
-        fseed: 4,
-        useed: 5,
+        id: '11',
+        conference: 'West',
+        favorite: 'OKC',
+        underdog: 'UTA',
+        fseed: null,
+        useed: null,
         games: [
-          {
-            date: '2018-04-15',
-            time: '6:30',
-            network: 'TNT',
-            winner: 'okc'
-          },
-          {
-            date: '2018-04-18',
-            time: '8:00',
-            network: 'NBA TV',
-            winner: 'uta'
-          },
-          {
-            date: '2018-04-21',
-            time: '10:00',
-            network: 'ESPN',
-            winner: 'uta'
-          },
-          {
-            date: '2018-04-23',
-            time: '10:30',
-            network: 'TNT',
-            winner: 'uta'
-          },
-          {
-            date: '2018-04-25',
-            time: '9:30',
-            network: 'NBA TV'
-          },
-          {
-            date: '2018-04-27'
-          },
-          {
-            date: '2018-04-29'
-          },
+          g('2018-04-15'),
+          g('2018-04-18'),
+          g('2018-04-21'),
+          g('2018-04-23'),
+          g('2018-04-25'),
+          g('2018-04-27'),
+          g('2018-04-29'),
         ]
       },
       {
-        conference: 'east',
-        favorite: 'tor',
-        underdog: 'was',
-        fseed: 1,
-        useed: 8,
+        id: '14',
+        conference: 'East',
+        favorite: 'TOR',
+        underdog: 'WAS',
+        fseed: null,
+        useed: null,
         games: [
-          {
-            date: '2018-04-14',
-            time: '5:30',
-            network: 'ESPN',
-            winner: 'tor'
-          },
-          {
-            date: '2018-04-17',
-            time: '7:00',
-            network: 'NBA TV',
-            winner: 'tor'
-          },
-          {
-            date: '2018-04-20',
-            time: '8:00',
-            network: 'ESPN2',
-            winner: 'was'
-          },
-          {
-            date: '2018-04-22',
-            time: '6:00',
-            network: 'TNT',
-            winner: 'was'
-          },
-          {
-            date: '2018-04-25',
-            time: '7:00',
-            network: 'NBA TV'
-          },
-          {
-            date: '2018-04-27'
-          },
-          {
-            date: '2018-04-29'
-          },
+          g('2018-04-14'),
+          g('2018-04-17'),
+          g('2018-04-20'),
+          g('2018-04-22'),
+          g('2018-04-25'),
+          g('2018-04-27'),
+          g('2018-04-29'),
         ]
       },
       {
-        conference: 'east',
-        favorite: 'bos',
-        underdog: 'mil',
-        fseed: 2,
-        useed: 7,
+        id: '17',
+        conference: 'East',
+        favorite: 'BOS',
+        underdog: 'MIL',
+        fseed: null,
+        useed: null,
         games: [
-          {
-            date: '2018-04-15',
-            time: '1:00',
-            network: 'TNT',
-            winner: 'bos'
-          },
-          {
-            date: '2018-04-17',
-            time: '8:00',
-            network: 'TNT',
-            winner: 'bos'
-          },
-          {
-            date: '2018-04-20',
-            time: '9:30',
-            network: 'ESPN',
-            winner: 'mil'
-          },
-          {
-            date: '2018-04-22',
-            time: '1:00',
-            network: 'ABC',
-            winner: 'mil'
-          },
-          {
-            date: '2018-04-24',
-            time: '7:00',
-            network: 'NBA TV',
-            winner: 'bos'
-          },
-          {
-            date: '2018-04-26'
-          },
-          {
-            date: '2018-04-28'
-          },
+          g('2018-04-15'),
+          g('2018-04-17'),
+          g('2018-04-20'),
+          g('2018-04-22'),
+          g('2018-04-24'),
+          g('2018-04-26'),
+          g('2018-04-28'),
         ]
       },
       {
-        conference: 'east',
-        favorite: 'phi',
-        underdog: 'mia',
-        fseed: 3,
-        useed: 6,
+        id: '16',
+        conference: 'East',
+        favorite: 'PHI',
+        underdog: 'MIA',
+        fseed: null,
+        useed: null,
         games: [
-          {
-            date: '2018-04-14',
-            time: '8:00',
-            network: 'ESPN',
-            winner: 'phi'
-          },
-          {
-            date: '2018-04-16',
-            time: '8:00',
-            network: 'TNT',
-            winner: 'mia'
-          },
-          {
-            date: '2018-04-19',
-            time: '7:00',
-            network: 'TNT',
-            winner: 'phi'
-          },
-          {
-            date: '2018-04-21',
-            time: '2:30',
-            network: 'TNT',
-            winner: 'phi'
-          },
-          {
-            date: '2018-04-24',
-            time: '8:00',
-            network: 'TNT'
-          },
-          {
-            date: '2018-04-26'
-          },
-          {
-            date: '2018-04-28'
-          },
+          g('2018-04-14'),
+          g('2018-04-16'),
+          g('2018-04-19'),
+          g('2018-04-21'),
+          g('2018-04-24'),
+          g('2018-04-26'),
+          g('2018-04-28'),
         ]
       },
       {
-        conference: 'east',
-        favorite: 'cle',
-        underdog: 'ind',
-        fseed: 4,
-        useed: 5,
+        id: '15',
+        conference: 'East',
+        favorite: 'CLE',
+        underdog: 'IND',
+        fseed: null,
+        useed: null,
         games: [
-          {
-            date: '2018-04-15',
-            time: '3:30',
-            network: 'ABC',
-            winner: 'ind'
-          },
-          {
-            date: '2018-04-18',
-            time: '7:00',
-            network: 'TNT',
-            winner: 'cle'
-          },
-          {
-            date: '2018-04-20',
-            time: '7:00',
-            network: 'ESPN',
-            winner: 'ind'
-          },
-          {
-            date: '2018-04-22',
-            time: '8:30',
-            network: 'TNT',
-            winner: 'cle'
-          },
-          {
-            date: '2018-04-25',
-            time: '7:00',
-            network: 'TNT'
-          },
-          {
-            date: '2018-04-27'
-          },
-          {
-            date: '2018-04-29'
-          },
+          g('2018-04-15'),
+          g('2018-04-18'),
+          g('2018-04-20'),
+          g('2018-04-22'),
+          g('2018-04-25'),
+          g('2018-04-27'),
+          g('2018-04-29'),
         ]
       }
     ]
