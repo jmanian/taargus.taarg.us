@@ -169,7 +169,7 @@ var NMatchup = {
 
 var NRound = {
   template: '#round-template',
-  props: ['round', 'number'],
+  props: ['round'],
   components: {
     'n-matchup': NMatchup
   },
@@ -185,8 +185,8 @@ var NRound = {
   },
   computed: {
     roundName: function () {
-      if (this.number < 3) {
-        return 'Round ' + String(this.number + 1)
+      if (this.round.number < 4) {
+        return 'Round ' + String(this.round.number)
       } else {
         return 'Finals'
       }
@@ -225,6 +225,10 @@ new Vue({
   },
   data: {
     rounds: rounds
+  },
+  created: function () {
+    // sort the rounds
+    this.rounds.sort((a, b) => a.number < b.number ? 1 : -1)
   },
   updated: function () {
   this.$nextTick(function () {

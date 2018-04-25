@@ -58,7 +58,7 @@
       <div class='container'>
         <h1>NBA Playoffs Schedules</h1>
         <h2>2018</h2>
-        <n-round v-for='(round, index) in rounds' :round='round' :number='index' :key='round.id'></n-round>
+        <n-round v-for='round in rounds' :round='round' :key='round.id'></n-round>
         <p class='link'><a href='archive'>older schedules >></a></p>
       </div>
     </div>

@@ -13,6 +13,7 @@ function g(date) {
 
 var rounds = [
   {
+    number: 1,
     startDate: '2018-04-14',
     endDate: '2018-04-29',
     matchups: [
@@ -152,6 +153,30 @@ var rounds = [
           g('2018-04-29'),
         ]
       }
+    ]
+  },
+  {
+    number: 2,
+    startDate: '2018-04-28',
+    endDate: '2018-05-13',
+    matchups: [
+      {
+        id: '21',
+        conference: 'West',
+        favorite: 'GSW',
+        underdog: 'NOP',
+        fseed: null,
+        useed: null,
+        games : [
+          g('2018-04-28'),
+          g(null),
+          g(null),
+          g(null),
+          g(null),
+          g(null),
+          g(null)
+        ]
+      },
     ]
   }
 ]
