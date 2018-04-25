@@ -256,7 +256,8 @@ var rounds = [
           {
             date: '2018-04-24',
             time: '7:00',
-            network: 'NBA TV'
+            network: 'NBA TV',
+            winner: 'bos'
           },
           {
             date: '2018-04-26'
