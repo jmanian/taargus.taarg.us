@@ -145,7 +145,11 @@ var NMatchup = {
       return this.matchup.underdog.toUpperCase()
     },
     scoreLabel: function () {
-      return String(this.fwins) + "–" + String(this.uwins)
+      if (!this.finished && this.matchup.games.some(g => g.loading)) {
+        return '...'
+      } else {
+        return String(this.fwins) + "–" + String(this.uwins)
+      }
     },
     teamsHover: function () {
       return this.matchup.conference + ' ' + this.matchup.fseed + ' v ' + this.matchup.useed
