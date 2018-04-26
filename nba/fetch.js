@@ -19,6 +19,8 @@ while (date < endDate) {
           matchup.useed = Math.max(seeda, seedb)
           // find the game
           g = matchup.games[Number(game.playoffs.gameNumInSeries) - 1]
+          // mark as not loading
+          g.loading = null
           // fill the start time
           if (game.startTimeEastern != '') {
             g.time = game.startTimeEastern.split(' ', 1)[0]

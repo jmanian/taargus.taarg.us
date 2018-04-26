@@ -65,6 +65,23 @@ var NGame = {
       var ordinal = {1: '1st', 2: '2nd', 3: '3rd', 4: '4th'}[this.game.quarter]
       return this.game.clock + ' in the ' + ordinal
     },
+    state: function () {
+      if (this.played) {
+        return 'played'
+      } else if (this.begun && this.ongoing) {
+        return 'playing'
+      } else if (this.scheduled) {
+        return 'scheduled'
+      } else if (this.necessary) {
+        return 'unscheduled'
+      } else if (this.matchupFinished) {
+        return 'notNeeded'
+      } else if (this.game.loading) {
+        return 'loading'
+      } else {
+        return 'ifNeeded'
+      }
+    },
     upset: function () {
       if (this.played) {
         if ([3, 4, 6].indexOf(this.game.number) > -1) {
@@ -78,29 +95,37 @@ var NGame = {
       return 'game' + this.game.number
     },
     content: function () {
-      if (this.played) {
-        return this.game.winner.toUpperCase()
-      } else if (this.begun) {
-        return this.scoreLabel
-      } else if (this.scheduled) {
-        return this.game.time
-      } else if (this.matchupFinished) {
-        return '–'
-      } else if (this.necessary) {
-        return 'TBD'
-      } else {
-        return '?'
+      switch (this.state) {
+        case 'loading':
+          return '...'
+        case 'notNeeded':
+          return '–'
+        case 'ifNeeded':
+          return '?'
+        case 'unscheduled':
+          return 'TBD'
+        case 'scheduled':
+          return this.game.time
+        case 'playing':
+          return this.scoreLabel
+        case 'played':
+          return this.game.winner.toUpperCase()
       }
     },
     hover: function () {
-      if (this.played) {
-        return [this.timeAndNetwork, this.scoreLabel].join('\n')
-      } else if (this.ongoing) {
-        return [this.timeAndNetwork, this.gameClock].join("\n")
-      } else if (this.scheduled) {
-        return this.timeAndNetwork
-      } else if (!this.necessary && !this.matchupFinished) {
-        return 'If Needed'
+      switch (this.state) {
+        case 'loading':
+          return 'loading...'
+        case 'notNeeded':
+          return 'Not Needed'
+        case 'ifNeeded':
+          return 'If Needed'
+        case 'scheduled':
+          return this.timeAndNetwork
+        case 'playing':
+          return [this.timeAndNetwork, this.gameClock].join("\n")
+        case 'played':
+          return [this.timeAndNetwork, this.scoreLabel].join('\n')
       }
     }
   }

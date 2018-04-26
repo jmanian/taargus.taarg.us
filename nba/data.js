@@ -7,7 +7,8 @@ function g(date) {
     fscore: null,
     uscore: null,
     clock: null,
-    quarter: null
+    quarter: null,
+    loading: true
   }
 }
 
