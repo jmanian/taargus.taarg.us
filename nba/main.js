@@ -22,7 +22,6 @@ Vue.directive('tooltip', {
 function addTooltip(el, binding) {
   $(el).tooltip('dispose')
   if (binding.value != undefined) {
-    $(el).tooltip('dispose')
     $(el).tooltip({
       title: binding.value,
       placement: binding.arg,
