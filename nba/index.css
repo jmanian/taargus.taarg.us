@@ -32,6 +32,12 @@ td {
   white-space: nowrap;
 }
 
+td.keystone {
+  font-style: italic;
+  color: gray;
+  font-family: monospace;
+}
+
 td.team {
   width: 44px;
 }

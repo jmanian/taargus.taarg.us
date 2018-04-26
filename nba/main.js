@@ -4,7 +4,7 @@ function datediff(first, second) {
     return Math.round((second-first)/(1000*60*60*24));
 }
 
-function matchupKey(matchup) {
+function matchupScheduleKey(matchup) {
   return matchup.games.map(g => g.date).join()
 }
 
@@ -209,14 +209,28 @@ var NRound = {
     'n-matchup': NMatchup
   },
   created: function () {
-    // sort the matchups
-    this.round.matchups.sort(function(a, b) {
-      var keyA = matchupKey(a)
-      var keyB = matchupKey(b)
-      if (keyA < keyB) return -1
-      if (keyA > keyB) return 1
-      return 0
+    this.round.matchups.forEach(function(matchup) {
+      matchup.scheduleSortKey = matchupScheduleKey(matchup)
     })
+    this.sort()
+  },
+  methods: {
+    sort: function () {
+      if (this.sorting != 'schedule') {
+        this.round.matchups.sort(function(a, b) {
+          if (a.scheduleSortKey < b.scheduleSortKey) return -1
+          if (a.scheduleSortKey > b.scheduleSortKey) return 1
+          return 0
+        })
+        this.sorting = 'schedule'
+      } else {
+        this.round.matchups.sort(function(a, b) {
+          if (Number(a.id) < Number(b.id)) return -1
+          else return 1
+        })
+        this.sorting = 'bracket'
+      }
+    }
   },
   computed: {
     roundName: function () {

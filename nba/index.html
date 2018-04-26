@@ -38,7 +38,8 @@
         <table>
           <thead>
             <tr class='no-hover'>
-              <td class='team'></td><td class='v'></td><td class='team'></td><td class='score'></td>
+              <td class='keystone' @click='sort' colspan="4">sort</td>
+              <!-- <td class='team'></td><td class='v'></td><td class='team'></td><td class='score'></td> -->
               <td class='date' scope='col' :class='{ today: dateLabel[2], weekend: dateLabel[3] }' v-for='dateLabel in dateLabels'>
                 {{ dateLabel[0] }}
                 <br>
