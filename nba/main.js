@@ -55,8 +55,23 @@ var NGame = {
     played: function () {
       return this.game.winner != null
     },
+    uhome: function () {
+      return [3, 4, 6].indexOf(this.game.number) > -1
+    },
     scoreLabel: function () {
       return this.game.fscore + '–' + this.game.uscore
+    },
+    fscoreLabel: function () {
+      return this.favorite + " – " + this.game.fscore
+    },
+    uscoreLabel: function () {
+      return this.underdog + " – " + this.game.uscore
+    },
+    homeScoreLabel: function () {
+      return this.uhome ? this.uscoreLabel : this.fscoreLabel
+    },
+    awayScoreLabel: function () {
+      return this.uhome ? this.fscoreLabel : this.uscoreLabel
     },
     timeAndNetwork: function () {
       return [this.game.time, 'pm', this.game.network].join(' ')
@@ -77,7 +92,11 @@ var NGame = {
       } else if (this.begun && this.ongoing) {
         return 'playing'
       } else if (this.scheduled) {
-        return 'scheduled'
+        if (this.necessary) {
+          return 'scheduledDefinite'
+        } else {
+          return 'scheduledPossible'
+        }
       } else if (this.necessary) {
         return 'unscheduled'
       } else if (this.matchupFinished) {
@@ -90,7 +109,7 @@ var NGame = {
     },
     upset: function () {
       if (this.played) {
-        if ([3, 4, 6].indexOf(this.game.number) > -1) {
+        if (this.uhome) {
           return this.game.winner == this.favorite
         } else {
           return this.game.winner == this.underdog
@@ -110,7 +129,9 @@ var NGame = {
           return '?'
         case 'unscheduled':
           return 'TBD'
-        case 'scheduled':
+        case 'scheduledPossible':
+          return this.game.time + '?'
+        case 'scheduledDefinite':
           return this.game.time
         case 'playing':
           return this.scoreLabel
@@ -126,12 +147,14 @@ var NGame = {
           return 'Not Needed'
         case 'ifNeeded':
           return 'If Needed'
-        case 'scheduled':
+        case 'scheduledPossible':
+          return ['If Needed', this.timeAndNetwork].join('\n')
+        case 'scheduledDefinite':
           return this.timeAndNetwork
         case 'playing':
-          return [this.timeAndNetwork, this.gameClock].join("\n")
+          return [this.timeAndNetwork, this.awayScoreLabel, this.homeScoreLabel, this.gameClock].join("\n")
         case 'played':
-          return [this.timeAndNetwork, this.scoreLabel].join('\n')
+          return [this.timeAndNetwork, this.awayScoreLabel, this.homeScoreLabel].join('\n')
       }
     }
   }
