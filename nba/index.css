@@ -16,6 +16,10 @@ table {
   border: 2px solid black;
 }
 
+.sort-matchups-move {
+  transition: transform 0.5s;
+}
+
 thead {
   border-bottom: 1px solid black;
 }
