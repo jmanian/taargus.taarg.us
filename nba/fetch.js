@@ -43,7 +43,7 @@ while (date < endDate) {
             }
             if (game.statusNum == 2) { // game ongoing
               g.clock = game.clock
-              g.quarter = game.period.current
+              g.period = game.period // this is an object
             } else if (game.statusNum == 3) { // game finished
               if (vscore > hscore) {
                 g.winner = game.vTeam.triCode

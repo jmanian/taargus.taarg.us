@@ -50,7 +50,7 @@ var NGame = {
       return this.game.fscore != null && this.game.uscore != null
     },
     ongoing: function () {
-      return this.game.clock != null && this.game.quarter != null
+      return this.game.clock != null && this.game.period != null
     },
     played: function () {
       return this.game.winner != null
@@ -62,8 +62,14 @@ var NGame = {
       return [this.game.time, 'pm', this.game.network].join(' ')
     },
     gameClock: function () {
-      var ordinal = {1: '1st', 2: '2nd', 3: '3rd', 4: '4th'}[this.game.quarter]
-      return this.game.clock + ' in the ' + ordinal
+      var ordinal = {1: '1st', 2: '2nd', 3: '3rd', 4: '4th'}[this.game.period.current]
+      if (this.game.period.isHalftime) {
+        return 'Halftime'
+      } else if (this.game.period.isEndOfPeriod) {
+        return 'End of ' + ordinal
+      } else {
+        return this.game.clock + ' in the ' + ordinal
+      }
     },
     state: function () {
       if (this.played) {
