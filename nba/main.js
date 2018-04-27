@@ -300,10 +300,5 @@ new Vue({
   created: function () {
     // sort the rounds
     this.rounds.sort((a, b) => a.number < b.number ? 1 : -1)
-  },
-  updated: function () {
-  this.$nextTick(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-  })
-}
+  }
 })
