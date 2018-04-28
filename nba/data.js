@@ -1,4 +1,23 @@
-function g(date) {
+function m(id, c, f, u, gs) {
+  var numNulls = 7 - gs.length
+  for (i = 0; i < numNulls; i++) {
+    gs.push(null)
+  }
+  var invisible = f == null || u == null
+  console.log(gs)
+  return {
+    id: id,
+    conference: c,
+    favorite: f,
+    underdog: u,
+    fseed: null,
+    useed: null,
+    invisible: invisible,
+    games: gs.map(g => makeGame(g))
+  }
+}
+
+function makeGame(date) {
   return {
     date: date,
     time: null,
@@ -18,142 +37,126 @@ var rounds = [
     startDate: '2018-04-14',
     endDate: '2018-04-29',
     matchups: [
-      {
-        id: '10',
-        conference: 'West',
-        favorite: 'HOU',
-        underdog: 'MIN',
-        fseed: null,
-        useed: null,
-        games: [
-          g('2018-04-15'),
-          g('2018-04-18'),
-          g('2018-04-21'),
-          g('2018-04-23'),
-          g('2018-04-25'),
-          g('2018-04-27'),
-          g('2018-04-29'),
+      m(
+        '10',
+        'West',
+        'HOU',
+        'MIN',
+        [
+          '2018-04-15',
+          '2018-04-18',
+          '2018-04-21',
+          '2018-04-23',
+          '2018-04-25',
+          '2018-04-27',
+          '2018-04-29',
         ]
-      },
-      {
-        id: '13',
-        conference: 'West',
-        favorite: 'GSW',
-        underdog: 'SAS',
-        fseed: null,
-        useed: null,
-        games: [
-          g('2018-04-14'),
-          g('2018-04-16'),
-          g('2018-04-19'),
-          g('2018-04-22'),
-          g('2018-04-24'),
-          g('2018-04-26'),
-          g('2018-04-28'),
+      ),
+      m(
+        '13',
+        'West',
+        'GSW',
+        'SAS',
+        [
+          '2018-04-14',
+          '2018-04-16',
+          '2018-04-19',
+          '2018-04-22',
+          '2018-04-24',
+          '2018-04-26',
+          '2018-04-28',
         ]
-      },
-      {
-        id: '12',
-        conference: 'West',
-        favorite: 'POR',
-        underdog: 'NOP',
-        fseed: null,
-        useed: null,
-        games: [
-          g('2018-04-14'),
-          g('2018-04-17'),
-          g('2018-04-19'),
-          g('2018-04-21'),
-          g('2018-04-24'),
-          g('2018-04-26'),
-          g('2018-04-28'),
+      ),
+      m(
+        '12',
+        'West',
+        'POR',
+        'NOP',
+        [
+          '2018-04-14',
+          '2018-04-17',
+          '2018-04-19',
+          '2018-04-21',
+          '2018-04-24',
+          '2018-04-26',
+          '2018-04-28',
         ]
-      },
-      {
-        id: '11',
-        conference: 'West',
-        favorite: 'OKC',
-        underdog: 'UTA',
-        fseed: null,
-        useed: null,
-        games: [
-          g('2018-04-15'),
-          g('2018-04-18'),
-          g('2018-04-21'),
-          g('2018-04-23'),
-          g('2018-04-25'),
-          g('2018-04-27'),
-          g('2018-04-29'),
+      ),
+      m(
+        '11',
+        'West',
+        'OKC',
+        'UTA',
+        [
+          '2018-04-15',
+          '2018-04-18',
+          '2018-04-21',
+          '2018-04-23',
+          '2018-04-25',
+          '2018-04-27',
+          '2018-04-29',
         ]
-      },
-      {
-        id: '14',
-        conference: 'East',
-        favorite: 'TOR',
-        underdog: 'WAS',
-        fseed: null,
-        useed: null,
-        games: [
-          g('2018-04-14'),
-          g('2018-04-17'),
-          g('2018-04-20'),
-          g('2018-04-22'),
-          g('2018-04-25'),
-          g('2018-04-27'),
-          g('2018-04-29'),
+      ),
+      m(
+        '14',
+        'East',
+        'TOR',
+        'WAS',
+        [
+          '2018-04-14',
+          '2018-04-17',
+          '2018-04-20',
+          '2018-04-22',
+          '2018-04-25',
+          '2018-04-27',
+          '2018-04-29',
         ]
-      },
-      {
-        id: '17',
-        conference: 'East',
-        favorite: 'BOS',
-        underdog: 'MIL',
-        fseed: null,
-        useed: null,
-        games: [
-          g('2018-04-15'),
-          g('2018-04-17'),
-          g('2018-04-20'),
-          g('2018-04-22'),
-          g('2018-04-24'),
-          g('2018-04-26'),
-          g('2018-04-28'),
+      ),
+      m(
+        '17',
+        'East',
+        'BOS',
+        'MIL',
+        [
+          '2018-04-15',
+          '2018-04-17',
+          '2018-04-20',
+          '2018-04-22',
+          '2018-04-24',
+          '2018-04-26',
+          '2018-04-28',
         ]
-      },
-      {
-        id: '16',
-        conference: 'East',
-        favorite: 'PHI',
-        underdog: 'MIA',
-        fseed: null,
-        useed: null,
-        games: [
-          g('2018-04-14'),
-          g('2018-04-16'),
-          g('2018-04-19'),
-          g('2018-04-21'),
-          g('2018-04-24'),
-          g('2018-04-26'),
-          g('2018-04-28'),
+      ),
+      m(
+        '16',
+        'East',
+        'PHI',
+        'MIA',
+        [
+          '2018-04-14',
+          '2018-04-16',
+          '2018-04-19',
+          '2018-04-21',
+          '2018-04-24',
+          '2018-04-26',
+          '2018-04-28',
         ]
-      },
-      {
-        id: '15',
-        conference: 'East',
-        favorite: 'CLE',
-        underdog: 'IND',
-        fseed: null,
-        useed: null,
-        games: [
-          g('2018-04-15'),
-          g('2018-04-18'),
-          g('2018-04-20'),
-          g('2018-04-22'),
-          g('2018-04-25'),
-          g('2018-04-27'),
-          g('2018-04-29'),
+      ),
+      m(
+        '15',
+        'East',
+        'CLE',
+        'IND',
+        [
+          '2018-04-15',
+          '2018-04-18',
+          '2018-04-20',
+          '2018-04-22',
+          '2018-04-25',
+          '2018-04-27',
+          '2018-04-29',
         ]
-      }
+      )
     ]
   },
   {
@@ -161,76 +164,40 @@ var rounds = [
     startDate: '2018-04-28',
     endDate: '2018-05-13',
     matchups: [
-      {
-        id: '20',
-        conference: 'West',
-        favorite: 'HOU',
-        underdog: 'UTA',
-        fseed: null,
-        useed: null,
-        games: [
-          g('2018-04-29'),
-          g('2018-05-02'),
-          g(null),
-          g(null),
-          g(null),
-          g(null),
-          g(null)
+      m(
+        '20',
+        'West',
+        'HOU',
+        'UTA',
+        [
+          '2018-04-29',
+          '2018-05-02',
         ]
-      },
-      {
-        id: '21',
-        conference: 'West',
-        favorite: 'GSW',
-        underdog: 'NOP',
-        fseed: null,
-        useed: null,
-        games: [
-          g('2018-04-28'),
-          g('2018-05-01'),
-          g(null),
-          g(null),
-          g(null),
-          g(null),
-          g(null)
+      ),
+      m(
+        '21',
+        'West',
+        'GSW',
+        'NOP',
+        [
+          '2018-04-28',
+          '2018-05-01',
         ]
-      },
-      {
-        id: '22',
-        conference: 'East',
-        favorite: 'TOR',
-        underdog: null,
-        fseed: null,
-        useed: null,
-        invisible: true,
-        games: [
-          g(null),
-          g(null),
-          g(null),
-          g(null),
-          g(null),
-          g(null),
-          g(null)
-        ]
-      },
-      {
-        id: '23',
-        conference: 'East',
-        favorite: null,
-        underdog: null,
-        fseed: null,
-        useed: null,
-        invisible: true,
-        games: [
-          g(null),
-          g(null),
-          g(null),
-          g(null),
-          g(null),
-          g(null),
-          g(null)
-        ]
-      },
+      ),
+      m(
+        '22',
+        'East',
+        'TOR',
+        null,
+        []
+      ),
+      m(
+        '23',
+        'East',
+        null,
+        null,
+        []
+      ),
     ]
   }
 ]
