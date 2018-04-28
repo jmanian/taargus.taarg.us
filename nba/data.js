@@ -12,6 +12,7 @@ function m(id, c, f, u, gs) {
     fseed: null,
     useed: null,
     invisible: invisible,
+    scheduleSortKey: null,
     games: gs.map(g => makeGame(g))
   }
 }

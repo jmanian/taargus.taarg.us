@@ -1,3 +1,6 @@
+// initialize scheduleSortKeys
+rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
+
 var date = rounds.map(r => new Date(r.startDate + 'T12:00:00-04:00')).reduce((r, current) => r < current ? r : current)
 var endDate = rounds.map(r => new Date(r.endDate + 'T13:00:00-04:00')).reduce((r, current) => r > current ? r : current)
 
@@ -33,7 +36,10 @@ while (date < endDate) {
           // mark as not loading
           g.loading = null
           // fill the start date
-          g.date = [game.startDateEastern.substr(0, 4), game.startDateEastern.substr(4, 2), game.startDateEastern.substr(6)].join('-')
+          if (g.date == null) {
+            g.date = [game.startDateEastern.substr(0, 4), game.startDateEastern.substr(4, 2), game.startDateEastern.substr(6)].join('-')
+            matchup.scheduleSortKey = scheduleSortKey(matchup)
+          }
           // fill the start time
           if (game.startTimeEastern != '') {
             g.time = game.startTimeEastern.split(' ', 1)[0]

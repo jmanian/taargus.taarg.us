@@ -221,9 +221,6 @@ var NRound = {
     'n-matchup': NMatchup
   },
   created: function () {
-    this.round.matchups.forEach(function(matchup) {
-      matchup.scheduleSortKey = matchup.games.map(g => g.date).join()
-    })
     this.sort()
   },
   methods: {
@@ -244,7 +241,17 @@ var NRound = {
       }
     }
   },
+  watch: {
+    totalSortIndex: function () {
+      this.sorting = null
+      this.sort()
+    }
+  },
   computed: {
+    totalSortIndex: function () {
+      // this exists just so that it can be watched for triggering a sort
+      return this.round.matchups.map(m => m.scheduleSortKey).sort().join()
+    },
     roundName: function () {
       if (this.round.number < 4) {
         return 'Round ' + String(this.round.number)
