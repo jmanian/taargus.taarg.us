@@ -1,13 +1,3 @@
-function datediff(first, second) {
-    // Take the difference between the dates and divide by milliseconds per day.
-    // Round to nearest whole number to deal with DST.
-    return Math.round((second-first)/(1000*60*60*24));
-}
-
-function matchupScheduleKey(matchup) {
-  return matchup.games.map(g => g.date).join()
-}
-
 // enables tooltips in a way that allows them to update as data changes
 Vue.directive('tooltip', {
   bind: addTooltip,
@@ -55,7 +45,7 @@ var NGame = {
       return this.game.winner != null
     },
     uhome: function () {
-      return [3, 4, 6].indexOf(this.game.number) > -1
+      return underdogHome(this.game.number)
     },
     scoreLabel: function () {
       return this.game.fscore + '–' + this.game.uscore
@@ -173,7 +163,7 @@ var NMatchup = {
       return this.matchup.underdog.toUpperCase()
     },
     scoreLabel: function () {
-      if (!this.finished && this.matchup.games.some(g => g.loading)) {
+      if (!this.finished && this.matchup.games.some(g => g.winner == null && g.loading && g.date < new Date().toISOString().split('T', 1))) {
         return '...'
       } else {
         return String(this.fwins) + "–" + String(this.uwins)
@@ -232,7 +222,7 @@ var NRound = {
   },
   created: function () {
     this.round.matchups.forEach(function(matchup) {
-      matchup.scheduleSortKey = matchupScheduleKey(matchup)
+      matchup.scheduleSortKey = matchup.games.map(g => g.date).join()
     })
     this.sort()
   },

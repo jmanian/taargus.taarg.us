@@ -12,13 +12,24 @@ while (date < endDate) {
         // find the matchup
         matchup = round.matchups.find(matchup => matchup.id == game.playoffs.seriesId)
         if (matchup != undefined) {
+          var gameNum = Number(game.playoffs.gameNumInSeries)
           // fill some matchup data
-          var seeda = Number(game.playoffs.vTeam.seedNum)
-          var seedb = Number(game.playoffs.hTeam.seedNum)
-          matchup.fseed = Math.min(seeda, seedb)
-          matchup.useed = Math.max(seeda, seedb)
+          if (underdogHome(gameNum)) {
+            matchup.favorite = game.vTeam.triCode
+            matchup.underdog = game.hTeam.triCode
+            matchup.fseed = Number(game.playoffs.vTeam.seedNum)
+            matchup.useed = Number(game.playoffs.hTeam.seedNum)
+          } else {
+            matchup.favorite = game.hTeam.triCode
+            matchup.underdog = game.vTeam.triCode
+            matchup.fseed = Number(game.playoffs.hTeam.seedNum)
+            matchup.useed = Number(game.playoffs.vTeam.seedNum)
+          }
+          if (matchup.favorite != null && matchup.underdog != null) {
+            matchup.invisible = false
+          }
           // find the game
-          g = matchup.games[Number(game.playoffs.gameNumInSeries) - 1]
+          g = matchup.games[gameNum - 1]
           // mark as not loading
           g.loading = null
           // fill the start date
