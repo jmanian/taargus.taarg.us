@@ -162,15 +162,32 @@ var rounds = [
     endDate: '2018-05-13',
     matchups: [
       {
+        id: '20',
+        conference: 'West',
+        favorite: 'HOU',
+        underdog: 'UTA',
+        fseed: null,
+        useed: null,
+        games: [
+          g('2018-04-29'),
+          g('2018-05-02'),
+          g(null),
+          g(null),
+          g(null),
+          g(null),
+          g(null)
+        ]
+      },
+      {
         id: '21',
         conference: 'West',
         favorite: 'GSW',
         underdog: 'NOP',
         fseed: null,
         useed: null,
-        games : [
+        games: [
           g('2018-04-28'),
-          g(null),
+          g('2018-05-01'),
           g(null),
           g(null),
           g(null),
