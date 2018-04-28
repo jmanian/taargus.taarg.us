@@ -17,24 +17,24 @@ while (date < endDate) {
         if (matchup != undefined) {
           var gameNum = Number(game.playoffs.gameNumInSeries)
           // fill some matchup data
-          if (underdogHome(gameNum)) {
-            matchup.favorite = game.vTeam.triCode
-            matchup.underdog = game.hTeam.triCode
-            matchup.fseed = Number(game.playoffs.vTeam.seedNum)
-            matchup.useed = Number(game.playoffs.hTeam.seedNum)
-          } else {
-            matchup.favorite = game.hTeam.triCode
-            matchup.underdog = game.vTeam.triCode
-            matchup.fseed = Number(game.playoffs.hTeam.seedNum)
-            matchup.useed = Number(game.playoffs.vTeam.seedNum)
+          if (matchup.favorite == null || matchup.underdog == null || matchup.fseed == null || matchup.useed == null) {
+            if (underdogHome(gameNum)) {
+              matchup.favorite = game.vTeam.triCode
+              matchup.underdog = game.hTeam.triCode
+              matchup.fseed = Number(game.playoffs.vTeam.seedNum)
+              matchup.useed = Number(game.playoffs.hTeam.seedNum)
+            } else {
+              matchup.favorite = game.hTeam.triCode
+              matchup.underdog = game.vTeam.triCode
+              matchup.fseed = Number(game.playoffs.hTeam.seedNum)
+              matchup.useed = Number(game.playoffs.vTeam.seedNum)
+            }
           }
-          if (matchup.favorite != null && matchup.underdog != null) {
+          if (matchup.invisible && matchup.favorite != null && matchup.underdog != null) {
             matchup.invisible = false
           }
           // find the game
           g = matchup.games[gameNum - 1]
-          // mark as not loading
-          g.loading = null
           // fill the start date
           if (g.date == null) {
             g.date = [game.startDateEastern.substr(0, 4), game.startDateEastern.substr(4, 2), game.startDateEastern.substr(6)].join('-')
@@ -71,6 +71,8 @@ while (date < endDate) {
               }
             }
           }
+          // mark as not loading
+          g.loading = null
         }
       }
     })
