@@ -21,6 +21,8 @@ while (date < endDate) {
           g = matchup.games[Number(game.playoffs.gameNumInSeries) - 1]
           // mark as not loading
           g.loading = null
+          // fill the start date
+          g.date = [game.startDateEastern.substr(0, 4), game.startDateEastern.substr(4, 2), game.startDateEastern.substr(6)].join('-')
           // fill the start time
           if (game.startTimeEastern != '') {
             g.time = game.startTimeEastern.split(' ', 1)[0]
