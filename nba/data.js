@@ -1,10 +1,9 @@
 function m(id, c, f, u, gs) {
-  var numNulls = 7 - gs.length
-  for (i = 0; i < numNulls; i++) {
+  var numMissing = 7 - gs.length
+  for (i = 0; i < numMissing; i++) {
     gs.push(null)
   }
   var invisible = f == null || u == null
-  console.log(gs)
   return {
     id: id,
     conference: c,
