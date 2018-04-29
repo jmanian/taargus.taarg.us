@@ -162,7 +162,7 @@ var rounds = [
   {
     number: 2,
     startDate: '2018-04-28',
-    endDate: '2018-05-13',
+    endDate: '2018-05-14',
     matchups: [
       m(
         '20',
