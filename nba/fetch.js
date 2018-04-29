@@ -4,11 +4,19 @@ rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKe
 var date = rounds.map(r => new Date(r.startDate + 'T12:00:00-04:00')).reduce((r, current) => r < current ? r : current)
 var endDate = rounds.map(r => new Date(r.endDate + 'T13:00:00-04:00')).reduce((r, current) => r > current ? r : current)
 
+var todayGames = []
+var now = new Date();
+var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+var pt = new Date(utc + (3600000*(-7)));
+
 while (date < endDate) {
   var endpointDate = date.toISOString().split('T', 1)[0].split('-').join('')
   var url = 'https://m95xx07048.execute-api.us-east-1.amazonaws.com/prod/games/' + endpointDate
   jQuery.getJSON(url, function (data) {
     data.games.forEach(function(game) {
+      if (Number(game.startDateEastern.substr(0, 4)) == pt.getFullYear() && Number(game.startDateEastern.substr(4, 2)) == pt.getMonth() + 1 && Number(game.startDateEastern.substr(6, 2)) == pt.getDate()) {
+        todayGames.push(game)
+      }
       // find the round
       round = rounds.find(r => r.number == Number(game.playoffs.roundNum))
       if (round != undefined) {

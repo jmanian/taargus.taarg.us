@@ -11,6 +11,45 @@
   </head>
   <body>
 
+    <!-- today game card -->
+    <script type='text/x-template' id='today-game-template'>
+      <div class='col-xl-4 col-lg-6 col-md-6 col-sm-6' style='padding-bottom: 20px'>
+        <div class='card'>
+          <div class='card-header'>
+            {{ seriesStatus }}
+          </div>
+          <div class='card-body'>
+            <span class='badge badge-danger' v-if='playing'>LIVE</span>
+            <span :class="{'text-danger': playing}">{{ timeLabel }}</span>
+            <span style='float: right;'>{{ network }}</span>
+            <br>
+            <span class='today-scores'>
+              <img :src='awayImageURL' style='height: 40px'>
+              {{ game.vTeam.triCode }}
+              <span style='float: right;' v-if='started'>{{ this.game.vTeam.score }}</span>
+              <br>
+              <img :src='homeImageURL' style='height: 40px'>
+              {{ game.hTeam.triCode }}
+              <span style='float: right;' v-if='started'>{{ this.game.hTeam.score }}</span>
+            </span>
+          </div>
+          <div class='card-footer' v-if='hasNugget'>
+            {{ nugget }}
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <!-- today card deck -->
+    <script type='text/x-template' id='today-template'>
+      <div>
+        <h3>Today's Games</h3>
+        <div class='row'>
+          <n-today-game v-for='game in games' :game='game'></n-today-game>
+        </div>
+      </div>
+    </script>
+
     <!-- game cells -->
     <script type="text/x-template" id="game-template">
       <td class='game' user-select="none" v-tooltip:top="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
@@ -58,6 +97,7 @@
       <div class='container'>
         <h1>NBA Playoffs Schedules</h1>
         <h2>2018</h2>
+        <n-today :games='todayGames' v-if='todayGames.length > 0'></n-today>
         <n-round v-for='round in rounds' :round='round' :key='round.id'></n-round>
         <p class='link'><a href='archive'>older schedules >></a></p>
       </div>

@@ -19,6 +19,68 @@ function addTooltip(el, binding) {
   }
 }
 
+var NTodayGame = {
+  template: '#today-game-template',
+  props: ['game'],
+  computed: {
+    seriesStatus: function () {
+      return "Game " + this.game.playoffs.gameNumInSeries + ' (' + this.game.playoffs.seriesSummaryText + ')'
+    },
+    started: function () {
+      return this.game.statusNum > 1
+    },
+    playing: function () {
+      return this.game.statusNum == 2
+    },
+    finished: function () {
+      return this.game.statusNum == 3
+    },
+    gameClock: function () {
+      if (this.game.period.isHalftime) {
+        return 'Halftime'
+      } else if (this.game.period.isEndOfPeriod) {
+        return 'End of ' + periodOrdinal(this.game.period.current)
+      } else {
+        return 'Q' + this.game.period.current + ' ' + this.game.clock
+      }
+    },
+    timeLabel: function () {
+      switch (this.game.statusNum) {
+        case 1:
+          return this.game.startTimeEastern
+        case 2:
+          return this.gameClock
+        case 3:
+          return 'Final'
+      }
+    },
+    network: function () {
+      var broadcaster = this.game.watch.broadcast.broadcasters.national[0]
+      if (broadcaster != undefined) return broadcaster.shortName
+    },
+    awayImageURL: function () {
+      return 'http://cdn.nba.net/assets/logos/teams/secondary/web/' + this.game.vTeam.triCode + '.svg'
+    },
+    homeImageURL: function () {
+      return 'http://cdn.nba.net/assets/logos/teams/secondary/web/' + this.game.hTeam.triCode + '.svg'
+    },
+    nugget: function () {
+      return this.game.nugget.text
+    },
+    hasNugget: function () {
+      return this.nugget != null && this.nugget != ''
+    }
+  }
+}
+
+var NToday = {
+  template: '#today-template',
+  props: ['games'],
+  components: {
+    'n-today-game': NTodayGame
+  }
+}
+
 var NGame = {
   template: '#game-template',
   props: ['game', 'favorite', 'underdog', 'matchupFinished', 'minGames'],
@@ -66,7 +128,7 @@ var NGame = {
       return [this.game.time, 'pm', this.game.network].join(' ')
     },
     gameClock: function () {
-      var ordinal = {1: '1st', 2: '2nd', 3: '3rd', 4: '4th'}[this.game.period.current]
+      var ordinal = periodOrdinal(this.game.period.current)
       if (this.game.period.isHalftime) {
         return 'Halftime'
       } else if (this.game.period.isEndOfPeriod) {
@@ -289,9 +351,11 @@ var NRound = {
 new Vue({
   el: '#app',
   components: {
+    'n-today': NToday,
     'n-round': NRound
   },
   data: {
+    todayGames: todayGames,
     rounds: rounds
   },
   created: function () {
