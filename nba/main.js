@@ -23,8 +23,11 @@ var NTodayGame = {
   template: '#today-game-template',
   props: ['game'],
   computed: {
+    gameNumber: function () {
+      return "Game " + this.game.playoffs.gameNumInSeries
+    },
     seriesStatus: function () {
-      return "Game " + this.game.playoffs.gameNumInSeries + ' (' + this.game.playoffs.seriesSummaryText + ')'
+      return this.game.playoffs.seriesSummaryText
     },
     started: function () {
       return this.game.statusNum > 1
