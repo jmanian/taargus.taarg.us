@@ -42,9 +42,9 @@ var NTodayGame = {
       if (this.game.period.isHalftime) {
         return 'Halftime'
       } else if (this.game.period.isEndOfPeriod) {
-        return 'End of ' + periodOrdinal(this.game.period.current)
+        return 'End of ' + periodName(this.game.period.current)
       } else {
-        return 'Q' + this.game.period.current + ' ' + this.game.clock
+        return periodName(this.game.period.current) + ' ' + this.game.clock
       }
     },
     timeLabel: function () {
@@ -131,13 +131,12 @@ var NGame = {
       return [this.game.time, 'pm', this.game.network].join(' ')
     },
     gameClock: function () {
-      var ordinal = periodOrdinal(this.game.period.current)
       if (this.game.period.isHalftime) {
         return 'Halftime'
       } else if (this.game.period.isEndOfPeriod) {
-        return 'End of ' + ordinal
+        return 'End of ' + periodName(this.game.period.current)
       } else {
-        return this.game.clock + ' in the ' + ordinal
+        return periodName(this.game.period.current) + ' ' + this.game.clock
       }
     },
     state: function () {

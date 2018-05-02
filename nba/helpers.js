@@ -19,15 +19,6 @@ function underdogHome(n) {
   }
 }
 
-function periodOrdinal(n) {
-  switch (n) {
-    case 1:
-      return '1st'
-    case 2:
-      return '2nd'
-    case 3:
-      return '3rd'
-    case 4:
-      return '4th'
-  }
+function periodName(n) {
+  return n > 4 ? 'OT' + (n - 4) : 'Q' + n
 }
