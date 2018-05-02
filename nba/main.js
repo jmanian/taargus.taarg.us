@@ -54,7 +54,7 @@ var NTodayGame = {
         case 2:
           return this.gameClock
         case 3:
-          return 'Final'
+          return this.game.period.current > 4 ? 'Final (' + periodName(this.game.period.current) + ')' : 'Final'
       }
     },
     network: function () {
@@ -135,8 +135,10 @@ var NGame = {
         return 'Halftime'
       } else if (this.game.period.isEndOfPeriod) {
         return 'End of ' + periodName(this.game.period.current)
-      } else {
+      } else if (!this.played) {
         return periodName(this.game.period.current) + ' ' + this.game.clock
+      } else if (this.game.period.current > 4) {
+        return periodName(this.game.period.current)
       }
     },
     state: function () {
@@ -205,9 +207,8 @@ var NGame = {
         case 'scheduledDefinite':
           return this.timeAndNetwork
         case 'playing':
-          return [this.timeAndNetwork, this.awayScoreLabel, this.homeScoreLabel, this.gameClock].join("\n")
         case 'played':
-          return [this.timeAndNetwork, this.awayScoreLabel, this.homeScoreLabel].join('\n')
+          return [this.timeAndNetwork, this.awayScoreLabel, this.homeScoreLabel, this.gameClock].join("\n")
       }
     }
   }

@@ -57,6 +57,7 @@ while (date < endDate) {
           if (broadcaster != undefined) g.network = broadcaster.shortName
 
           // fill the scores, clock, and winner
+          g.period = game.period // this is an object
           if (game.statusNum > 1) { // game started
             var vscore = Number(game.vTeam.score)
             var hscore = Number(game.hTeam.score)
@@ -70,7 +71,6 @@ while (date < endDate) {
             }
             if (game.statusNum == 2) { // game ongoing
               g.clock = game.clock
-              g.period = game.period // this is an object
             } else if (game.statusNum == 3) { // game finished
               if (vscore > hscore) {
                 g.winner = game.vTeam.triCode
