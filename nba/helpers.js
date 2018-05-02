@@ -20,5 +20,11 @@ function underdogHome(n) {
 }
 
 function periodName(n) {
-  return n > 4 ? 'OT' + (n - 4) : 'Q' + n
+  if (n <= 4) {
+    return 'Q' + n
+  } else if (n == 5) {
+    return 'OT'
+  } else {
+    return 'OT' + (n - 4)
+  }
 }
