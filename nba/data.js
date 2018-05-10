@@ -228,7 +228,7 @@ var rounds = [
   },
   {
     number: 3,
-    startDate: '2018-05-14',
+    startDate: '2018-05-13',
     endDate: '2018-05-28',
     matchups: [
       m(
@@ -239,14 +239,14 @@ var rounds = [
         [
         ]
       ),
-      // m(
-      //   '31',
-      //   'East',
-      //   '',
-      //   'CLE',
-      //   [
-      //   ]
-      // ),
+      m(
+        '31',
+        'East',
+        'BOS',
+        'CLE',
+        [
+        ]
+      ),
     ]
   }
 ]
