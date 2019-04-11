@@ -53,7 +53,7 @@ var rounds = [
         ]
       ),
       m(
-        '13',
+        '11',
         'West',
         'HOU',
         'UTA',
@@ -83,7 +83,7 @@ var rounds = [
         ]
       ),
       m(
-        '11',
+        '13',
         'West',
         'DEN',
         'SAS',
@@ -113,7 +113,7 @@ var rounds = [
         ]
       ),
       m(
-        '17',
+        '15',
         'East',
         'BOS',
         'IND',
@@ -143,7 +143,7 @@ var rounds = [
         ]
       ),
       m(
-        '15',
+        '17',
         'East',
         'TOR',
         'ORL',
