@@ -62,10 +62,10 @@ var NTodayGame = {
       if (broadcaster != undefined) return broadcaster.shortName
     },
     awayImageURL: function () {
-      return 'http://cdn.nba.net/assets/logos/teams/secondary/web/' + this.game.vTeam.triCode + '.svg'
+      return 'https://cdn.nba.net/assets/logos/teams/secondary/web/' + this.game.vTeam.triCode + '.svg'
     },
     homeImageURL: function () {
-      return 'http://cdn.nba.net/assets/logos/teams/secondary/web/' + this.game.hTeam.triCode + '.svg'
+      return 'https://cdn.nba.net/assets/logos/teams/secondary/web/' + this.game.hTeam.triCode + '.svg'
     },
     nugget: function () {
       return this.game.nugget.text
