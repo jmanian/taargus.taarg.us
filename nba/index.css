@@ -24,6 +24,13 @@ table {
   border: 2px solid black;
 }
 
+.sort-toggle-enter-active, .sort-toggle-leave-active {
+  transition: opacity 0.25s;
+}
+.sort-toggle-enter, .sort-toggle-leave-to /* .sort-toggle-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+
 .sort-matchups-move {
   transition: transform 0.5s;
 }

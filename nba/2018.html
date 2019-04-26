@@ -81,7 +81,11 @@
               <td class='keystone' @click='changeSorting' colspan="4">
                 sort
                 <br>
-                {{ currentSortName }}
+                <transition name='sort-toggle' mode='out-in'>
+                  <div :key='this.sorting'>
+                    {{ currentSortName }}
+                  </div>
+                </transition>
               </td>
               <td class='date' scope='col' :class='{ today: dateLabel[2], weekend: dateLabel[3] }' v-for='dateLabel in dateLabels'>
                 {{ dateLabel[0] }}
