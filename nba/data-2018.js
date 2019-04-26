@@ -13,6 +13,7 @@ function m(id, c, f, u, gs) {
     useed: null,
     invisible: invisible,
     scheduleSortKey: null,
+    nextGameSortKey: null,
     games: gs.map(g => makeGame(g))
   }
 }

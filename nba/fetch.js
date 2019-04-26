@@ -1,5 +1,6 @@
 // initialize scheduleSortKeys
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
+rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
 
 var date = rounds.map(r => new Date(r.startDate + 'T12:00:00-04:00')).reduce((r, current) => r < current ? r : current)
 var endDate = rounds.map(r => new Date(r.endDate + 'T13:00:00-04:00')).reduce((r, current) => r > current ? r : current)
@@ -81,6 +82,9 @@ while (date < endDate) {
           }
           // mark as not loading
           g.loading = null
+
+          // update nextGameSortKey for this matchup based on new data
+          matchup.nextGameSortKey = nextGameSortKey(matchup)
         }
       }
     })

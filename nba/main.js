@@ -285,44 +285,55 @@ var NRound = {
   components: {
     'n-matchup': NMatchup
   },
-  created: function () {
-    this.sort()
+  data: function () {
+    return {sorting: 'schedule'}
   },
   methods: {
-    sort: function () {
-      if (this.sorting != 'schedule') {
-        this.round.matchups.sort(function(a, b) {
-          if (a.scheduleSortKey < b.scheduleSortKey) return -1
-          if (a.scheduleSortKey > b.scheduleSortKey) return 1
-          return 0
-        })
+    changeSorting: function () {
+      if (this.sorting === 'bracket' || this.sorting === null || this.sorting === undefined) {
         this.sorting = 'schedule'
+      } else if (this.sorting === 'schedule') {
+        this.sorting = 'nextGame'
       } else {
-        this.round.matchups.sort(function(a, b) {
-          if (Number(a.id) < Number(b.id)) return -1
-          else return 1
-        })
         this.sorting = 'bracket'
       }
-    }
-  },
-  watch: {
-    totalSortIndex: function () {
-      this.sorting = null
-      this.sort()
-    }
+    },
   },
   computed: {
-    totalSortIndex: function () {
-      // this exists just so that it can be watched for triggering a sort
-      return this.round.matchups.map(m => m.scheduleSortKey).sort().join()
-    },
     roundName: function () {
       if (this.round.number < 4) {
         return 'Round ' + String(this.round.number)
       } else {
         return 'Finals'
       }
+    },
+    currentSortName: function () {
+      if (this.sorting === 'nextGame') return 'next game'
+      if (this.sorting === null || this.sorting === undefined) return 'schedule'
+      return this.sorting
+    },
+    // do this as a computed property so that it will get recalculated
+    // and resorted anytime any of the things it uses is changed
+    sortedMatchups: function() {
+      if (this.sorting === 'schedule' || this.sorting === null || this.sorting === undefined) {
+        this.round.matchups.sort(function(a, b) {
+          if (a.scheduleSortKey < b.scheduleSortKey) return -1
+          if (a.scheduleSortKey > b.scheduleSortKey) return 1
+          return 0
+        })
+      } else if (this.sorting === 'nextGame') {
+        this.round.matchups.sort(function(a, b) {
+          if (a.nextGameSortKey < b.nextGameSortKey) return -1
+          if (a.nextGameSortKey > b.nextGameSortKey) return 1
+          return 0
+        })
+      } else {
+        this.round.matchups.sort(function(a, b) {
+          if (Number(a.id) < Number(b.id)) return -1
+          else return 1
+        })
+      }
+      return this.round.matchups
     },
     startDate: function () { return new Date(this.round.startDate + 'T12:00:00-04:00') },
     endDate: function () { return new Date(this.round.endDate + 'T12:00:00-04:00') },

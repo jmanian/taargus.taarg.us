@@ -78,7 +78,11 @@
         <table>
           <thead>
             <tr class='no-hover'>
-              <td class='keystone' @click='sort' colspan="4">sort</td>
+              <td class='keystone' @click='changeSorting' colspan="4">
+                sort
+                <br>
+                {{ currentSortName }}
+              </td>
               <td class='date' scope='col' :class='{ today: dateLabel[2], weekend: dateLabel[3] }' v-for='dateLabel in dateLabels'>
                 {{ dateLabel[0] }}
                 <br>
@@ -87,7 +91,7 @@
             </tr>
           </thead>
           <transition-group name='sort-matchups' tag='tbody'>
-            <n-matchup v-for='matchup in round.matchups' v-if='!matchup.invisible' :matchup='matchup' :duration='duration' :startDate='startDate' :weekends='weekends' :key='matchup.id'></n-matchup>
+            <n-matchup v-for='matchup in sortedMatchups' v-if='!matchup.invisible' :matchup='matchup' :duration='duration' :startDate='startDate' :weekends='weekends' :key='matchup.id'></n-matchup>
           </transition-group>
         </table>
       </div>

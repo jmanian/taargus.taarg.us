@@ -8,6 +8,12 @@ function scheduleSortKey(matchup) {
   return matchup.games.map(g => g.date).join()
 }
 
+function nextGameSortKey(matchup) {
+  var games = matchup.games.filter(g => (g.winner == null && g.loading != true))
+  if (games === undefined || games === null || games.length === 0) return `z${scheduleSortKey(matchup)}`
+  return `x${games.map(g => g.date).join()}`
+}
+
 function underdogHome(n) {
   switch (n) {
     case 3:
