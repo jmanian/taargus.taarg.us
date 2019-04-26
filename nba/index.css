@@ -131,7 +131,11 @@ td.game.game7 {
 }
 
 p {
-  padding-top: 30px;
+  padding-top: 10px;
+}
+
+.time-zone-note {
+  font-style: italic;
 }
 
 a {
