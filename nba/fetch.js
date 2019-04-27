@@ -52,6 +52,7 @@ while (date < endDate) {
           // fill the start time
           if (game.startTimeEastern != '') {
             g.time = game.startTimeEastern.split(' ', 1)[0]
+            g.timeUTC = game.startTimeUTC
           }
           // fill the network
           var broadcaster = game.watch.broadcast.broadcasters.national[0]

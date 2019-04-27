@@ -128,7 +128,7 @@ var NGame = {
       return this.uhome ? this.fscoreLabel : this.uscoreLabel
     },
     timeAndNetwork: function () {
-      return [this.game.time, 'pm', this.game.network].join(' ')
+      return [this.localHoursMinutes, this.localAmPm, this.game.network].join(' ')
     },
     gameClock: function () {
       if (this.game.period.isHalftime) {
@@ -174,6 +174,32 @@ var NGame = {
     gameClass: function () {
       return 'game' + this.game.number
     },
+    localAmPm: function () {
+      var d = new Date(this.game.timeUTC)
+      if (d.getHours() < 12) {
+        return 'am'
+      } else {
+        return 'pm'
+      }
+    },
+    localHoursMinutes: function () {
+      var d = new Date(this.game.timeUTC)
+      var hour = d.getHours()
+      if (hour === 0) {
+        hour = 12
+      } else if (hour > 12) {
+        hour = hour -12
+      }
+      var minute = d.getMinutes()
+      return `${hour}:${minute.toString(10).padStart(2, '0')}`
+    },
+    localTimeShort: function () {
+      if (this.localAmPm === 'am') {
+        return `${this.localHoursMinutes}a`
+      } else {
+        return `${this.localHoursMinutes}p`
+      }
+    },
     content: function () {
       switch (this.state) {
         case 'loading':
@@ -185,9 +211,9 @@ var NGame = {
         case 'unscheduled':
           return 'TBD'
         case 'scheduledPossible':
-          return this.game.time + '?'
+          return this.localTimeShort + '?'
         case 'scheduledDefinite':
-          return this.game.time
+          return this.localTimeShort
         case 'playing':
           return this.scoreLabel
         case 'played':
@@ -375,5 +401,13 @@ new Vue({
   created: function () {
     // sort the rounds
     this.rounds.sort((a, b) => a.number < b.number ? 1 : -1)
+  },
+  computed: {
+    showTodaysGames: function () {
+      return this.todayGames.length > 0
+    },
+    localTimeZone: function () {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone
+    }
   }
 })
