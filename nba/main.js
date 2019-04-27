@@ -47,10 +47,17 @@ var NTodayGame = {
         return periodName(this.game.period.current) + ' ' + this.game.clock
       }
     },
+    startTimeShort: function ()  {
+      var time, amPm
+      [time, amPm] = new Date(this.game.startTimeUTC).toLocaleTimeString().split(' ')
+      // remove the seconds
+      time = time.split(':').slice(0, 2).join(':')
+      return `${time} ${amPm}`
+    },
     timeLabel: function () {
       switch (this.game.statusNum) {
         case 1:
-          return this.game.startTimeEastern
+          return this.startTimeShort
         case 2:
           return this.gameClock
         case 3:
