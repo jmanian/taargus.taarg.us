@@ -34,3 +34,11 @@ function periodName(n) {
     return 'OT' + (n - 4)
   }
 }
+
+function timeZoneName(date) {
+  var regex = /\((.+)\)/
+  var result = regex.exec(date.toString())
+  if (result) {
+    return result[1]
+  }
+}

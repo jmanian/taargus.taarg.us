@@ -414,6 +414,22 @@ new Vue({
       return this.todayGames.length > 0
     },
     localTimeZone: function () {
+      var startDate = new Date(this.rounds[this.rounds.length - 1].startDate)
+      var endDate = new Date(this.rounds[0].endDate)
+
+      var startZone = timeZoneName(startDate)
+      var endZone = timeZoneName(endDate)
+
+      if (startZone) {
+        if (startZone === endZone || !endZone) {
+          return startZone
+        } else {
+          return `${startZone} or ${endZone}`
+        }
+      } else if (endZone) {
+        return endZone
+      }
+
       return Intl.DateTimeFormat().resolvedOptions().timeZone
     }
   }
