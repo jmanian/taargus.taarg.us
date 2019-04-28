@@ -101,6 +101,16 @@
       </div>
     </script>
 
+    <!-- footer -->
+    <script type="text/x-template" id="footer-template">
+      <p class='time-zone-note'>
+        All times are in your local time zone, {{ localTimeZone }}.
+        <br>
+        However, the dates in the grids are based on the game time in Secaucus Daylight Time.
+      </p>
+      <p><a href='archive'>older schedules >></a></p>
+    </script>
+
     <!-- root element -->
     <div id="app">
       <div class='container'>
@@ -109,11 +119,7 @@
         <n-today :games='todayGames' v-if='showTodaysGames'></n-today>
         <n-round v-for='round in rounds' :round='round' :key='round.id'></n-round>
         <br>
-        <p class='time-zone-note'>
-          All times are in your local time zone, {{ localTimeZone }}.
-          <br>
-          However, the dates in the grids are based on the game time in Secaucus Daylight Time.
-        </p>
+        <n-footer :rounds='rounds'></n-footer>
         <p><a href='archive'>older schedules >></a></p>
       </div>
     </div>

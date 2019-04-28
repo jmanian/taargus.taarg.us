@@ -395,24 +395,10 @@ var NRound = {
   }
 }
 
-new Vue({
-  el: '#app',
-  components: {
-    'n-today': NToday,
-    'n-round': NRound
-  },
-  data: {
-    todayGames: todayGames,
-    rounds: rounds
-  },
-  created: function () {
-    // sort the rounds
-    this.rounds.sort((a, b) => a.number < b.number ? 1 : -1)
-  },
+var NFooter = {
+  template: '#footer-template',
+  props: ['rounds'],
   computed: {
-    showTodaysGames: function () {
-      return this.todayGames.length > 0
-    },
     localTimeZone: function () {
       var startDate = new Date(this.rounds[this.rounds.length - 1].startDate)
       var endDate = new Date(this.rounds[0].endDate)
@@ -431,6 +417,28 @@ new Vue({
       }
 
       return Intl.DateTimeFormat().resolvedOptions().timeZone
+    }
+  }
+}
+
+new Vue({
+  el: '#app',
+  components: {
+    'n-today': NToday,
+    'n-round': NRound,
+    'n-footer': NFooter
+  },
+  data: {
+    todayGames: todayGames,
+    rounds: rounds
+  },
+  created: function () {
+    // sort the rounds
+    this.rounds.sort((a, b) => a.number < b.number ? 1 : -1)
+  },
+  computed: {
+    showTodaysGames: function () {
+      return this.todayGames.length > 0
     }
   }
 })
