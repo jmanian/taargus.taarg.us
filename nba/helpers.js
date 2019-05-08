@@ -11,7 +11,7 @@ function scheduleSortKey(matchup) {
 function nextGameSortKey(matchup) {
   var games = matchup.games.filter(g => (g.winner == null && g.loading != true))
   if (games === undefined || games === null || games.length === 0) return `z${scheduleSortKey(matchup)}`
-  return `x${games.map(g => g.date).join()}`
+  return `x${games.map(g => g.timeUTC).join()}`
 }
 
 function underdogHome(n) {
