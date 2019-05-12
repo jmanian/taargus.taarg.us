@@ -227,4 +227,27 @@ var rounds = [
       ),
     ]
   },
+  {
+    number: 3,
+    startDate: '2019-05-14',
+    endDate: '2019-05-26',
+    matchups: [
+      m(
+        '30',
+        'West',
+        'GSW',
+        'POR',
+        [
+        ]
+      ),
+      m(
+        '31',
+        'East',
+        'MIL',
+        null,
+        [
+        ]
+      ),
+    ]
+  },
 ]
