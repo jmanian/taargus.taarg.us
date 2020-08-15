@@ -1,4 +1,4 @@
-// initialize scheduleSortKeys
+// initialize sort keys
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
 
@@ -84,7 +84,8 @@ while (date < endDate) {
           // mark as not loading
           g.loading = null
 
-          // update nextGameSortKey for this matchup based on new data
+          // update sort keys for this matchup based on new data (game time)
+          matchup.scheduleSortKey = scheduleSortKey(matchup)
           matchup.nextGameSortKey = nextGameSortKey(matchup)
         }
       }
