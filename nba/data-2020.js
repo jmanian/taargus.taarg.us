@@ -4,13 +4,25 @@ function m(id, c, f, u, gs) {
     gs.push(null)
   }
   var invisible = f == null || u == null
+  // temporary fix for missing seed data from NBA
+  // remove this when they start sending the seeds
+  var seeds = {
+    '10': [1, 8],
+    '11': [4, 5],
+    '12': [3, 6],
+    '13': [2, 7],
+    '14': [1, 8],
+    '15': [4, 5],
+    '16': [3, 6],
+    '17': [2, 7],
+  }
   return {
     id: id,
     conference: c,
     favorite: f,
     underdog: u,
-    fseed: null,
-    useed: null,
+    fseed: seeds[id][0],
+    useed: seeds[id][1],
     invisible: invisible,
     scheduleSortKey: null,
     nextGameSortKey: null,
