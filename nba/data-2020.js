@@ -54,7 +54,7 @@ var rounds = [
         '10',
         'West',
         'LAL',
-        'TBD',
+        'POR',
         [
 
         ]
