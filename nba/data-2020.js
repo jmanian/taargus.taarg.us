@@ -47,7 +47,7 @@ function makeGame(date) {
 var rounds = [
   {
     number: 1,
-    startDate: '2020-08-15',
+    startDate: '2020-08-17',
     endDate: '2020-08-30',
     matchups: [
       m(
