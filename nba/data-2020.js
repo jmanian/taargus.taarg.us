@@ -4,25 +4,13 @@ function m(id, c, f, u, gs) {
     gs.push(null)
   }
   var invisible = f == null || u == null
-  // temporary fix for missing seed data from NBA
-  // remove this when they start sending the seeds
-  var seeds = {
-    '10': [1, 8],
-    '11': [4, 5],
-    '12': [3, 6],
-    '13': [2, 7],
-    '14': [1, 8],
-    '15': [4, 5],
-    '16': [3, 6],
-    '17': [2, 7],
-  }
   return {
     id: id,
     conference: c,
     favorite: f,
     underdog: u,
-    fseed: seeds[id][0],
-    useed: seeds[id][1],
+    fseed: null,
+    useed: null,
     invisible: invisible,
     scheduleSortKey: null,
     nextGameSortKey: null,
@@ -171,5 +159,44 @@ var rounds = [
         ]
       ),
     ]
-  }
+  },
+  {
+    number: 2,
+    startDate: '2020-08-27',
+    endDate: '2020-09-10',
+    matchups: [
+      m(
+        '20',
+        'West',
+        null,
+        null,
+        [
+        ]
+      ),
+      m(
+        '21',
+        'West',
+        null,
+        null,
+        [
+        ]
+      ),
+      m(
+        '22',
+        'East',
+        null,
+        null,
+        [
+        ]
+      ),
+      m(
+        '23',
+        'East',
+        'TOR',
+        'BOS',
+        [
+        ]
+      ),
+    ]
+  },
 ]
