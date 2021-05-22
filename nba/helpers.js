@@ -48,3 +48,7 @@ function timeZoneName(date) {
     return result[1]
   }
 }
+
+function teamImageURL(tricode) {
+  return 'https://cdn.nba.net/assets/logos/teams/secondary/web/' + tricode + '.svg'
+}

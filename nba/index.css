@@ -8,6 +8,10 @@ body {
   font-size: 20pt;
 }
 
+img.cardimg {
+  height: 40px;
+}
+
 /* end of today card styles */
 
 h1, h2, h3 {
@@ -47,8 +51,8 @@ td {
   text-align: center;
   cursor: default;
   user-select: none;
-  font-size: 12pt;
   white-space: nowrap;
+  height: 24px;
 }
 
 td.keystone {
@@ -60,6 +64,9 @@ td.keystone {
 
 td.team {
   width: 44px;
+  text-align: left;
+  font-size: 10pt;
+
 }
 
 td.team.winner {
@@ -72,6 +79,7 @@ td.team.loser {
 
 td.v {
   width: 5px;
+  font-size: 10pt;
 }
 
 td.score {
@@ -83,6 +91,7 @@ td.score {
 td.date {
   width: 52px;
   min-width: 40px;
+  font-size: 12pt;
 }
 
 td.date.today {
@@ -92,6 +101,10 @@ td.date.today {
 
 td.weekend {
   background-color: rgba(200, 200, 255, 0.5);
+}
+
+img.table-img {
+  height: 24px;
 }
 
 td.game {

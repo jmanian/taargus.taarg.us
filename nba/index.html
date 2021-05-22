@@ -25,11 +25,11 @@
             <span style='float: right;'>{{ network }}</span>
             <br>
             <span class='today-scores'>
-              <img :src='awayImageURL' style='height: 40px'>
+              <img class='cardimg' :src='awayImageURL'>
               {{ game.vTeam.triCode }}
               <span style='float: right;' v-if='started'>{{ this.game.vTeam.score }}</span>
               <br>
-              <img :src='homeImageURL' style='height: 40px'>
+              <img class='cardimg' :src='homeImageURL'>
               {{ game.hTeam.triCode }}
               <span style='float: right;' v-if='started'>{{ this.game.hTeam.score }}</span>
             </span>
@@ -54,7 +54,8 @@
     <!-- game cells -->
     <script type="text/x-template" id="game-template">
       <td class='game' user-select="none" v-tooltip:top="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
-        {{ content }}
+        <img class='table-img' :src='winnerImageURL' v-if='played'>
+        <div v-else>{{ content }}</div>
       </td>
       <td v-else :class='{ weekend: isWeekend }'>
       </td>
@@ -63,10 +64,20 @@
     <!-- matchup rows -->
     <script type="text/x-template" id="matchup-template">
       <tr>
-        <td class='team' :class='{ winner: fwon, loser: uwon }' v-tooltip:left="teamsHover">{{ favoriteLabel }}</td>
-        <td class='v' v-tooltip:left="teamsHover">—</td>
-        <td class='team' :class='{ winner: uwon, loser: fwon }' v-tooltip:left="teamsHover">{{ underdogLabel }}</td>
-        <td class='score'>{{ scoreLabel }}</td>
+        <td class='team' :class='{ winner: fwon, loser: uwon }' v-tooltip:left="teamsHover">
+          <img class='table-img' :src='favoriteImageURL'>
+          {{ favoriteLabel }}
+        </td>
+        <td class='v' v-tooltip:left="teamsHover">
+          –
+        </td>
+        <td class='team' :class='{ winner: uwon, loser: fwon }' v-tooltip:left="teamsHover">
+          <img class='table-img' :src='underdogImageURL'>
+          {{ underdogLabel }}
+        </td>
+        <td class='score'>
+          {{ scoreLabel }}
+        </td>
         <n-game v-for='(day, index) in days' :game='day' :favorite='matchup.favorite' :underdog='matchup.underdog' :matchupFinished='finished' :minGames='minGames' :key='String(matchup.id) + String(index)'></n-game>
       </tr>
     </script>

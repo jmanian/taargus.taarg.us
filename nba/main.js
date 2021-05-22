@@ -69,10 +69,10 @@ var NTodayGame = {
       if (broadcaster != undefined) return broadcaster.shortName
     },
     awayImageURL: function () {
-      return 'https://cdn.nba.net/assets/logos/teams/secondary/web/' + this.game.vTeam.triCode + '.svg'
+      return teamImageURL(this.game.vTeam.triCode)
     },
     homeImageURL: function () {
-      return 'https://cdn.nba.net/assets/logos/teams/secondary/web/' + this.game.hTeam.triCode + '.svg'
+      return teamImageURL(this.game.hTeam.triCode)
     },
     nugget: function () {
       return this.game.nugget.text
@@ -207,6 +207,9 @@ var NGame = {
         return `${this.localHoursMinutes}p`
       }
     },
+    winnerImageURL: function () {
+      return teamImageURL(this.game.winner)
+    },
     content: function () {
       switch (this.state) {
         case 'loading':
@@ -259,6 +262,12 @@ var NMatchup = {
     },
     underdogLabel: function () {
       return this.matchup.underdog.toUpperCase()
+    },
+    favoriteImageURL: function () {
+      return teamImageURL(this.matchup.favorite)
+    },
+    underdogImageURL: function () {
+      return teamImageURL(this.matchup.underdog)
     },
     scoreLabel: function () {
       if (!this.finished && this.matchup.games.some(g => g.winner == null && g.loading && g.date < new Date().toISOString().split('T', 1))) {
