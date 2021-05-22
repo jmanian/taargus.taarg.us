@@ -30,13 +30,20 @@ while (date < endDate) {
             if (underdogHome(gameNum)) {
               matchup.favorite = game.vTeam.triCode
               matchup.underdog = game.hTeam.triCode
-              matchup.fseed = Number(game.playoffs.vTeam.seedNum)
-              matchup.useed = Number(game.playoffs.hTeam.seedNum)
+              var fseed = Number(game.playoffs.vTeam.seedNum)
+              var useed = Number(game.playoffs.hTeam.seedNum)
             } else {
               matchup.favorite = game.hTeam.triCode
               matchup.underdog = game.vTeam.triCode
-              matchup.fseed = Number(game.playoffs.hTeam.seedNum)
-              matchup.useed = Number(game.playoffs.vTeam.seedNum)
+              var fseed = Number(game.playoffs.hTeam.seedNum)
+              var useed = Number(game.playoffs.vTeam.seedNum)
+            }
+            // Some game data doesn't have the seeds filled in
+            if (fseed > 0) {
+              matchup.fseed = fseed
+            }
+            if (useed > 0) {
+              matchup.useed = useed
             }
           }
           if (matchup.invisible && matchup.favorite != null && matchup.underdog != null) {
