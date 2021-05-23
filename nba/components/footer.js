@@ -4,7 +4,6 @@ var footerTemplate = `
   <br>
   However, the dates in the grids are based on the game time in Secaucus Daylight Time.
 </p>
-<p><a href='archive'>older schedules >></a></p>
 `
 
 var NFooter = {
