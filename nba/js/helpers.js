@@ -5,18 +5,17 @@ function datediff(first, second) {
 }
 
 function scheduleSortKey(matchup) {
-  // Sort by times of all games
-  return sortKeyForGames(matchup, matchup.games)
+  // Sort by dates (not times) of all games
+  var games = matchup.games
+  if (games === undefined || games === null || games.length === 0) return `z-${matchup.id}`
+  return games.map(g => g.date || 'z').join()
 }
 
 function nextGameSortKey(matchup) {
   // Sort by times of remaining games
-  var games = matchup.games.filter(g => (g.winner == null && g.loading != true))
-  return sortKeyForGames(matchup, games)
-}
-
-function sortKeyForGames(matchup, games) {
+  var games = matchup.games
   if (games === undefined || games === null || games.length === 0) return `z-${matchup.id}`
+  games = games.filter(g => (g.winner == null && g.loading != true))
   return games.map(g => g.timeUTC || g.date || 'z').join()
 }
 
