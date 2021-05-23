@@ -1,4 +1,4 @@
-var todayGameCardTemplate = `
+var todayGameTemplate = `
 <div class='col-xl-4 col-lg-6 col-md-6 col-sm-6' style='padding-bottom: 20px'>
   <div class='card'>
     <div class='card-header'>
@@ -28,7 +28,7 @@ var todayGameCardTemplate = `
 `
 
 var NTodayGame = {
-  template: todayGameCardTemplate,
+  template: todayGameTemplate,
   props: ['game'],
   computed: {
     gameNumber: function () {
