@@ -1,3 +1,7 @@
+console.log(document.cookie)
+document.cookie = `test=foo;`
+console.log(document.cookie)
+
 // initialize sort keys
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
