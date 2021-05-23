@@ -6,3 +6,11 @@ var todayTemplate = `
 </div>
 </div>
 `
+
+var NToday = {
+  template: todayTemplate,
+  props: ['games'],
+  components: {
+    'n-today-game': NTodayGame
+  }
+}
