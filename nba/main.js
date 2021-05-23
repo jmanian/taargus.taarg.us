@@ -24,7 +24,8 @@ new Vue({
   components: {
     'n-today': NToday,
     'n-round': NRound,
-    'n-footer': NFooter
+    'n-footer': NFooter,
+    'n-nav': NNav
   },
   data: {
     todayGames: todayGames,
