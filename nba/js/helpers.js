@@ -59,7 +59,7 @@ function setCookie(cname, cvalue, exdays) {
   d.setTime(d.getTime() + (exdays*24*60*60*1000));
   var expires = "expires="+ d.toUTCString();
   var cookie = cname + "=" + cvalue + ";" + expires + ";path=/"
-  console.log(`setCookie: ${cookie}`)
+  // console.log(`setCookie: ${cookie}`)
   document.cookie = cookie;
 }
 
@@ -74,10 +74,10 @@ function getCookie(cname) {
     }
     if (c.indexOf(name) == 0) {
       var cvalue = c.substring(name.length, c.length)
-      console.log(`getCookie: ${cname}=${cvalue}`)
+      // console.log(`getCookie: ${cname}=${cvalue}`)
       return cvalue;
     }
   }
-  console.log(`getCookie ${cname}: null`)
+  // console.log(`getCookie ${cname}: null`)
   return null;
 }

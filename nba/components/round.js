@@ -34,9 +34,10 @@ var NRound = {
     'n-matchup': NMatchup
   },
   data: function () {
-    var initialSorting = getCookie(this.sortingCookieName) || 'schedule'
-    console.log(`initialSorting: ${initialSorting}`)
-    return {sorting: initialSorting}
+    return {sorting: null}
+  },
+  created: function () {
+    this.sorting = getCookie(this.sortingCookieName) || 'schedule'
   },
   methods: {
     changeSorting: function () {
@@ -69,8 +70,6 @@ var NRound = {
     // do this as a computed property so that it will get recalculated
     // and resorted anytime any of the things it uses is changed
     sortedMatchups: function() {
-      console.log('sortedMatchups')
-      console.log(this.sorting)
       if (this.sorting === 'schedule' || this.sorting === null || this.sorting === undefined) {
         this.round.matchups.sort(function(a, b) {
           if (a.scheduleSortKey < b.scheduleSortKey) return -1
