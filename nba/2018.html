@@ -12,104 +12,22 @@
   <body>
 
     <!-- today game card -->
-    <script type='text/x-template' id='today-game-template'>
-      <div class='col-xl-4 col-lg-6 col-md-6 col-sm-6' style='padding-bottom: 20px'>
-        <div class='card'>
-          <div class='card-header'>
-            {{ gameNumber }}
-            <span style='float: right;'>{{ seriesStatus }}</span>
-          </div>
-          <div class='card-body'>
-            <span class='badge badge-danger' v-if='playing'>LIVE</span>
-            <span :class="{'text-danger': playing}">{{ timeLabel }}</span>
-            <span style='float: right;'>{{ network }}</span>
-            <br>
-            <span class='today-scores'>
-              <img :src='awayImageURL' style='height: 40px'>
-              {{ game.vTeam.triCode }}
-              <span style='float: right;' v-if='started'>{{ this.game.vTeam.score }}</span>
-              <br>
-              <img :src='homeImageURL' style='height: 40px'>
-              {{ game.hTeam.triCode }}
-              <span style='float: right;' v-if='started'>{{ this.game.hTeam.score }}</span>
-            </span>
-          </div>
-          <div class='card-footer' v-if='hasNugget'>
-            {{ nugget }}
-          </div>
-        </div>
-      </div>
-    </script>
+    <script type="text/javascript" src="templates/today-game-card.js"></script>
 
     <!-- today card deck -->
-    <script type='text/x-template' id='today-template'>
-      <div>
-        <h3>Today's Games</h3>
-        <div class='row'>
-          <n-today-game v-for='game in games' :game='game'></n-today-game>
-        </div>
-      </div>
-    </script>
+    <script type="text/javascript" src="templates/today.js"></script>
 
     <!-- game cells -->
-    <script type="text/x-template" id="game-template">
-      <td class='game' user-select="none" v-tooltip:top="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
-        {{ content }}
-      </td>
-      <td v-else :class='{ weekend: isWeekend }'>
-      </td>
-    </script>
+    <script type="text/javascript" src="templates/game.js"></script>
 
     <!-- matchup rows -->
-    <script type="text/x-template" id="matchup-template">
-      <tr>
-        <td class='team' :class='{ winner: fwon, loser: uwon }' v-tooltip:left="teamsHover">{{ favoriteLabel }}</td>
-        <td class='v' v-tooltip:left="teamsHover">—</td>
-        <td class='team' :class='{ winner: uwon, loser: fwon }' v-tooltip:left="teamsHover">{{ underdogLabel }}</td>
-        <td class='score'>{{ scoreLabel }}</td>
-        <n-game v-for='(day, index) in days' :game='day' :favorite='matchup.favorite' :underdog='matchup.underdog' :matchupFinished='finished' :minGames='minGames' :key='String(matchup.id) + String(index)'></n-game>
-      </tr>
-    </script>
+    <script type="text/javascript" src="templates/matchup.js"></script>
 
     <!-- round table -->
-    <script type="text/x-template" id="round-template">
-      <div>
-        <h3>{{ roundName }}</h3>
-        <table>
-          <thead>
-            <tr class='no-hover'>
-              <td class='keystone' @click='changeSorting' colspan="4">
-                sort by
-                <br>
-                <transition name='sort-toggle' mode='out-in'>
-                  <div :key='this.sorting'>
-                    {{ currentSortName }}
-                  </div>
-                </transition>
-              </td>
-              <td class='date' scope='col' :class='{ today: dateLabel[2], weekend: dateLabel[3] }' v-for='dateLabel in dateLabels'>
-                {{ dateLabel[0] }}
-                <br>
-                {{ dateLabel[1] }}
-              </td>
-            </tr>
-          </thead>
-          <transition-group name='sort-matchups' tag='tbody'>
-            <n-matchup v-for='matchup in sortedMatchups' v-if='!matchup.invisible' :matchup='matchup' :duration='duration' :startDate='startDate' :weekends='weekends' :key='matchup.id'></n-matchup>
-          </transition-group>
-        </table>
-      </div>
-    </script>
+    <script type="text/javascript" src="templates/round.js"></script>
 
     <!-- footer -->
-    <script type="text/x-template" id="footer-template">
-      <p class='time-zone-note'>
-        All times are in your local time zone, {{ localTimeZone }}.
-        <br>
-        However, the dates in the grids are based on the game time in Secaucus Daylight Time.
-      </p>
-      <p><a href='archive'>older schedules >></a></p>
-    </script>
+    <script type="text/javascript" src="templates/footer.js"></script>
 
     <!-- root element -->
     <div id="app">

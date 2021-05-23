@@ -20,7 +20,7 @@ function addTooltip(el, binding) {
 }
 
 var NTodayGame = {
-  template: '#today-game-template',
+  template: todayGameCardTemplate,
   props: ['game'],
   computed: {
     gameNumber: function () {
@@ -84,7 +84,7 @@ var NTodayGame = {
 }
 
 var NToday = {
-  template: '#today-template',
+  template: todayTemplate,
   props: ['games'],
   components: {
     'n-today-game': NTodayGame
@@ -92,7 +92,7 @@ var NToday = {
 }
 
 var NGame = {
-  template: '#game-template',
+  template: gameTemplate,
   props: ['game', 'favorite', 'underdog', 'matchupFinished', 'minGames'],
   computed: {
     isWeekend: function () {
@@ -251,7 +251,7 @@ var NGame = {
 }
 
 var NMatchup = {
-  template: '#matchup-template',
+  template: matchupTemplate,
   props: ['matchup', 'duration', 'startDate', 'weekends'],
   components: {
     'n-game': NGame
@@ -322,7 +322,7 @@ var NMatchup = {
 }
 
 var NRound = {
-  template: '#round-template',
+  template: roundTemplate,
   props: ['round'],
   components: {
     'n-matchup': NMatchup
@@ -405,7 +405,7 @@ var NRound = {
 }
 
 var NFooter = {
-  template: '#footer-template',
+  template: footerTemplate,
   props: ['rounds'],
   computed: {
     localTimeZone: function () {
