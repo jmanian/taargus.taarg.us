@@ -1,5 +1,6 @@
 console.log(document.cookie)
 document.cookie = `test=foo;`
+document.cookie = `random=${Math.random()};`
 console.log(document.cookie)
 
 // initialize sort keys
