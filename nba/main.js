@@ -22,10 +22,7 @@ function addTooltip(el, binding) {
 new Vue({
   el: '#app',
   components: {
-    'n-today': NToday,
-    'n-round': NRound,
-    'n-footer': NFooter,
-    'n-nav': NNav
+    'n-page': NPage
   },
   data: {
     todayGames: todayGames,
@@ -34,10 +31,5 @@ new Vue({
   created: function () {
     // sort the rounds
     this.rounds.sort((a, b) => a.number < b.number ? 1 : -1)
-  },
-  computed: {
-    showTodaysGames: function () {
-      return this.todayGames.length > 0
-    }
   }
 })
