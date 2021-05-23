@@ -29,12 +29,13 @@ var roundTemplate = `
 
 var NRound = {
   template: roundTemplate,
-  props: ['round'],
+  props: ['round', 'year'],
   components: {
     'n-matchup': NMatchup
   },
   data: function () {
-    return {sorting: 'schedule'}
+    var initialSorting = getCookie(this.sortingCookieName) || 'schedule'
+    return {sorting: initialSorting}
   },
   methods: {
     changeSorting: function () {
@@ -45,9 +46,13 @@ var NRound = {
       } else {
         this.sorting = 'bracket'
       }
+      setCookie(this.sortingCookieName, this.sorting, 180)
     },
   },
   computed: {
+    sortingCookieName: function () {
+      return `${this.year}-${this.round.number}-sorting`
+    },
     roundName: function () {
       if (this.round.number < 4) {
         return 'Round ' + String(this.round.number)

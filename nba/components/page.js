@@ -3,7 +3,7 @@ var pageTemplate = `
   <h1>NBA Playoffs Schedules</h1>
   <h2>{{ year }}</h2>
   <n-today :games='todayGames' v-if='showTodaysGames'></n-today>
-  <n-round v-for='round in rounds' :round='round' :key='round.id'></n-round>
+  <n-round v-for='round in rounds' :round='round' :key='round.id' :year=year></n-round>
   <br>
   <n-footer :rounds='rounds'></n-footer>
   <n-nav :currentYear='year'></n-nav>
