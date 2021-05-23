@@ -1,8 +1,3 @@
-console.log(document.cookie)
-document.cookie = `test=foo;`
-document.cookie = `random=${Math.random()};`
-console.log(document.cookie)
-
 // initialize sort keys
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
