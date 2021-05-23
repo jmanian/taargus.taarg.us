@@ -73,7 +73,7 @@ function getCookie(cname) {
       c = c.substring(1);
     }
     if (c.indexOf(name) == 0) {
-      val cvalue = c.substring(name.length, c.length)
+      var cvalue = c.substring(name.length, c.length)
       console.log(`getCookie: ${cname}=${cvalue}`)
       return cvalue;
     }
