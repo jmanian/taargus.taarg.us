@@ -73,8 +73,7 @@ var NTodayGame = {
       }
     },
     network: function () {
-      var broadcaster = this.game.watch.broadcast.broadcasters.national[0]
-      if (broadcaster != undefined) return broadcaster.shortName
+      return broadcasterName(this.game.watch.broadcast.broadcasters.national)
     },
     awayImageURL: function () {
       return teamImageURL(this.game.vTeam.triCode)

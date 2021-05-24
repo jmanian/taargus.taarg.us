@@ -52,6 +52,16 @@ function teamImageURL(tricode) {
   return 'https://cdn.nba.net/assets/logos/teams/secondary/web/' + tricode + '.svg'
 }
 
+// Extract the relevant national broadcaster(s) from the data.
+// Soemtimes TNTOT appears in addition to TNT -- ignore it.
+function broadcasterName(broadcasters) {
+  if (broadcasters.length > 0) {
+    return broadcasters.map(b => b.shortName).filter(n => n !== 'TNTOT').join()
+  } else {
+    return null
+  }
+}
+
 // Cookie functions from https://www.w3schools.com/js/js_cookies.asp
 
 function setCookie(cname, cvalue, exdays) {

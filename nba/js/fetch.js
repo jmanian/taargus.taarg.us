@@ -62,8 +62,7 @@ while (date < endDate) {
             g.timeUTC = game.startTimeUTC
           }
           // fill the network
-          var broadcaster = game.watch.broadcast.broadcasters.national[0]
-          if (broadcaster != undefined) g.network = broadcaster.shortName
+          g.network = broadcasterName(game.watch.broadcast.broadcasters.national)
 
           // fill the scores, clock, and winner
           g.period = game.period // this is an object
