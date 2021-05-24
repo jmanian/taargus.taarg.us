@@ -16,6 +16,7 @@ function nextGameSortKey(matchup) {
   var games = matchup.games
   if (games === undefined || games === null || games.length === 0) return `z-${matchup.id}`
   games = games.filter(g => (g.winner == null && g.loading != true))
+  if (games.length === 0) return `y-${scheduleSortKey(matchup)}`
   return games.map(g => g.timeUTC || g.date || 'z').join()
 }
 
