@@ -230,7 +230,7 @@ var rounds = [
   {
     number: 3,
     startDate: '2021-06-20',
-    endDate: '2021-07-04',
+    endDate: '2021-07-05',
     matchups: [
       m(
         '30',
