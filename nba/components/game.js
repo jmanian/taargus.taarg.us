@@ -69,6 +69,8 @@ var NGame = {
         return 'played'
       } else if (this.begun && this.ongoing) {
         return 'playing'
+      } else if (this.matchupFinished) {
+        return 'notNeeded'
       } else if (this.scheduled) {
         if (this.necessary) {
           return 'scheduledDefinite'
@@ -77,8 +79,6 @@ var NGame = {
         }
       } else if (this.necessary) {
         return 'unscheduled'
-      } else if (this.matchupFinished) {
-        return 'notNeeded'
       } else if (this.game.loading) {
         return 'loading'
       } else {
