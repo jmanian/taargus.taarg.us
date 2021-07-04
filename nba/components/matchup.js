@@ -81,7 +81,7 @@ var NMatchup = {
       return this.uwins == 4
     },
     finished: function () {
-      return this.fwins == 4 || this.uwins == 4
+      return this.fwon || this.uwon
     },
     minGames: function () {
       return Math.min(this.fwins, this.uwins) + 4
