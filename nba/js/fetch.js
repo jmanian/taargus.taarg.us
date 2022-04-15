@@ -22,7 +22,10 @@ while (date < endDate) {
       round = rounds.find(r => r.number == Number(game.playoffs.roundNum))
       if (round != undefined) {
         // find the matchup
-        matchup = round.matchups.find(matchup => matchup.id == game.playoffs.seriesId)
+        matchup = round.matchups.find(matchup =>
+          (matchup.favorite === game.hTeam.triCode || matchup.favorite === game.vTeam.triCode) &&
+          (matchup.underdog === game.hTeam.triCode || matchup.underdog === game.vTeam.triCode)
+        )
         if (matchup != undefined) {
           var gameNum = Number(game.playoffs.gameNumInSeries)
           // fill some matchup data
