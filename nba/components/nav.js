@@ -4,7 +4,7 @@ var navTemplate = `
     <n-nav-year  :year='year' :key='year' :currentYear='currentYear'></n-nav-year>
     //
   </template>
-  <a href='archive'>older schedules</a>
+  <a href='archive' class='year'>older schedules</a>
 </p>
 `
 

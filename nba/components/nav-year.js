@@ -1,6 +1,6 @@
 var navYearTemplate = `
 <template v-if='isCurrentYear'>{{ year }}</template>
-<a :href='year' v-else>{{ year }}</a>
+<a :href='year' class='year' v-else>{{ year }}</a>
 `
 var NNavYear = {
   template: navYearTemplate,

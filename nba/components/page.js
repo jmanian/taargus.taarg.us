@@ -7,6 +7,10 @@ var pageTemplate = `
   <br>
   <n-footer :rounds='rounds'></n-footer>
   <n-nav :currentYear='year'></n-nav>
+  <p>
+    Built by
+    <a href='https://twitter.com/jeffmanian'>Jeff Manian</a>.
+  </p>
 </div>
 `
 
