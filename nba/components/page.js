@@ -7,9 +7,9 @@ var pageTemplate = `
   <br>
   <n-footer :rounds='rounds'></n-footer>
   <n-nav :currentYear='year'></n-nav>
-  <p>
+  <p class='attribution'>
     Built by
-    <a href='https://twitter.com/jeffmanian'>Jeff Manian</a>.
+    <a class='attribution' href='https://twitter.com/jeffmanian' target='_blank'>Jeff Manian</a>.
   </p>
 </div>
 `

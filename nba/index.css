@@ -147,6 +147,17 @@ p {
   padding-top: 10px;
 }
 
+p.attribution {
+  font-style: italic;
+  color: gray;
+  font-size: 10pt;
+}
+
+a.attribution {
+  color: gray;
+  text-decoration: underline;
+}
+
 .time-zone-note {
   font-style: italic;
 }
