@@ -163,7 +163,7 @@ var rounds = [
   {
     number: 2,
     startDate: '2022-05-01',
-    endDate: '2022-05-15',
+    endDate: '2022-05-16',
     matchups: [
       m(
         '20',
@@ -183,7 +183,7 @@ var rounds = [
       m(
         '21',
         'West',
-        null,
+        'MEM',
         'GSW',
         [
           // '2022-04-16',
