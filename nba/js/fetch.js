@@ -11,11 +11,20 @@ var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
 var pt = new Date(utc + (3600000*(-7)));
 
 while (date < endDate) {
-  var endpointDate = date.toISOString().split('T', 1)[0].split('-').join('')
+  // var endpointDate = date.toISOString().split('T', 1)[0].split('-').join('')
+  var endpointDate = date.toISOString().split('T', 1)[0]
   var url = 'https://m95xx07048.execute-api.us-east-1.amazonaws.com/prod/games/' + endpointDate
+  // var url = 'https://data.nba.net/prod/v2/' + endpointDate + '/scoreboard.json'
+  // https://data.nba.net/prod/v2/{date}/scoreboard.json
+
+  // https://stats.nba.com/stats/scoreboardv3?GameDate=2023-04-20&LeagueID=00
+  // var url = 'https://stats.nba.com/stats/scoreboardv3?GameDate=' + endpointDate + '&LeagueID=00'
+
+  // var url = 'https://site.api.espn.com/apis/v2/scoreboard/header?sport=basketball&league=nba&dates=' + endpointDate + '&tz=America%2FNew_York&showAirings=buy%2Clive%2Creplay&showZipLookup=true&buyWindow=1m&lang=en&region=us&contentorigin=espn'
+
   jQuery.getJSON(url, function (data) {
-    data.games.forEach(function(game) {
-      if (Number(game.startDateEastern.substr(0, 4)) == pt.getFullYear() && Number(game.startDateEastern.substr(4, 2)) == pt.getMonth() + 1 && Number(game.startDateEastern.substr(6, 2)) == pt.getDate()) {
+    data.sports[0].leagues[0].events.forEach(function(game) {
+      if (new Date(game.date).toDateString() === pt.toDateString()) {
         todayGames.push(game)
       }
       // find the round
