@@ -50,7 +50,12 @@ function timeZoneName(date) {
 }
 
 function teamImageURL(tricode) {
-  return 'https://cdn.nba.net/assets/logos/teams/secondary/web/' + tricode + '.svg'
+  // Replace L with D for dark mode versions
+  return 'https://cdn.nba.com/logos/nba/' + teamId(tricode) + '/primary/L/logo.svg';
+}
+
+function teamId(tricode) {
+  return teamData[tricode].teamId;
 }
 
 // Extract the relevant national broadcaster(s) from the data.
