@@ -58,6 +58,9 @@ var NGame = {
     gameClock: function () {
       return this.game.clock;
     },
+    statusDetail: function () {
+      return this.game.statusDetail;
+    },
     state: function () {
       if (this.played) {
         return 'played'
@@ -154,7 +157,7 @@ var NGame = {
           return this.timeAndNetwork
         case 'playing':
         case 'played':
-          return [this.timeAndNetwork, this.awayScoreLabel, this.homeScoreLabel, this.gameClock].join("\n")
+          return [this.timeAndNetwork, this.awayScoreLabel, this.homeScoreLabel, this.statusDetail].join("\n")
       }
     }
   }
