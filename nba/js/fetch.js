@@ -44,7 +44,7 @@ while (date < endDate) {
           }
 
           //
-          if (matchup.invisible && matchup.favorite != null && matchup.underdog != null) {
+          if (matchup.invisible && matchup.favorite !== null && matchup.underdog !== null) {
             matchup.invisible = false
           }
           // find the game
@@ -61,7 +61,7 @@ while (date < endDate) {
           g.network = eventData.network;
 
           // fill the scores, clock, and winner
-          g.state = eventData.state // this is an object
+          g.state = eventData.state
           g.statusDetail = eventData.statusDetail
           if (g.state !== 'pre') { // game started
             if (underdogHome(gameNum)) {
