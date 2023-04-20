@@ -16,7 +16,9 @@ function parseEvent(event) {
     network: findNationalBroadcast(competition.broadcasts),
     state: event.status.type.state,
     statusDetail: event.status.type.shortDetail,
-    clock: event.status.displayClock
+    clock: event.status.displayClock,
+    seriesSummary: fixSummary(competition.series.summary, homeTeam, awayTeam),
+    headline: findRecap(competition.headlines)
   }
 }
 
@@ -31,6 +33,11 @@ function translateEspnRound(round) {
     case 'FINAL':
       return 4;
   }
+}
+
+function fixSummary(summary, homeTeam, awayTeam) {
+  return summary.replace(homeTeam.team.abbreviation, teamTricode(homeTeam))
+                .replace(awayTeam.team.abbreviation, teamTricode(awayTeam))
 }
 
 function findTeam(competitors, homeAway) {
@@ -70,5 +77,14 @@ function findNationalBroadcast(broadcasts) {
   var broadcast = broadcasts.find(bc => bc.market.toLowerCase() === 'national')
   if (broadcast) {
     return broadcast.names[0];
+  }
+}
+
+function findRecap(headlines) {
+  if (headlines) {
+    var headline = headlines.find(hl => hl.type.toLowerCase() === 'recap')
+    if (headline) {
+      return headline.shortLinkText
+    }
   }
 }

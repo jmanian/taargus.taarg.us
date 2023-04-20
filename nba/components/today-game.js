@@ -12,12 +12,12 @@ var todayGameTemplate = `
       <br>
       <span class='today-scores'>
         <img class='cardimg' :src='awayImageURL'>
-        {{ game.vTeam.triCode }}
-        <span style='float: right;' v-if='started'>{{ this.game.vTeam.score }}</span>
+        {{ game.awayTeam }}
+        <span style='float: right;' v-if='started'>{{ this.game.awayScore }}</span>
         <br>
         <img class='cardimg' :src='homeImageURL'>
-        {{ game.hTeam.triCode }}
-        <span style='float: right;' v-if='started'>{{ this.game.hTeam.score }}</span>
+        {{ game.homeTeam }}
+        <span style='float: right;' v-if='started'>{{ this.game.homeScore }}</span>
       </span>
     </div>
     <div class='card-footer' v-if='hasNugget'>
@@ -32,60 +32,61 @@ var NTodayGame = {
   props: ['game'],
   computed: {
     gameNumber: function () {
-      return "Game " + this.game.playoffs.gameNumInSeries
+      return "Game " + this.game.gameNum
     },
     seriesStatus: function () {
-      return this.game.playoffs.seriesSummaryText
+      return this.game.seriesSummary
     },
     started: function () {
-      return this.game.statusNum > 1
+      return this.game.state !== 'pre'
     },
     playing: function () {
-      return this.game.statusNum == 2
+      return this.game.state === 'in'
     },
     finished: function () {
-      return this.game.statusNum == 3
+      return this.game.state === 'post'
     },
     gameClock: function () {
-      if (this.game.period.isHalftime) {
-        return 'Halftime'
-      } else if (this.game.period.isEndOfPeriod) {
-        return 'End of ' + periodName(this.game.period.current)
-      } else {
-        return periodName(this.game.period.current) + ' ' + this.game.clock
-      }
+      return this.game.statusDetail
+      // if (this.game.period.isHalftime) {
+      //   return 'Halftime'
+      // } else if (this.game.period.isEndOfPeriod) {
+      //   return 'End of ' + periodName(this.game.period.current)
+      // } else {
+      //   return periodName(this.game.period.current) + ' ' + this.game.clock
+      // }
     },
     startTimeShort: function ()  {
       var time, amPm
-      [time, amPm] = new Date(this.game.startTimeUTC).toLocaleTimeString().split(' ')
+      [time, amPm] = new Date(this.game.timeUTC).toLocaleTimeString().split(' ')
       // remove the seconds
       time = time.split(':').slice(0, 2).join(':')
       return `${time} ${amPm}`
     },
     timeLabel: function () {
-      switch (this.game.statusNum) {
-        case 1:
+      switch (this.game.state) {
+        case 'pre':
           return this.startTimeShort
-        case 2:
+        case 'in':
+        case 'post':
           return this.gameClock
-        case 3:
-          return this.game.period.current > 4 ? 'Final (' + periodName(this.game.period.current) + ')' : 'Final'
+          // return this.game.period.current > 4 ? 'Final (' + periodName(this.game.period.current) + ')' : 'Final'
       }
     },
     network: function () {
-      return broadcasterName(this.game.watch.broadcast.broadcasters.national)
+      return this.game.network
     },
     awayImageURL: function () {
-      return teamImageURL(this.game.vTeam.triCode)
+      return teamImageURL(this.game.awayTeam)
     },
     homeImageURL: function () {
-      return teamImageURL(this.game.hTeam.triCode)
+      return teamImageURL(this.game.homeTeam)
     },
     nugget: function () {
-      return this.game.nugget.text
+      return this.game.headline
     },
     hasNugget: function () {
-      return this.nugget != null && this.nugget != ''
+      return this.nugget !== undefined && this.nugget !== null && this.nugget !== ''
     }
   }
 }

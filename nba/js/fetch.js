@@ -18,7 +18,7 @@ while (date < endDate) {
       eventData = parseEvent(event);
 
       if (new Date(eventData.timeUTC).toDateString() === pt.toDateString()) {
-        // todayGames.push(game)
+        todayGames.push(eventData)
       }
       // find the round
       round = rounds.find(r => r.number === eventData.round)
