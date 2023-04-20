@@ -1,3 +1,22 @@
+var seeds = {
+  'DEN': 1,
+  'MEM': 2,
+  'SAC': 3,
+  'PHX': 4,
+  'LAC': 5,
+  'GSW': 6,
+  'LAL': 7,
+  'MIN': 8,
+  'MIL': 1,
+  'BOS': 2,
+  'PHI': 3,
+  'CLE': 4,
+  'NYK': 5,
+  'BKN': 6,
+  'ATL': 7,
+  'MIA': 8
+}
+
 var rounds = [
   {
     number: 1,

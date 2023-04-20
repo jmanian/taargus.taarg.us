@@ -1,3 +1,5 @@
+var seeds = {}
+
 var rounds = [
   {
     number: 1,
