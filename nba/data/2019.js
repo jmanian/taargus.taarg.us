@@ -1,37 +1,3 @@
-function m(id, c, f, u, gs) {
-  var numMissing = 7 - gs.length
-  for (i = 0; i < numMissing; i++) {
-    gs.push(null)
-  }
-  var invisible = f == null || u == null
-  return {
-    id: id,
-    conference: c,
-    favorite: f,
-    underdog: u,
-    fseed: null,
-    useed: null,
-    invisible: invisible,
-    scheduleSortKey: null,
-    nextGameSortKey: null,
-    games: gs.map(g => makeGame(g))
-  }
-}
-
-function makeGame(date) {
-  return {
-    date: date,
-    time: null,
-    network: null,
-    winner: null,
-    fscore: null,
-    uscore: null,
-    clock: null,
-    period: null,
-    loading: true
-  }
-}
-
 var rounds = [
   {
     number: 1,

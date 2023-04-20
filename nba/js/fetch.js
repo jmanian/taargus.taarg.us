@@ -11,96 +11,78 @@ var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
 var pt = new Date(utc + (3600000*(-7)));
 
 while (date < endDate) {
-  // var endpointDate = date.toISOString().split('T', 1)[0].split('-').join('')
-  var endpointDate = date.toISOString().split('T', 1)[0]
-  var url = 'https://m95xx07048.execute-api.us-east-1.amazonaws.com/prod/games/' + endpointDate
-  // var url = 'https://data.nba.net/prod/v2/' + endpointDate + '/scoreboard.json'
-  // https://data.nba.net/prod/v2/{date}/scoreboard.json
-
-  // https://stats.nba.com/stats/scoreboardv3?GameDate=2023-04-20&LeagueID=00
-  // var url = 'https://stats.nba.com/stats/scoreboardv3?GameDate=' + endpointDate + '&LeagueID=00'
-
-  // var url = 'https://site.api.espn.com/apis/v2/scoreboard/header?sport=basketball&league=nba&dates=' + endpointDate + '&tz=America%2FNew_York&showAirings=buy%2Clive%2Creplay&showZipLookup=true&buyWindow=1m&lang=en&region=us&contentorigin=espn'
-
+  var endpointDate = date.toISOString().split('T', 1)[0].split('-').join('')
+  var url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
   jQuery.getJSON(url, function (data) {
-    data.sports[0].leagues[0].events.forEach(function(game) {
-      if (new Date(game.date).toDateString() === pt.toDateString()) {
-        todayGames.push(game)
+    data.events.forEach(function(event) {
+      eventData = parseEvent(event);
+
+      if (new Date(eventData.timeUTC).toDateString() === pt.toDateString()) {
+        // todayGames.push(game)
       }
       // find the round
-      round = rounds.find(r => r.number == Number(game.playoffs.roundNum))
-      if (round != undefined) {
+      round = rounds.find(r => r.number === eventData.round)
+      if (round !== undefined) {
         // find the matchup
         matchup = round.matchups.find(matchup =>
-          (matchup.favorite === game.hTeam.triCode || matchup.favorite === game.vTeam.triCode) &&
-          (matchup.underdog === game.hTeam.triCode || matchup.underdog === game.vTeam.triCode)
+          (matchup.favorite === eventData.homeTeam || matchup.favorite === eventData.awayTeam) &&
+          (matchup.underdog === eventData.homeTeam || matchup.underdog === eventData.awayTeam)
         )
         if (matchup != undefined) {
-          var gameNum = Number(game.playoffs.gameNumInSeries)
+          var gameNum = eventData.gameNum
           // fill some matchup data
-          if (matchup.favorite == null || matchup.underdog == null || matchup.fseed == null || matchup.useed == null) {
+
+          // Set teams and seeds
+          if (matchup.favorite === null || matchup.underdog === null) {
             if (underdogHome(gameNum)) {
-              matchup.favorite = game.vTeam.triCode
-              matchup.underdog = game.hTeam.triCode
-              var fseed = Number(game.playoffs.vTeam.seedNum)
-              var useed = Number(game.playoffs.hTeam.seedNum)
+              matchup.favorite = eventData.awayTeam
+              matchup.underdog = eventData.homeTeam
             } else {
-              matchup.favorite = game.hTeam.triCode
-              matchup.underdog = game.vTeam.triCode
-              var fseed = Number(game.playoffs.hTeam.seedNum)
-              var useed = Number(game.playoffs.vTeam.seedNum)
-            }
-            // Some game data doesn't have the seeds filled in
-            if (fseed > 0) {
-              matchup.fseed = fseed
-            }
-            if (useed > 0) {
-              matchup.useed = useed
+              matchup.favorite = eventData.homeTeam
+              matchup.underdog = eventData.awayTeam
             }
           }
+
+          //
           if (matchup.invisible && matchup.favorite != null && matchup.underdog != null) {
             matchup.invisible = false
           }
           // find the game
           g = matchup.games[gameNum - 1]
-          // fill the start date
-          if (g.date == null) {
-            g.date = [game.startDateEastern.substr(0, 4), game.startDateEastern.substr(4, 2), game.startDateEastern.substr(6)].join('-')
+          // fill the start date and time
+          if (g.date === null) {
+            g.date = eventData.date
             matchup.scheduleSortKey = scheduleSortKey(matchup)
           }
-          // fill the start time
-          if (game.startTimeEastern != '') {
-            g.time = game.startTimeEastern.split(' ', 1)[0]
-            g.timeUTC = game.startTimeUTC
+          if (g.timeUTC === null) {
+            g.timeUTC = eventData.timeUTC
           }
           // fill the network
-          g.network = broadcasterName(game.watch.broadcast.broadcasters.national)
+          g.network = eventData.network;
 
           // fill the scores, clock, and winner
-          g.period = game.period // this is an object
-          if (game.statusNum > 1) { // game started
-            var vscore = Number(game.vTeam.score)
-            var hscore = Number(game.hTeam.score)
-            var n = game.playoffs.gameNumInSeries
-            if (n == '3' || n == '4' || n == '6') {
-              g.fscore = vscore
-              g.uscore = hscore
+          g.state = eventData.state // this is an object
+          g.statusDetail = eventData.statusDetail
+          if (g.state !== 'pre') { // game started
+            if (underdogHome(gameNum)) {
+              g.fscore = eventData.awayScore
+              g.uscore = eventData.homeScore
             } else {
-              g.fscore = hscore
-              g.uscore = vscore
+              g.fscore = eventData.homeScore
+              g.uscore = eventData.awayScore
             }
-            if (game.statusNum == 2) { // game ongoing
-              g.clock = game.clock
-            } else if (game.statusNum == 3) { // game finished
-              if (vscore > hscore) {
-                g.winner = game.vTeam.triCode
+            if (g.state === 'in') { // game ongoing
+              g.clock = eventData.clock;
+            } else if (g.state === 'post') { // game finished
+              if (eventData.awayScore > eventData.homeScore) {
+                g.winner = eventData.awayTeam
               } else {
-                g.winner = game.hTeam.triCode
+                g.winner = eventData.homeTeam
               }
             }
           }
           // mark as not loading
-          g.loading = null
+          g.loading = false
 
           // update sort keys for this matchup based on new data (game time)
           matchup.scheduleSortKey = scheduleSortKey(matchup)

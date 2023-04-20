@@ -18,16 +18,18 @@ var NGame = {
       return this.game != undefined && !this.isWeekend
     },
     scheduled: function () {
-      return this.game.time != null
+      if (this.game.timeUTC === null) {
+        return false
+      }
+      var date = new Date(this.game.timeUTC)
+      var hour = date.getUTCHours()
+      return hour !== 4
     },
     necessary: function () {
       return this.game.number <= this.minGames
     },
-    begun: function () {
-      return this.game.fscore != null && this.game.uscore != null
-    },
     ongoing: function () {
-      return this.game.clock != null && this.game.period != null
+      return this.game.state === 'in'
     },
     played: function () {
       return this.game.winner != null
@@ -54,20 +56,12 @@ var NGame = {
       return [this.localHoursMinutes, this.localAmPm, this.game.network].join(' ')
     },
     gameClock: function () {
-      if (this.game.period.isHalftime) {
-        return 'Halftime'
-      } else if (this.game.period.isEndOfPeriod) {
-        return 'End of ' + periodName(this.game.period.current)
-      } else if (!this.played) {
-        return periodName(this.game.period.current) + ' ' + this.game.clock
-      } else if (this.game.period.current > 4) {
-        return periodName(this.game.period.current)
-      }
+      return this.game.clock;
     },
     state: function () {
       if (this.played) {
         return 'played'
-      } else if (this.begun && this.ongoing) {
+      } else if (this.ongoing) {
         return 'playing'
       } else if (this.matchupFinished) {
         return 'notNeeded'
