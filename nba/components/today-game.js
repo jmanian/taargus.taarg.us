@@ -12,11 +12,11 @@ var todayGameTemplate = `
       <br>
       <span class='today-scores'>
         <img class='cardimg' :src='awayImageURL'>
-        {{ game.awayTeam }}
+        {{ game.awayTeamName }}
         <span style='float: right;' v-if='started'>{{ this.game.awayScore }}</span>
         <br>
         <img class='cardimg' :src='homeImageURL'>
-        {{ game.homeTeam }}
+        {{ game.homeTeamName }}
         <span style='float: right;' v-if='started'>{{ this.game.homeScore }}</span>
       </span>
     </div>
@@ -46,16 +46,15 @@ var NTodayGame = {
     finished: function () {
       return this.game.state === 'post'
     },
-    gameClock: function () {
-      return this.game.statusDetail
-      // if (this.game.period.isHalftime) {
-      //   return 'Halftime'
-      // } else if (this.game.period.isEndOfPeriod) {
-      //   return 'End of ' + periodName(this.game.period.current)
-      // } else {
-      //   return periodName(this.game.period.current) + ' ' + this.game.clock
-      // }
-    },
+    // gameClock: function () {
+    //   if (this.game.period.isHalftime) {
+    //     return 'Halftime'
+    //   } else if (this.game.period.isEndOfPeriod) {
+    //     return 'End of ' + periodName(this.game.period.current)
+    //   } else {
+    //     return periodName(this.game.period.current) + ' ' + this.game.clock
+    //   }
+    // },
     startTimeShort: function ()  {
       var time, amPm
       [time, amPm] = new Date(this.game.timeUTC).toLocaleTimeString().split(' ')
@@ -69,7 +68,7 @@ var NTodayGame = {
           return this.startTimeShort
         case 'in':
         case 'post':
-          return this.gameClock
+          return this.game.statusDetail
           // return this.game.period.current > 4 ? 'Final (' + periodName(this.game.period.current) + ')' : 'Final'
       }
     },

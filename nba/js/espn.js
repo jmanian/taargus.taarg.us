@@ -8,6 +8,8 @@ function parseEvent(event) {
     round: translateEspnRound(competition.type.abbreviation),
     homeTeam: teamTricode(homeTeam),
     awayTeam: teamTricode(awayTeam),
+    homeTeamName: homeTeam.team.name,
+    awayTeamName: awayTeam.team.name,
     gameNum: extractGameNum(competition.notes),
     timeUTC: event.date,
     date: event.date.split('T')[0],
@@ -15,7 +17,7 @@ function parseEvent(event) {
     awayScore: Number(awayTeam.score),
     network: findNationalBroadcast(competition.broadcasts),
     state: event.status.type.state,
-    statusDetail: event.status.type.shortDetail,
+    statusDetail: event.status.type.shortDetail.replace('-', '–'),
     clock: event.status.displayClock,
     seriesSummary: fixSummary(competition.series.summary, homeTeam, awayTeam),
     headline: findRecap(competition.headlines)
