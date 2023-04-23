@@ -1,12 +1,12 @@
 var todayGameTemplate = `
-<div class='col-xl-4 col-lg-6 col-md-6 col-sm-6' style='padding-bottom: 20px'>
+<div class='col' style='padding-bottom: 20px'>
   <div class='card'>
     <div class='card-header'>
       {{ gameNumber }}
       <span style='float: right;'>{{ seriesStatus }}</span>
     </div>
     <div class='card-body'>
-      <span class='badge badge-danger' v-if='playing'>LIVE</span>
+      <span class='badge bg-danger' v-if='playing'>LIVE</span>
       <span :class="{'text-danger': playing}">{{ timeLabel }}</span>
       <span style='float: right;'>{{ network }}</span>
       <br>
