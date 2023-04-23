@@ -11,6 +11,10 @@ var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
 var pt = new Date(utc + (3600000*(-7)));
 
 while (date < endDate) {
+  fetchGamesForDate(date);
+}
+
+function fetchGamesForDate(date) {
   var endpointDate = date.toISOString().split('T', 1)[0].split('-').join('')
   var url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
   jQuery.getJSON(url, function (data) {
