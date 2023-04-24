@@ -5,14 +5,13 @@ Vue.directive('tooltip', {
   update: addTooltip,
   componentUpdated: addTooltip,
   unbind (el, binding) {
-    $(el).tooltip('dispose');
+    bootstrap.Tooltip.getInstance(el)?.dispose()
   }
 })
 
 function addTooltip(el, binding) {
-  $(el).tooltip('dispose')
-  if (binding.value != undefined) {
-    $(el).tooltip({
+  if (binding.value !== undefined) {
+    new bootstrap.Tooltip(el, {
       title: binding.value,
       placement: binding.arg,
     })
