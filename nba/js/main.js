@@ -15,6 +15,8 @@ function addTooltip(el, binding) {
       title: binding.value,
       placement: binding.arg,
     })
+  } else {
+    bootstrap.Tooltip.getInstance(el)?.dispose()
   }
 }
 
