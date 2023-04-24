@@ -29,7 +29,8 @@ function makeGame(date) {
     clock: null,
     period: null,
     loading: true,
-    state: null
+    state: null,
+    statusDetail: null
   }
 }
 

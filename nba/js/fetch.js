@@ -2,22 +2,34 @@
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
 
-var date = rounds.map(r => new Date(r.startDate + 'T12:00:00-04:00')).reduce((r, current) => r < current ? r : current)
+var thisDate = rounds.map(r => new Date(r.startDate + 'T12:00:00-04:00')).reduce((r, current) => r < current ? r : current)
 var endDate = rounds.map(r => new Date(r.endDate + 'T13:00:00-04:00')).reduce((r, current) => r > current ? r : current)
 
 var todayGames = []
 var now = new Date();
 var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
 var pt = new Date(utc + (3600000*(-7)));
-
-while (date < endDate) {
-  fetchGamesForDate(date);
+while (thisDate < endDate) {
+  fetchGamesForDate(thisDate);
+  thisDate = new Date(thisDate)
+  thisDate.setDate(thisDate.getDate() + 1);
 }
 
-function fetchGamesForDate(date) {
+pollingStarted = false
+function startPollingToday(pollDate) {
+  if (!pollingStarted) {
+    setInterval(fetchGamesForDate, 5000, pollDate, true)
+    pollingStarted = true
+  }
+}
+
+function fetchGamesForDate(date, isPolling = false) {
   var endpointDate = date.toISOString().split('T', 1)[0].split('-').join('')
   var url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
   jQuery.getJSON(url, function (data) {
+    if (isPolling) {
+      todayGames.length = 0
+    }
     data.events.forEach(function(event) {
       eventData = parseEvent(event);
 
@@ -77,6 +89,7 @@ function fetchGamesForDate(date) {
             }
             if (g.state === 'in') { // game ongoing
               g.clock = eventData.clock;
+              startPollingToday(date)
             } else if (g.state === 'post') { // game finished
               if (eventData.awayScore > eventData.homeScore) {
                 g.winner = eventData.awayTeam
@@ -95,5 +108,4 @@ function fetchGamesForDate(date) {
       }
     })
   })
-  date.setDate(date.getDate() + 1)
 }
