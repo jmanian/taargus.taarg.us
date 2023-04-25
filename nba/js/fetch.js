@@ -1,3 +1,8 @@
+const { reactive } = Vue
+
+var todayGames = reactive([])
+rounds = reactive(rounds)
+
 // initialize sort keys
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
@@ -5,7 +10,6 @@ rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKe
 var thisDate = rounds.map(r => new Date(r.startDate + 'T12:00:00-04:00')).reduce((r, current) => r < current ? r : current)
 var endDate = rounds.map(r => new Date(r.endDate + 'T13:00:00-04:00')).reduce((r, current) => r > current ? r : current)
 
-var todayGames = []
 var now = new Date();
 var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
 var pt = new Date(utc + (3600000*(-7)));

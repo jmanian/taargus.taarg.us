@@ -31,7 +31,10 @@ table {
 .sort-toggle-enter-active, .sort-toggle-leave-active {
   transition: opacity 0.25s;
 }
-.sort-toggle-enter, .sort-toggle-leave-to /* .sort-toggle-leave-active below version 2.1.8 */ {
+.sort-toggle-enter-to, .sort-toggle-leave-from {
+  opacity: 1;
+}
+.sort-toggle-enter-from, .sort-toggle-leave-to {
   opacity: 0;
 }
 

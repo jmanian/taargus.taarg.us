@@ -21,7 +21,9 @@ var roundTemplate = `
       </tr>
     </thead>
     <transition-group name='sort-matchups' tag='tbody'>
-      <n-matchup v-for='matchup in sortedMatchups' v-if='!matchup.invisible' :matchup='matchup' :duration='duration' :startDate='startDate' :weekends='weekends' :key='matchup.id'></n-matchup>
+      <template v-for='matchup in sortedMatchups' :key='matchup.id'>
+        <n-matchup v-if='!matchup.invisible' :matchup='matchup' :duration='duration' :startDate='startDate' :weekends='weekends'></n-matchup>
+      </template>
     </transition-group>
   </table>
 </div>

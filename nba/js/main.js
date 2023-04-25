@@ -1,14 +1,3 @@
-// enables tooltips in a way that allows them to update as data changes
-Vue.directive('tooltip', {
-  bind: addTooltip,
-  inserted: addTooltip,
-  update: addTooltip,
-  componentUpdated: addTooltip,
-  unbind (el, binding) {
-    bootstrap.Tooltip.getInstance(el)?.dispose()
-  }
-})
-
 function addTooltip(el, binding) {
   const tooltip = bootstrap.Tooltip.getInstance(el)
 
@@ -26,17 +15,32 @@ function addTooltip(el, binding) {
   }
 }
 
-new Vue({
-  el: '#app',
+const { createApp } = Vue
+
+const app = createApp({
   components: {
     'n-page': NPage
   },
-  data: {
-    todayGames: todayGames,
-    rounds: rounds
+  data() {
+    return {
+      rounds,
+      todayGames
+    }
   },
   created: function () {
     // sort the rounds
     this.rounds.sort((a, b) => a.number < b.number ? 1 : -1)
   }
 })
+
+// A custom vue directive for adding tooltips. This allows the tooltips
+// to update along with the underlying element.
+app.directive('tooltip', {
+  mounted: addTooltip,
+  updated: addTooltip,
+  unmounted (el, binding) {
+    bootstrap.Tooltip.getInstance(el)?.dispose()
+  }
+})
+
+app.mount('#app')
