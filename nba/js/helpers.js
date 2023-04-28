@@ -3,7 +3,7 @@ function m(id, c, f, u, gs) {
   for (i = 0; i < numMissing; i++) {
     gs.push(null)
   }
-  var invisible = f == null || u == null
+  var invisible = f === null || u === null
   return {
     id: id,
     conference: c,
@@ -31,6 +31,121 @@ function makeGame(date) {
     loading: true,
     state: null,
     statusDetail: null
+  }
+}
+
+function seriesIdForRoundAndTeam(round, team) {
+  const seed = seeds[team]
+  const conference = conferenceForTeam(team)
+  switch (round) {
+    case 1:
+      switch(conference) {
+        case 'west':
+          switch(seed) {
+            case 1:
+            case 8:
+              return 10;
+            case 2:
+            case 7:
+              return 11;
+            case 3:
+            case 6:
+              return 12;
+            case 4:
+            case 5:
+              return 13;
+          }
+        case 'east':
+          switch(seed) {
+            case 1:
+            case 8:
+              return 14;
+            case 2:
+            case 7:
+              return 15;
+            case 3:
+            case 6:
+              return 16;
+            case 4:
+            case 5:
+              return 17;
+          }
+      }
+    case 2:
+      switch(conference) {
+        case 'west':
+          switch(seed) {
+            case 1:
+            case 8:
+            case 4:
+            case 5:
+              return 20;
+            case 2:
+            case 7:
+            case 3:
+            case 6:
+              return 21;
+          }
+        case 'east':
+          switch(seed) {
+            case 1:
+            case 8:
+            case 4:
+            case 5:
+              return 22;
+            case 2:
+            case 7:
+            case 3:
+            case 6:
+              return 23;
+          }
+      }
+    case 3:
+      switch(conference) {
+        case 'west':
+          return 30;
+        case 'east':
+          return 31;
+      }
+    case 4:
+      return 40;
+  }
+}
+
+function conferenceForTeam(team) {
+  switch(team) {
+    case 'ATL':
+    case 'BKN':
+    case 'BOS':
+    case 'CHA':
+    case 'CHI':
+    case 'CLE':
+    case 'DET':
+    case 'IND':
+    case 'MIA':
+    case 'MIL':
+    case 'NYK':
+    case 'ORL':
+    case 'PHI':
+    case 'TOR':
+    case 'WAS':
+      return 'east';
+    case 'DAL':
+    case 'DEN':
+    case 'GSW':
+    case 'HOU':
+    case 'LAC':
+    case 'LAL':
+    case 'MEM':
+    case 'MIN':
+    case 'NOP':
+    case 'OKC':
+    case 'PHX':
+    case 'POR':
+    case 'SAC':
+    case 'SAS':
+    case 'UTA':
+      return 'west';
   }
 }
 

@@ -1,5 +1,5 @@
 var roundTemplate = `
-<div>
+<div v-if='visible'>
   <h3>{{ roundName }}</h3>
   <table>
     <thead>
@@ -52,6 +52,9 @@ var NRound = {
     },
   },
   computed: {
+    visible: function () {
+      return this.round.matchups.find(matchup => !matchup.invisible)
+    },
     sortingCookieName: function () {
       return `${this.year}-${this.round.number}-sorting`
     },

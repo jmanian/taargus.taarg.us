@@ -64,6 +64,8 @@ function translateEspnTeamCode(code) {
       return 'UTA';
     case 'WSH':
       return 'WAS';
+    case 'TBD':
+      return null;
     default:
       return code;
   }

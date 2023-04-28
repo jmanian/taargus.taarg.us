@@ -2,8 +2,12 @@
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
 
-var thisDate = rounds.map(r => new Date(r.startDate + 'T12:00:00-04:00')).reduce((r, current) => r < current ? r : current)
-var endDate = rounds.map(r => new Date(r.endDate + 'T13:00:00-04:00')).reduce((r, current) => r > current ? r : current)
+var thisDate = rounds.map(r => r.startDate === null ? null : new Date(r.startDate + 'T12:00:00-04:00'))
+  .filter(r => r !== null)
+  .reduce((r, current) => r < current ? r : current)
+var endDate = rounds.map(r => r.endDate === null ? null : new Date(r.endDate + 'T13:00:00-04:00'))
+  .filter(r => r !== null)
+  .reduce((r, current) => r > current ? r : current)
 
 var todayGames = []
 var now = new Date();
@@ -24,7 +28,8 @@ function startPollingToday(pollDate) {
 }
 
 function fetchGamesForDate(date, isPolling = false) {
-  var endpointDate = date.toISOString().split('T', 1)[0].split('-').join('')
+  var dateString = date.toISOString().split('T', 1)[0]
+  var endpointDate = dateString.split('-').join('')
   var url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
   jQuery.getJSON(url, function (data) {
     if (isPolling) {
@@ -39,11 +44,24 @@ function fetchGamesForDate(date, isPolling = false) {
       // find the round
       round = rounds.find(r => r.number === eventData.round)
       if (round !== undefined) {
+
+        // Update round start and end
+        if (round.startDate === null || round.startDate > dateString) {
+          round.startDate = dateString
+        }
+        if (round.endDate === null || round.endDate < dateString) {
+          round.endDate = dateString
+        }
+
         // find the matchup
         matchup = round.matchups.find(matchup =>
           (matchup.favorite === eventData.homeTeam || matchup.favorite === eventData.awayTeam) &&
           (matchup.underdog === eventData.homeTeam || matchup.underdog === eventData.awayTeam)
         )
+        if (matchup === null || matchup === undefined) {
+          var id = seriesIdForRoundAndTeam(eventData.round, eventData.homeTeam)
+          matchup = round.matchups.find(matchup => Number(matchup.id) === id )
+        }
         if (matchup != undefined) {
           var gameNum = eventData.gameNum
           // fill some matchup data
