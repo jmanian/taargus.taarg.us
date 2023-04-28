@@ -217,7 +217,7 @@ function broadcasterName(broadcasters) {
 function setCookie(cname, cvalue, exdays) {
   var expires = "expires="+ DateTime.now().plus({hours: exdays * 24}).toHTTP();
   var cookie = cname + "=" + cvalue + ";" + expires + ";path=/"
-  console.log(`setCookie: ${cookie}`)
+  // console.log(`setCookie: ${cookie}`)
   document.cookie = cookie;
 }
 
