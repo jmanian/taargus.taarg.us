@@ -151,6 +151,8 @@ var NGame = {
           return 'Not Needed'
         case 'ifNeeded':
           return 'If Needed'
+        case 'unscheduled':
+          return this.game.network
         case 'scheduledPossible':
           return ['If Needed', this.timeAndNetwork].join('\n')
         case 'scheduledDefinite':
