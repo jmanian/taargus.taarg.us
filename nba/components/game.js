@@ -96,7 +96,7 @@ var NGame = {
       return this.game.dateTime.setZone()
     },
     localAmPm: function () {
-      return this.localDateTime.toLocaleString(DateTime.TIME_SIMPLE).split(' ', 2)[1].toLowerCase()
+      return this.localDateTime.toLocaleString(DateTime.TIME_SIMPLE).split(' ', 2)[1]?.toLowerCase()
     },
     localHoursMinutes: function () {
       return this.localDateTime.toLocaleString(DateTime.TIME_SIMPLE).split(' ', 1)[0]
@@ -104,8 +104,10 @@ var NGame = {
     localTimeShort: function () {
       if (this.localAmPm === 'am') {
         return `${this.localHoursMinutes}a`
-      } else {
+      } else if (this.localAmPm === 'pm') {
         return `${this.localHoursMinutes}p`
+      } else {
+        return this.localHoursMinutes
       }
     },
     winnerImageURL: function () {
