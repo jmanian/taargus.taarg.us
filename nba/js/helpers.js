@@ -1,3 +1,5 @@
+var DateTime = luxon.DateTime;
+
 function m(id, c, f, u, gs) {
   var numMissing = 7 - gs.length
   for (i = 0; i < numMissing; i++) {
@@ -21,7 +23,7 @@ function m(id, c, f, u, gs) {
 function makeGame(date) {
   return {
     date: date,
-    timeUTC: null,
+    dateTime: null,
     network: null,
     winner: null,
     fscore: null,
@@ -150,9 +152,8 @@ function conferenceForTeam(team) {
 }
 
 function datediff(first, second) {
-    // Take the difference between the dates and divide by milliseconds per day.
-    // Round to nearest whole number to deal with DST.
-    return Math.round((second-first)/(1000*60*60*24));
+  // Assumes the dates are set to the right zones and time components
+  return second.startOf('day').diff(first.startOf('day'), 'day').days
 }
 
 function scheduleSortKey(matchup) {
@@ -168,7 +169,7 @@ function nextGameSortKey(matchup) {
   if (games === undefined || games === null || games.length === 0) return `z-${matchup.id}`
   games = games.filter(g => (g.winner == null && g.loading != true))
   if (games.length === 0) return `y-${scheduleSortKey(matchup)}`
-  return games.map(g => g.timeUTC || g.date || 'z').join()
+  return games.map(g => g.dateTime.toUTC() || g.date || 'z').join()
 }
 
 function underdogHome(n) {
@@ -189,14 +190,6 @@ function periodName(n) {
     return 'OT'
   } else {
     return 'OT' + (n - 4)
-  }
-}
-
-function timeZoneName(date) {
-  var regex = /\((.+)\)/
-  var result = regex.exec(date.toString())
-  if (result) {
-    return result[1]
   }
 }
 
@@ -222,11 +215,9 @@ function broadcasterName(broadcasters) {
 // Cookie functions from https://www.w3schools.com/js/js_cookies.asp
 
 function setCookie(cname, cvalue, exdays) {
-  var d = new Date();
-  d.setTime(d.getTime() + (exdays*24*60*60*1000));
-  var expires = "expires="+ d.toUTCString();
+  var expires = "expires="+ DateTime.now().plus({hours: exdays * 24}).toHTTP();
   var cookie = cname + "=" + cvalue + ";" + expires + ";path=/"
-  // console.log(`setCookie: ${cookie}`)
+  console.log(`setCookie: ${cookie}`)
   document.cookie = cookie;
 }
 

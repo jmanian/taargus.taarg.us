@@ -4,6 +4,7 @@ function parseEvent(event) {
   var competition = event.competitions[0];
   var homeTeam = findTeam(competition.competitors, 'home');
   var awayTeam = findTeam(competition.competitors, 'away');
+  var dateTime = DateTime.fromISO(event.date).setZone('America/New_York')
   return {
     round: translateEspnRound(competition.type.abbreviation),
     homeTeam: teamTricode(homeTeam),
@@ -11,8 +12,8 @@ function parseEvent(event) {
     homeTeamName: homeTeam.team.name,
     awayTeamName: awayTeam.team.name,
     gameNum: extractGameNum(competition.notes),
-    timeUTC: event.date,
-    date: event.date.split('T')[0],
+    dateTime: dateTime,
+    date: dateTime.toISODate,
     homeScore: Number(homeTeam.score),
     awayScore: Number(awayTeam.score),
     network: findNationalBroadcast(competition.broadcasts),

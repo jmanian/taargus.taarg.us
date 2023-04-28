@@ -2,21 +2,20 @@
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
 
-var thisDate = rounds.map(r => r.startDate === null ? null : new Date(r.startDate + 'T12:00:00-04:00'))
-  .filter(r => r !== null)
-  .reduce((r, current) => r < current ? r : current)
-var endDate = rounds.map(r => r.endDate === null ? null : new Date(r.endDate + 'T13:00:00-04:00'))
-  .filter(r => r !== null)
-  .reduce((r, current) => r > current ? r : current)
+var roundStarts = rounds.filter(r => r.startDate !== null)
+                        .map(r => DateTime.fromISO(r.startDate, {zone: 'America/New_York'}).set({hour: 12}))
+var thisFetchDate = DateTime.min(...roundStarts)
+
+var roundEnds = rounds.filter(r => r.endDate !== null)
+                      .map(r => DateTime.fromISO(r.endDate, {zone: 'America/New_York'}).set({hour: 12}))
+var endFetchDate = DateTime.max(...roundEnds)
 
 var todayGames = []
-var now = new Date();
-var utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-var pt = new Date(utc + (3600000*(-7)));
-while (thisDate < endDate) {
-  fetchGamesForDate(thisDate);
-  thisDate = new Date(thisDate)
-  thisDate.setDate(thisDate.getDate() + 1);
+var todayGamesDate = DateTime.now().setZone('America/Los_Angeles').toISODate()
+
+while (thisFetchDate <= endFetchDate) {
+  fetchGamesForDate(thisFetchDate);
+  thisFetchDate = thisFetchDate.plus({days: 1});
 }
 
 pollingStarted = false
@@ -28,8 +27,8 @@ function startPollingToday(pollDate) {
 }
 
 function fetchGamesForDate(date, isPolling = false) {
-  var dateString = date.toISOString().split('T', 1)[0]
-  var endpointDate = dateString.split('-').join('')
+  var dateString = date.toISODate()
+  var endpointDate = date.toISODate({format: 'basic'})
   var url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
   jQuery.getJSON(url, function (data) {
     if (isPolling) {
@@ -38,7 +37,7 @@ function fetchGamesForDate(date, isPolling = false) {
     data.events.forEach(function(event) {
       eventData = parseEvent(event);
 
-      if (new Date(eventData.timeUTC).toDateString() === pt.toDateString()) {
+      if (eventData.dateTime.toISODate() === todayGamesDate) {
         todayGames.push(eventData)
       }
       // find the round
@@ -62,7 +61,7 @@ function fetchGamesForDate(date, isPolling = false) {
           var id = seriesIdForRoundAndTeam(eventData.round, eventData.homeTeam)
           matchup = round.matchups.find(matchup => Number(matchup.id) === id )
         }
-        if (matchup != undefined) {
+        if (matchup !== undefined) {
           var gameNum = eventData.gameNum
           // fill some matchup data
 
@@ -88,8 +87,8 @@ function fetchGamesForDate(date, isPolling = false) {
             g.date = dateString
             matchup.scheduleSortKey = scheduleSortKey(matchup)
           }
-          if (g.timeUTC === null) {
-            g.timeUTC = eventData.timeUTC
+          if (g.dateTime === null) {
+            g.dateTime = eventData.dateTime
           }
           // fill the network
           g.network = eventData.network;

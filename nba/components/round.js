@@ -93,19 +93,19 @@ var NRound = {
       }
       return this.round.matchups
     },
-    startDate: function () { return new Date(this.round.startDate + 'T12:00:00-04:00') },
-    endDate: function () { return new Date(this.round.endDate + 'T12:00:00-04:00') },
+    startDate: function () { return DateTime.fromISO(this.round.startDate).setZone('America/New_York') },
+    endDate: function () { return DateTime.fromISO(this.round.endDate).setZone('America/New_York') },
     duration: function () { return datediff(this.startDate, this.endDate) + 1 },
     dateLabels: function () {
       var labels = Array(this.duration)
-      var date = new Date(this.startDate.getTime())
-      var days = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa']
-      var today = new Date()
+      var date = this.startDate
+      var days = [null, 'M', 'Tu', 'W', 'Th', 'F', 'Sa', 'Su']
+      var today = DateTime.now()
       for (var i = 0; i < this.duration; i++) {
-        var isWeekend = date.getDay() == 0 || date.getDay() == 6
-        var isToday = today.getFullYear() == date.getFullYear() && today.getMonth() == date.getMonth() && today.getDate() == date.getDate()
-        labels[i] = [days[date.getDay()], String(date.getMonth() + 1) + '/' + String(date.getDate()), isToday, isWeekend]
-        date.setDate(date.getDate() + 1)
+        var isWeekend = date.weekday >= 6
+        var isToday = date.toISODate() === today.toISODate()
+        labels[i] = [days[date.weekday], date.toLocaleString({month: 'numeric', day: 'numeric'}), isToday, isWeekend]
+        date = date.plus({days: 1})
       }
       return labels
     },

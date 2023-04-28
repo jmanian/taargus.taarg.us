@@ -18,12 +18,10 @@ var NGame = {
       return this.game != undefined && !this.isWeekend
     },
     scheduled: function () {
-      if (this.game.timeUTC === null) {
+      if (this.game.dateTime === null) {
         return false
       }
-      var date = new Date(this.game.timeUTC)
-      var hour = date.getUTCHours()
-      return hour !== 4
+      return this.game.dateTime.toUTC().hour !== 4
     },
     necessary: function () {
       return this.game.number <= this.minGames
@@ -94,24 +92,14 @@ var NGame = {
     gameClass: function () {
       return 'game' + this.game.number
     },
+    localDateTime: function () {
+      return this.game.dateTime.setZone()
+    },
     localAmPm: function () {
-      var d = new Date(this.game.timeUTC)
-      if (d.getHours() < 12) {
-        return 'am'
-      } else {
-        return 'pm'
-      }
+      return this.localDateTime.toLocaleString(DateTime.TIME_SIMPLE).split(' ', 2)[1].toLowerCase()
     },
     localHoursMinutes: function () {
-      var d = new Date(this.game.timeUTC)
-      var hour = d.getHours()
-      if (hour === 0) {
-        hour = 12
-      } else if (hour > 12) {
-        hour = hour -12
-      }
-      var minute = d.getMinutes()
-      return `${hour}:${minute.toString(10).padStart(2, '0')}`
+      return this.localDateTime.toLocaleString(DateTime.TIME_SIMPLE).split(' ', 1)[0]
     },
     localTimeShort: function () {
       if (this.localAmPm === 'am') {

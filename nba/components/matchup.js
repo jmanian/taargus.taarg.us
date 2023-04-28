@@ -38,7 +38,7 @@ var NMatchup = {
       return teamImageURL(this.matchup.underdog)
     },
     scoreLabel: function () {
-      if (!this.finished && this.matchup.games.some(g => g.winner == null && g.loading && g.date < new Date().toISOString().split('T', 1))) {
+      if (!this.finished && this.matchup.games.some(g => g.winner === null && g.loading && g.date < DateTime.now().toISODate())) {
         return '...'
       } else {
         return String(this.fwins) + "–" + String(this.uwins)
@@ -56,8 +56,12 @@ var NMatchup = {
       }
       for (var i = 0; i < this.matchup.games.length; i++) {
         game = this.matchup.games[i]
-        game['number'] = i + 1
-        day = datediff(this.startDate, new Date(game.date + 'T12:00:00-04:00'))
+        game.number = i + 1
+        if (game.dateTime) {
+          day = datediff(this.startDate, game.dateTime)
+        } else {
+          day = datediff(this.startDate, DateTime.fromISO(game.date).setZone('America/New_York'))
+        }
         d[day] = game
       }
       return d
