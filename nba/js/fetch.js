@@ -85,7 +85,7 @@ function fetchGamesForDate(date, isPolling = false) {
           g = matchup.games[gameNum - 1]
           // fill the start date and time
           if (g.date === null) {
-            g.date = eventData.date
+            g.date = dateString
             matchup.scheduleSortKey = scheduleSortKey(matchup)
           }
           if (g.timeUTC === null) {
