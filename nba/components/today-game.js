@@ -1,4 +1,4 @@
-var todayGameTemplate = `
+const todayGameTemplate = `
 <div class='col' style='padding-bottom: 20px'>
   <div class='card'>
     <div class='card-header'>
@@ -27,7 +27,7 @@ var todayGameTemplate = `
 </div>
 `
 
-var NTodayGame = {
+const NTodayGame = {
   template: todayGameTemplate,
   props: ['game'],
   computed: {

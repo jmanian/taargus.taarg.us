@@ -1,4 +1,4 @@
-var roundTemplate = `
+const roundTemplate = `
 <div v-if='visible'>
   <h3>{{ roundName }}</h3>
   <table>
@@ -27,7 +27,7 @@ var roundTemplate = `
 </div>
 `
 
-var NRound = {
+const NRound = {
   template: roundTemplate,
   props: ['round', 'year'],
   components: {
@@ -97,21 +97,21 @@ var NRound = {
     endDate: function () { return DateTime.fromISO(this.round.endDate, {zone: 'America/Los_Angeles'}) },
     duration: function () { return datediff(this.startDate, this.endDate) + 1 },
     dateLabels: function () {
-      var labels = Array(this.duration)
-      var date = this.startDate
-      var days = [null, 'M', 'Tu', 'W', 'Th', 'F', 'Sa', 'Su']
-      var today = DateTime.now()
-      for (var i = 0; i < this.duration; i++) {
-        var isWeekend = date.weekday >= 6
-        var isToday = date.toISODate() === today.toISODate()
+      const labels = Array(this.duration)
+      let date = this.startDate
+      const days = [null, 'M', 'Tu', 'W', 'Th', 'F', 'Sa', 'Su']
+      const today = DateTime.now()
+      for (let i = 0; i < this.duration; i++) {
+        const isWeekend = date.weekday >= 6
+        const isToday = date.toISODate() === today.toISODate()
         labels[i] = [days[date.weekday], date.toLocaleString({month: 'numeric', day: 'numeric'}), isToday, isWeekend]
         date = date.plus({days: 1})
       }
       return labels
     },
     weekends: function () {
-      var indexes = []
-      for (i = 0; i < this.dateLabels.length; i++) {
+      const indexes = []
+      for (let i = 0; i < this.dateLabels.length; i++) {
         dateLabel = this.dateLabels[i]
         if (dateLabel[3]) indexes.push(i)
       }

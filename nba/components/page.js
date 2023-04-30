@@ -1,4 +1,4 @@
-var pageTemplate = `
+const pageTemplate = `
 <div class='container'>
   <h1>NBA Playoffs Schedules</h1>
   <h2>{{ year }}</h2>
@@ -14,7 +14,7 @@ var pageTemplate = `
 </div>
 `
 
-var NPage = {
+const NPage = {
   template: pageTemplate,
   components: {
     'n-today': NToday,

@@ -1,4 +1,4 @@
-var seeds = {
+const seeds = {
   'DEN': 1,
   'MEM': 2,
   'SAC': 3,
@@ -17,7 +17,7 @@ var seeds = {
   'MIA': 8
 }
 
-var rounds = [
+const rounds = [
   {
     number: 1,
     startDate: '2023-04-15',

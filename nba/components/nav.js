@@ -1,4 +1,4 @@
-var navTemplate = `
+const navTemplate = `
 <p>
   <template v-for='year in years'>
     <n-nav-year  :year='year' :key='year' :currentYear='currentYear'></n-nav-year>
@@ -8,7 +8,7 @@ var navTemplate = `
 </p>
 `
 
-var NNav = {
+const NNav = {
   template: navTemplate,
   components: {
     'n-nav-year': NNavYear

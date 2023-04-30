@@ -1,11 +1,11 @@
-var DateTime = luxon.DateTime;
+const DateTime = luxon.DateTime;
 
 function m(id, c, f, u, gs) {
-  var numMissing = 7 - gs.length
-  for (i = 0; i < numMissing; i++) {
+  const numMissing = 7 - gs.length
+  for (let i = 0; i < numMissing; i++) {
     gs.push(null)
   }
-  var invisible = f === null || u === null
+  const invisible = f === null || u === null
   return {
     id: id,
     conference: c,
@@ -158,14 +158,14 @@ function datediff(first, second) {
 
 function scheduleSortKey(matchup) {
   // Sort by dates (not times) of all games
-  var games = matchup.games
+  const games = matchup.games
   if (games === undefined || games === null || games.length === 0) return `z-${matchup.id}`
   return games.map(g => g.date || 'z').join()
 }
 
 function nextGameSortKey(matchup) {
   // Sort by times of remaining games
-  var games = matchup.games
+  let games = matchup.games
   if (games === undefined || games === null || games.length === 0) return `z-${matchup.id}`
   games = games.filter(g => (g.winner == null && g.loading != true))
   if (games.length === 0) return `y-${scheduleSortKey(matchup)}`
@@ -215,23 +215,23 @@ function broadcasterName(broadcasters) {
 // Cookie functions from https://www.w3schools.com/js/js_cookies.asp
 
 function setCookie(cname, cvalue, exdays) {
-  var expires = "expires="+ DateTime.now().plus({hours: exdays * 24}).toHTTP();
-  var cookie = cname + "=" + cvalue + ";" + expires + ";path=/"
+  const expires = "expires="+ DateTime.now().plus({hours: exdays * 24}).toHTTP();
+  const cookie = cname + "=" + cvalue + ";" + expires + ";path=/"
   // console.log(`setCookie: ${cookie}`)
   document.cookie = cookie;
 }
 
 function getCookie(cname) {
-  var name = cname + "=";
-  var decodedCookie = decodeURIComponent(document.cookie);
-  var ca = decodedCookie.split(';');
-  for(var i = 0; i <ca.length; i++) {
-    var c = ca[i];
+  const name = cname + "=";
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
     while (c.charAt(0) == ' ') {
       c = c.substring(1);
     }
     if (c.indexOf(name) == 0) {
-      var cvalue = c.substring(name.length, c.length)
+      const cvalue = c.substring(name.length, c.length)
       // console.log(`getCookie: ${cname}=${cvalue}`)
       return cvalue;
     }

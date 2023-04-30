@@ -1,6 +1,6 @@
-var seeds = {}
+const seeds = {}
 
-var rounds = [
+const rounds = [
   {
     number: 1,
     startDate: '2018-04-14',

@@ -1,4 +1,4 @@
-var gameTemplate = `
+const gameTemplate = `
 <td class='game' user-select="none" v-tooltip:top="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
   <img class='table-img' :src='winnerImageURL' v-if='played'>
   <div v-else>{{ content }}</div>
@@ -7,7 +7,7 @@ var gameTemplate = `
 </td>
 `
 
-var NGame = {
+const NGame = {
   template: gameTemplate,
   props: ['game', 'favorite', 'underdog', 'matchupFinished', 'minGames'],
   computed: {

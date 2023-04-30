@@ -1,4 +1,4 @@
-var matchupTemplate = `
+const matchupTemplate = `
 <tr>
   <td class='team' :class='{ winner: fwon, loser: uwon }' v-tooltip:left="teamsHover">
     <img class='table-img' :src='favoriteImageURL'>
@@ -18,7 +18,7 @@ var matchupTemplate = `
 </tr>
 `
 
-var NMatchup = {
+const NMatchup = {
   template: matchupTemplate,
   props: ['matchup', 'duration', 'startDate', 'weekends'],
   components: {
@@ -50,12 +50,11 @@ var NMatchup = {
       }
     },
     days: function () {
-      var d = Array(this.duration)
-      for (var i = 0; i < this.weekends.length; i++) {
-        d[this.weekends[i]] = 'weekend'
-      }
-      for (var i = 0; i < this.matchup.games.length; i++) {
-        game = this.matchup.games[i]
+      const d = Array(this.duration)
+      this.weekends.forEach(weekend =>
+        d[weekend] = 'weekend'
+      )
+      this.matchup.games.forEach((game, i) => {
         game.number = i + 1
         if (game.dateTime) {
           day = datediff(this.startDate, game.dateTime)
@@ -63,21 +62,21 @@ var NMatchup = {
           day = datediff(this.startDate, DateTime.fromISO(game.date, {zone: 'America/Los_Angeles'}))
         }
         d[day] = game
-      }
+      })
       return d
     },
     fwins: function () {
-      var count = 0
-      for (var i = 0; i < this.matchup.games.length; i++) {
-        if (this.matchup.games[i].winner == this.matchup.favorite) count++
-      }
+      let count = 0
+      this.matchup.games.forEach((game, i) => {
+        if (game.winner == this.matchup.favorite) count++
+      })
       return count
     },
     uwins: function () {
-      var count = 0
-      for (var i = 0; i < this.matchup.games.length; i++) {
-        if (this.matchup.games[i].winner == this.matchup.underdog) count++
-      }
+      let count = 0
+      this.matchup.games.forEach((game, i) => {
+        if (game.winner == this.matchup.underdog) count++
+      })
       return count
     },
     fwon: function () {

@@ -1,8 +1,8 @@
-var navYearTemplate = `
+const navYearTemplate = `
 <template v-if='isCurrentYear'>{{ year }}</template>
 <a :href='year' class='year' v-else>{{ year }}</a>
 `
-var NNavYear = {
+const NNavYear = {
   template: navYearTemplate,
   props: ['year', 'currentYear'],
   computed: {
