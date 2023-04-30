@@ -36,10 +36,12 @@ function fetchGamesForDate(date) {
   var url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
 
   jQuery.getJSON(url, function (data) {
+    const now = DateTime.now().setZone('America/Los_Angeles')
     var possibleRefreshTimes = []
     var gameFinished = false
-    var isToday = dateString == DateTime.now().setZone('America/Los_Angeles').toISODate()
+    var isToday = dateString == now.toISODate()
     if (isToday) {
+      possibleRefreshTimes.push(now.plus({days: 1}).startOf('day'))
       todayGames.length = 0
     }
     data.events.forEach(function(event) {
@@ -142,10 +144,12 @@ function fetchGamesForDate(date) {
     if (gameFinished) {
       // New games tend to get scheduled when a series finishes,
       // so when a game has just finished refetch everything.
+      console.log('game finished, refreshing all')
       fetchAll()
     } else if (possibleRefreshTimes.length > 0) {
       refreshTime = DateTime.min(...possibleRefreshTimes)
       milliseconds = refreshTime.diffNow().milliseconds
+      console.log(`refreshing ${date} at ${refreshTime} in ${milliseconds} ms`)
       setTimeout(refreshToday, milliseconds, date)
     }
   })
