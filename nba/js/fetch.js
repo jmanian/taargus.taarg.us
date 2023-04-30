@@ -2,47 +2,68 @@
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
 
-var roundStarts = rounds.filter(r => r.startDate !== null)
+const roundStarts = rounds.filter(r => r.startDate !== null)
                         .map(r => DateTime.fromISO(r.startDate, {zone: 'America/Los_Angeles'}))
-var startFetchDate = DateTime.min(...roundStarts)
+const startFetchDate = DateTime.min(...roundStarts)
 
-var roundEnds = rounds.filter(r => r.endDate !== null)
+const roundEnds = rounds.filter(r => r.endDate !== null)
                       .map(r => DateTime.fromISO(r.endDate, {zone: 'America/Los_Angeles'}))
-var endFetchDate = DateTime.max(...roundEnds)
+const endFetchDate = DateTime.max(...roundEnds)
 
-var todayGames = []
+const todayGames = []
+const refreshDates = {}
+const datesMissingSchedules = new Set()
 
 function fetchAll() {
-  var thisFetchDate = startFetchDate
+  let thisFetchDate = startFetchDate
   while (thisFetchDate <= endFetchDate) {
     fetchGamesForDate(thisFetchDate);
     thisFetchDate = thisFetchDate.plus({days: 1});
   }
 }
 fetchAll()
+setInterval(refresh, 5000)
 
-function refreshToday(lastRefreshDate) {
-  var todayGamesDate = DateTime.now().setZone('America/Los_Angeles').startOf('day')
-  var thisDate = lastRefreshDate
-  while (thisDate <= todayGamesDate) {
-    console.log(`refreshing ${thisDate.toISODate()}`)
-    fetchGamesForDate(thisDate)
-    thisDate = thisDate.plus({days: 1})
+function refresh() {
+  console.log('beginning refresh')
+  for (const dateString in refreshDates) {
+    const {refreshTime, date} = refreshDates[dateString]
+    // console.log(`should refresh ${dateString} at ${refreshTime}`)
+    if (refreshTime.diffNow() <= 0) {
+      console.log(`refreshing ${dateString} now`)
+      delete refreshDates[dateString]
+      fetchGamesForDate(date)
+    }
+  }
+}
+
+function scheduleRefreshOfMissingDates() {
+  for (const dateString of datesMissingSchedules) {
+    const date = DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'})
+    const refreshTime = DateTime.now()
+    datesMissingSchedules.delete(dateString)
+    console.log(`scheduled refresh of ${dateString} at ${refreshTime} for missing dates`)
+    refreshDates[dateString] = {
+      refreshTime,
+      date
+    }
   }
 }
 
 function fetchGamesForDate(date) {
-  var dateString = date.toISODate()
-  var endpointDate = date.toISODate({format: 'basic'})
-  var url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
+  const dateString = date.toISODate()
+  delete refreshDates[dateString]
+  datesMissingSchedules.delete(dateString)
+
+  const endpointDate = date.toISODate({format: 'basic'})
+  const url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
 
   jQuery.getJSON(url, function (data) {
     const now = DateTime.now().setZone('America/Los_Angeles')
-    var possibleRefreshTimes = []
-    var gameFinished = false
-    var isToday = dateString == now.toISODate()
+    const possibleRefreshTimes = []
+    let gameFinished = false
+    const isToday = dateString == now.toISODate()
     if (isToday) {
-      possibleRefreshTimes.push(now.plus({days: 1}).startOf('day'))
       todayGames.length = 0
     }
     data.events.forEach(function(event) {
@@ -69,11 +90,11 @@ function fetchGamesForDate(date) {
           (matchup.underdog === eventData.homeTeam || matchup.underdog === eventData.awayTeam)
         )
         if (matchup === null || matchup === undefined) {
-          var id = seriesIdForRoundAndTeam(eventData.round, eventData.homeTeam)
+          const id = seriesIdForRoundAndTeam(eventData.round, eventData.homeTeam)
           matchup = round.matchups.find(matchup => Number(matchup.id) === id )
         }
         if (matchup !== undefined) {
-          var gameNum = eventData.gameNum
+          const gameNum = eventData.gameNum
           // fill some matchup data
 
           // Set teams and seeds
@@ -105,7 +126,7 @@ function fetchGamesForDate(date) {
           g.network = eventData.network;
 
           // fill the scores, clock, and winner
-          var priorState = g.state
+          const priorState = g.state
           g.state = eventData.state
           g.statusDetail = eventData.statusDetail
           if (g.state !== 'pre') { // game started
@@ -118,7 +139,7 @@ function fetchGamesForDate(date) {
             }
             if (g.state === 'in') { // game ongoing
               g.clock = eventData.clock;
-              possibleRefreshTimes.push(DateTime.now().plus({seconds: 5}))
+              possibleRefreshTimes.push(DateTime.now())
             } else if (g.state === 'post') { // game finished
               if (eventData.awayScore > eventData.homeScore) {
                 g.winner = eventData.awayTeam
@@ -130,7 +151,11 @@ function fetchGamesForDate(date) {
               }
             }
           } else { // game in future
-            if (isToday && g.dateTime) possibleRefreshTimes.push(g.dateTime)
+            if (g.dateTime) {
+              possibleRefreshTimes.push(g.dateTime.setZone())
+            } else {
+              datesMissingSchedules.add(dateString)
+            }
           }
           // mark as not loading
           g.loading = false
@@ -145,13 +170,17 @@ function fetchGamesForDate(date) {
     if (gameFinished) {
       // New games tend to get scheduled when a series finishes,
       // so when a game has just finished refetch everything.
-      console.log('game finished, refreshing all')
-      fetchAll()
-    } else if (possibleRefreshTimes.length > 0) {
-      refreshTime = DateTime.min(...possibleRefreshTimes)
-      milliseconds = refreshTime.diffNow().milliseconds
-      console.log(`set refresh of ${date.toISODate()} at ${refreshTime} in ${milliseconds} ms`)
-      setTimeout(refreshToday, milliseconds, date)
+      console.log('game finished, scheduling refreshes')
+      scheduleRefreshOfMissingDates()
+    }
+
+    if (possibleRefreshTimes.length > 0) {
+      const refreshTime = DateTime.min(...possibleRefreshTimes)
+      console.log(`scheduled refresh of ${dateString} at ${refreshTime}`)
+      refreshDates[dateString] = {
+        refreshTime,
+        date
+      }
     }
   })
 }
