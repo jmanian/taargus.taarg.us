@@ -25,6 +25,7 @@ function refreshToday(lastRefreshDate) {
   var todayGamesDate = DateTime.now().setZone('America/Los_Angeles').startOf('day')
   var thisDate = lastRefreshDate
   while (thisDate <= todayGamesDate) {
+    console.log(`refreshing ${thisDate.toISODate()}`)
     fetchGamesForDate(thisDate)
     thisDate = thisDate.plus({days: 1})
   }
@@ -149,7 +150,7 @@ function fetchGamesForDate(date) {
     } else if (possibleRefreshTimes.length > 0) {
       refreshTime = DateTime.min(...possibleRefreshTimes)
       milliseconds = refreshTime.diffNow().milliseconds
-      console.log(`refreshing ${date} at ${refreshTime} in ${milliseconds} ms`)
+      console.log(`set refresh of ${date.toISODate()} at ${refreshTime} in ${milliseconds} ms`)
       setTimeout(refreshToday, milliseconds, date)
     }
   })
