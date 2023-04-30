@@ -93,8 +93,8 @@ var NRound = {
       }
       return this.round.matchups
     },
-    startDate: function () { return DateTime.fromISO(this.round.startDate, {zone: 'America/New_York'}) },
-    endDate: function () { return DateTime.fromISO(this.round.endDate, {zone: 'America/New_York'}) },
+    startDate: function () { return DateTime.fromISO(this.round.startDate, {zone: 'America/Los_Angeles'}) },
+    endDate: function () { return DateTime.fromISO(this.round.endDate, {zone: 'America/Los_Angeles'}) },
     duration: function () { return datediff(this.startDate, this.endDate) + 1 },
     dateLabels: function () {
       var labels = Array(this.duration)

@@ -4,7 +4,7 @@ function parseEvent(event) {
   var competition = event.competitions[0];
   var homeTeam = findTeam(competition.competitors, 'home');
   var awayTeam = findTeam(competition.competitors, 'away');
-  var dateTime = DateTime.fromISO(event.date).setZone('America/New_York')
+  var dateTime = DateTime.fromISO(event.date).setZone('America/Los_Angeles')
   return {
     round: translateEspnRound(competition.type.abbreviation),
     homeTeam: teamTricode(homeTeam),

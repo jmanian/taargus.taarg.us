@@ -3,41 +3,49 @@ rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKe
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
 
 var roundStarts = rounds.filter(r => r.startDate !== null)
-                        .map(r => DateTime.fromISO(r.startDate, {zone: 'America/New_York'}).set({hour: 12}))
-var thisFetchDate = DateTime.min(...roundStarts)
+                        .map(r => DateTime.fromISO(r.startDate, {zone: 'America/Los_Angeles'}))
+var startFetchDate = DateTime.min(...roundStarts)
 
 var roundEnds = rounds.filter(r => r.endDate !== null)
-                      .map(r => DateTime.fromISO(r.endDate, {zone: 'America/New_York'}).set({hour: 12}))
+                      .map(r => DateTime.fromISO(r.endDate, {zone: 'America/Los_Angeles'}))
 var endFetchDate = DateTime.max(...roundEnds)
 
 var todayGames = []
-var todayGamesDate = DateTime.now().setZone('America/Los_Angeles').toISODate()
 
-while (thisFetchDate <= endFetchDate) {
-  fetchGamesForDate(thisFetchDate);
-  thisFetchDate = thisFetchDate.plus({days: 1});
+function fetchAll() {
+  var thisFetchDate = startFetchDate
+  while (thisFetchDate <= endFetchDate) {
+    fetchGamesForDate(thisFetchDate);
+    thisFetchDate = thisFetchDate.plus({days: 1});
+  }
 }
+fetchAll()
 
-pollingStarted = false
-function startPollingToday(pollDate) {
-  if (!pollingStarted) {
-    setInterval(fetchGamesForDate, 5000, pollDate, true)
-    pollingStarted = true
+function refreshToday(lastRefreshDate) {
+  var todayGamesDate = DateTime.now().setZone('America/Los_Angeles').startOf('day')
+  var thisDate = lastRefreshDate
+  while (thisDate <= todayGamesDate) {
+    fetchGamesForDate(thisDate)
+    thisDate = thisDate.plus({days: 1})
   }
 }
 
-function fetchGamesForDate(date, isPolling = false) {
+function fetchGamesForDate(date) {
   var dateString = date.toISODate()
   var endpointDate = date.toISODate({format: 'basic'})
   var url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
+
   jQuery.getJSON(url, function (data) {
-    if (isPolling) {
+    var possibleRefreshTimes = []
+    var gameFinished = false
+    var isToday = dateString == DateTime.now().setZone('America/Los_Angeles').toISODate()
+    if (isToday) {
       todayGames.length = 0
     }
     data.events.forEach(function(event) {
       eventData = parseEvent(event);
 
-      if (eventData.dateTime.toISODate() === todayGamesDate) {
+      if (isToday) {
         todayGames.push(eventData)
       }
       // find the round
@@ -94,6 +102,7 @@ function fetchGamesForDate(date, isPolling = false) {
           g.network = eventData.network;
 
           // fill the scores, clock, and winner
+          var priorState = g.state
           g.state = eventData.state
           g.statusDetail = eventData.statusDetail
           if (g.state !== 'pre') { // game started
@@ -106,14 +115,19 @@ function fetchGamesForDate(date, isPolling = false) {
             }
             if (g.state === 'in') { // game ongoing
               g.clock = eventData.clock;
-              startPollingToday(date)
+              possibleRefreshTimes.push(DateTime.now().plus({seconds: 5}))
             } else if (g.state === 'post') { // game finished
               if (eventData.awayScore > eventData.homeScore) {
                 g.winner = eventData.awayTeam
               } else {
                 g.winner = eventData.homeTeam
               }
+              if (priorState && priorState !== 'post') {
+                gameFinished = true
+              }
             }
+          } else { // game in future
+            if (isToday && g.dateTime) possibleRefreshTimes.push(g.dateTime)
           }
           // mark as not loading
           g.loading = false
@@ -124,5 +138,15 @@ function fetchGamesForDate(date, isPolling = false) {
         }
       }
     })
+
+    if (gameFinished) {
+      // New games tend to get scheduled when a series finishes,
+      // so when a game has just finished refetch everything.
+      fetchAll()
+    } else if (possibleRefreshTimes.length > 0) {
+      refreshTime = DateTime.min(...possibleRefreshTimes)
+      milliseconds = refreshTime.diffNow().milliseconds
+      setTimeout(refreshToday, milliseconds, date)
+    }
   })
 }

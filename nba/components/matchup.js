@@ -60,7 +60,7 @@ var NMatchup = {
         if (game.dateTime) {
           day = datediff(this.startDate, game.dateTime)
         } else {
-          day = datediff(this.startDate, DateTime.fromISO(game.date, {zone: 'America/New_York'}))
+          day = datediff(this.startDate, DateTime.fromISO(game.date, {zone: 'America/Los_Angeles'}))
         }
         d[day] = game
       }
