@@ -56,11 +56,7 @@ const NMatchup = {
       )
       this.matchup.games.forEach((game, i) => {
         game.number = i + 1
-        if (game.dateTime) {
-          day = datediff(this.startDate, game.dateTime)
-        } else {
-          day = datediff(this.startDate, DateTime.fromISO(game.date, {zone: 'America/Los_Angeles'}))
-        }
+        day = datediff(this.startDate, DateTime.fromISO(game.date, {zone: 'America/Los_Angeles'}))
         d[day] = game
       })
       return d
