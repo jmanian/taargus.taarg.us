@@ -18,10 +18,7 @@ const NGame = {
       return this.game != undefined && !this.isWeekend
     },
     scheduled: function () {
-      if (this.game.dateTime === null) {
-        return false
-      }
-      return this.game.dateTime.toUTC().hour !== 4
+      return this.game.dateTime !== null
     },
     necessary: function () {
       return this.game.number <= this.minGames

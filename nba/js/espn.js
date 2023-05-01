@@ -5,6 +5,7 @@ function parseEvent(event) {
   const homeTeam = findTeam(competition.competitors, 'home');
   const awayTeam = findTeam(competition.competitors, 'away');
   const dateTime = DateTime.fromISO(event.date).setZone('America/Los_Angeles')
+  const date = dateTime.toISODate()
   return {
     round: translateEspnRound(competition.type.abbreviation),
     homeTeam: teamTricode(homeTeam),
@@ -12,8 +13,8 @@ function parseEvent(event) {
     homeTeamName: homeTeam.team.name,
     awayTeamName: awayTeam.team.name,
     gameNum: extractGameNum(competition.notes),
-    dateTime: dateTime,
-    date: dateTime.toISODate,
+    dateTime: competition.timeValid ? dateTime : null,
+    date: date,
     homeScore: Number(homeTeam.score),
     awayScore: Number(awayTeam.score),
     network: findNationalBroadcast(competition.broadcasts),
