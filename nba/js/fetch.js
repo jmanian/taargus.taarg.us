@@ -154,6 +154,7 @@ function fetchGamesForDate(date) {
             if (g.dateTime) {
               possibleRefreshTimes.push(g.dateTime.setZone())
             } else {
+              possibleRefreshTimes.push(DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'}).setZone())
               datesMissingSchedules.add(dateString)
             }
           }
