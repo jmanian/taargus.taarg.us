@@ -106,6 +106,8 @@ function fetchGamesForDate(date) {
               matchup.favorite = eventData.homeTeam
               matchup.underdog = eventData.awayTeam
             }
+            matchup.fseed = seeds[matchup.favorite]
+            matchup.useed = seeds[matchup.underdog]
           }
 
           //
