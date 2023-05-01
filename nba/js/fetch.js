@@ -65,6 +65,8 @@ function fetchGamesForDate(date) {
     const isToday = dateString == now.toISODate()
     if (isToday) {
       todayGames.length = 0
+    } else if (dateString > now.toISODate()) {
+      possibleRefreshTimes.push(date.startOf('day').setZone())
     }
     data.events.forEach(function(event) {
       eventData = parseEvent(event);
