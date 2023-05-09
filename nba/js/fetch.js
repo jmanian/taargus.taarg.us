@@ -13,6 +13,7 @@ const endFetchDate = DateTime.max(...roundEnds)
 const todayGames = []
 const refreshDates = {}
 const datesMissingSchedules = new Set()
+let nowLocal = DateTime.now()
 
 function fetchAll() {
   let thisFetchDate = startFetchDate
@@ -26,6 +27,7 @@ setInterval(refresh, 5000)
 
 function refresh() {
   console.log('beginning refresh')
+  nowLocal = DateTime.now()
   for (const dateString in refreshDates) {
     const {refreshTime, date} = refreshDates[dateString]
     // console.log(`should refresh ${dateString} at ${refreshTime}`)

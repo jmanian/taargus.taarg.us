@@ -29,7 +29,7 @@ const roundTemplate = `
 
 const NRound = {
   template: roundTemplate,
-  props: ['round', 'year'],
+  props: ['round', 'nowLocal', 'year'],
   components: {
     'n-matchup': NMatchup
   },
@@ -100,10 +100,9 @@ const NRound = {
       const labels = Array(this.duration)
       let date = this.startDate
       const days = [null, 'M', 'Tu', 'W', 'Th', 'F', 'Sa', 'Su']
-      const today = DateTime.now()
       for (let i = 0; i < this.duration; i++) {
         const isWeekend = date.weekday >= 6
-        const isToday = date.toISODate() === today.toISODate()
+        const isToday = date.toISODate() === this.nowLocal.toISODate()
         labels[i] = [days[date.weekday], date.toLocaleString({month: 'numeric', day: 'numeric'}), isToday, isWeekend]
         date = date.plus({days: 1})
       }
