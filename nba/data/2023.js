@@ -148,7 +148,7 @@ const rounds = [
   {
     number: 2,
     startDate: '2023-04-29',
-    endDate: '2023-05-14',
+    endDate: '2023-05-15',
     matchups: [
       m(
         '20',
