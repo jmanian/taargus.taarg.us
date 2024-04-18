@@ -13,7 +13,7 @@ const seeds = {
   'CLE': 4,
   'ORL': 5,
   'IND': 6,
-  // 'ATL': 7,
+  'PHI': 7,
   // 'MIA': 8
 }
 
@@ -102,7 +102,7 @@ const rounds = [
         '15',
         'East',
         'NYK',
-        null,
+        'PHI',
         [
           '2024-04-20',
           '2024-04-22',
