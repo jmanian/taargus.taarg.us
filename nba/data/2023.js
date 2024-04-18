@@ -17,7 +17,7 @@ const seeds = {
   'MIA': 8
 }
 
-const rounds = [
+const initRounds = [
   {
     number: 1,
     startDate: '2023-04-15',

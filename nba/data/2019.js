@@ -1,6 +1,6 @@
 const seeds = {}
 
-const rounds = [
+const initRounds = [
   {
     number: 1,
     startDate: '2019-04-13',
