@@ -1,4 +1,4 @@
-var todayTemplate = `
+const todayTemplate = `
 <div>
   <h3>Today's Games</h3>
   <div class='row row-cols-1 row-cols-md-2 row-cols-xl-3 row-cols-xxl-4'>
@@ -7,7 +7,7 @@ var todayTemplate = `
 </div>
 `
 
-var NToday = {
+const NToday = {
   template: todayTemplate,
   props: ['games'],
   components: {

@@ -1,9 +1,11 @@
 // Parse data from espn api
 
 function parseEvent(event) {
-  var competition = event.competitions[0];
-  var homeTeam = findTeam(competition.competitors, 'home');
-  var awayTeam = findTeam(competition.competitors, 'away');
+  const competition = event.competitions[0];
+  const homeTeam = findTeam(competition.competitors, 'home');
+  const awayTeam = findTeam(competition.competitors, 'away');
+  const dateTime = DateTime.fromISO(event.date).setZone('America/Los_Angeles')
+  const date = dateTime.toISODate()
   return {
     round: translateEspnRound(competition.type.abbreviation),
     homeTeam: teamTricode(homeTeam),
@@ -11,8 +13,8 @@ function parseEvent(event) {
     homeTeamName: homeTeam.team.name,
     awayTeamName: awayTeam.team.name,
     gameNum: extractGameNum(competition.notes),
-    timeUTC: event.date,
-    date: event.date.split('T')[0],
+    dateTime: competition.timeValid ? dateTime : null,
+    date: date,
     homeScore: Number(homeTeam.score),
     awayScore: Number(awayTeam.score),
     network: findNationalBroadcast(competition.broadcasts),
@@ -64,19 +66,21 @@ function translateEspnTeamCode(code) {
       return 'UTA';
     case 'WSH':
       return 'WAS';
+    case 'TBD':
+      return null;
     default:
       return code;
   }
 }
 
 function extractGameNum(notes) {
-  var regex = /game ([1-7])/i;
-  var headline = notes.find(note => note.type === 'event').headline;
+  const regex = /game ([1-7])/i;
+  const headline = notes.find(note => note.type === 'event').headline;
   return Number(regex.exec(headline)[1]);
 }
 
 function findNationalBroadcast(broadcasts) {
-  var broadcast = broadcasts.find(bc => bc.market.toLowerCase() === 'national')
+  const broadcast = broadcasts.find(bc => bc.market.toLowerCase() === 'national')
   if (broadcast) {
     return broadcast.names[0];
   }
@@ -84,7 +88,7 @@ function findNationalBroadcast(broadcasts) {
 
 function findRecap(headlines) {
   if (headlines) {
-    var headline = headlines.find(hl => hl.type.toLowerCase() === 'recap')
+    const headline = headlines.find(hl => hl.type.toLowerCase() === 'recap')
     if (headline) {
       return headline.shortLinkText
     }

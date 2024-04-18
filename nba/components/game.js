@@ -1,4 +1,4 @@
-var gameTemplate = `
+const gameTemplate = `
 <td class='game' user-select="none" v-tooltip:top="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
   <img class='table-img' :src='winnerImageURL' v-if='played'>
   <div v-else>{{ content }}</div>
@@ -7,7 +7,7 @@ var gameTemplate = `
 </td>
 `
 
-var NGame = {
+const NGame = {
   template: gameTemplate,
   props: ['game', 'favorite', 'underdog', 'matchupFinished', 'minGames'],
   computed: {
@@ -18,12 +18,7 @@ var NGame = {
       return this.game != undefined && !this.isWeekend
     },
     scheduled: function () {
-      if (this.game.timeUTC === null) {
-        return false
-      }
-      var date = new Date(this.game.timeUTC)
-      var hour = date.getUTCHours()
-      return hour !== 4
+      return this.game.dateTime !== null
     },
     necessary: function () {
       return this.game.number <= this.minGames
@@ -94,30 +89,22 @@ var NGame = {
     gameClass: function () {
       return 'game' + this.game.number
     },
+    localDateTime: function () {
+      return this.game.dateTime.setZone()
+    },
     localAmPm: function () {
-      var d = new Date(this.game.timeUTC)
-      if (d.getHours() < 12) {
-        return 'am'
-      } else {
-        return 'pm'
-      }
+      return this.localDateTime.toLocaleString(DateTime.TIME_SIMPLE).split(' ', 2)[1]?.toLowerCase()
     },
     localHoursMinutes: function () {
-      var d = new Date(this.game.timeUTC)
-      var hour = d.getHours()
-      if (hour === 0) {
-        hour = 12
-      } else if (hour > 12) {
-        hour = hour -12
-      }
-      var minute = d.getMinutes()
-      return `${hour}:${minute.toString(10).padStart(2, '0')}`
+      return this.localDateTime.toLocaleString(DateTime.TIME_SIMPLE).split(' ', 1)[0]
     },
     localTimeShort: function () {
       if (this.localAmPm === 'am') {
         return `${this.localHoursMinutes}a`
-      } else {
+      } else if (this.localAmPm === 'pm') {
         return `${this.localHoursMinutes}p`
+      } else {
+        return this.localHoursMinutes
       }
     },
     winnerImageURL: function () {
@@ -151,6 +138,8 @@ var NGame = {
           return 'Not Needed'
         case 'ifNeeded':
           return 'If Needed'
+        case 'unscheduled':
+          return this.game.network
         case 'scheduledPossible':
           return ['If Needed', this.timeAndNetwork].join('\n')
         case 'scheduledDefinite':

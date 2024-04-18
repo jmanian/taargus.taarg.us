@@ -1,5 +1,5 @@
-var roundTemplate = `
-<div>
+const roundTemplate = `
+<div v-if='visible'>
   <h3>{{ roundName }}</h3>
   <table>
     <thead>
@@ -29,9 +29,9 @@ var roundTemplate = `
 </div>
 `
 
-var NRound = {
+const NRound = {
   template: roundTemplate,
-  props: ['round', 'year'],
+  props: ['round', 'nowLocal', 'year'],
   components: {
     'n-matchup': NMatchup
   },
@@ -54,6 +54,9 @@ var NRound = {
     },
   },
   computed: {
+    visible: function () {
+      return this.round.matchups.find(matchup => !matchup.invisible)
+    },
     sortingCookieName: function () {
       return `${this.year}-${this.round.number}-sorting`
     },
@@ -92,25 +95,24 @@ var NRound = {
       }
       return this.round.matchups
     },
-    startDate: function () { return new Date(this.round.startDate + 'T12:00:00-04:00') },
-    endDate: function () { return new Date(this.round.endDate + 'T12:00:00-04:00') },
+    startDate: function () { return DateTime.fromISO(this.round.startDate, {zone: 'America/Los_Angeles'}) },
+    endDate: function () { return DateTime.fromISO(this.round.endDate, {zone: 'America/Los_Angeles'}) },
     duration: function () { return datediff(this.startDate, this.endDate) + 1 },
     dateLabels: function () {
-      var labels = Array(this.duration)
-      var date = new Date(this.startDate.getTime())
-      var days = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa']
-      var today = new Date()
-      for (var i = 0; i < this.duration; i++) {
-        var isWeekend = date.getDay() == 0 || date.getDay() == 6
-        var isToday = today.getFullYear() == date.getFullYear() && today.getMonth() == date.getMonth() && today.getDate() == date.getDate()
-        labels[i] = [days[date.getDay()], String(date.getMonth() + 1) + '/' + String(date.getDate()), isToday, isWeekend]
-        date.setDate(date.getDate() + 1)
+      const labels = Array(this.duration)
+      let date = this.startDate
+      const days = [null, 'M', 'Tu', 'W', 'Th', 'F', 'Sa', 'Su']
+      for (let i = 0; i < this.duration; i++) {
+        const isWeekend = date.weekday >= 6
+        const isToday = date.toISODate() === this.nowLocal.toISODate()
+        labels[i] = [days[date.weekday], date.toLocaleString({month: 'numeric', day: 'numeric'}), isToday, isWeekend]
+        date = date.plus({days: 1})
       }
       return labels
     },
     weekends: function () {
-      var indexes = []
-      for (i = 0; i < this.dateLabels.length; i++) {
+      const indexes = []
+      for (let i = 0; i < this.dateLabels.length; i++) {
         dateLabel = this.dateLabels[i]
         if (dateLabel[3]) indexes.push(i)
       }

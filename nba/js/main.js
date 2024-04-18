@@ -1,7 +1,7 @@
 function addTooltip(el, binding) {
   const tooltip = bootstrap.Tooltip.getInstance(el)
 
-  if (binding.value !== undefined) {
+  if (binding.value !== undefined && binding.value !== null) {
     if (tooltip !== null) {
       tooltip.setContent({'.tooltip-inner': binding.value})
     } else {
@@ -24,7 +24,8 @@ const app = createApp({
   data() {
     return {
       rounds,
-      todayGames
+      todayGames,
+      nowLocal,
     }
   },
   created: function () {

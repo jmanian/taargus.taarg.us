@@ -1,4 +1,4 @@
-var matchupTemplate = `
+const matchupTemplate = `
 <tr>
   <td class='team' :class='{ winner: fwon, loser: uwon }' v-tooltip:left="teamsHover">
     <img class='table-img' :src='favoriteImageURL'>
@@ -18,7 +18,7 @@ var matchupTemplate = `
 </tr>
 `
 
-var NMatchup = {
+const NMatchup = {
   template: matchupTemplate,
   props: ['matchup', 'duration', 'startDate', 'weekends'],
   components: {
@@ -26,19 +26,34 @@ var NMatchup = {
   },
   computed: {
     favoriteLabel: function () {
-      return this.matchup.favorite.toUpperCase()
+      if (this.matchup.favorite) {
+        return this.matchup.favorite.toUpperCase()
+      } else {
+        return 'TBD'
+      }
+
     },
     underdogLabel: function () {
-      return this.matchup.underdog.toUpperCase()
+      if (this.matchup.underdog) {
+        return this.matchup.underdog.toUpperCase()
+      } else {
+        return 'TBD'
+      }
     },
     favoriteImageURL: function () {
-      return teamImageURL(this.matchup.favorite)
+      if (this.matchup.favorite) {
+        return teamImageURL(this.matchup.favorite)
+      }
+      return null
     },
     underdogImageURL: function () {
-      return teamImageURL(this.matchup.underdog)
+      if (this.matchup.underdog) {
+        return teamImageURL(this.matchup.underdog)
+      }
+      return null
     },
     scoreLabel: function () {
-      if (!this.finished && this.matchup.games.some(g => g.winner == null && g.loading && g.date < new Date().toISOString().split('T', 1))) {
+      if (!this.finished && this.matchup.games.some(g => g.winner === null && g.loading && g.date < DateTime.now().toISODate())) {
         return '...'
       } else {
         return String(this.fwins) + "–" + String(this.uwins)
@@ -50,30 +65,31 @@ var NMatchup = {
       }
     },
     days: function () {
-      var d = Array(this.duration)
-      for (var i = 0; i < this.weekends.length; i++) {
-        d[this.weekends[i]] = 'weekend'
-      }
-      for (var i = 0; i < this.matchup.games.length; i++) {
-        game = this.matchup.games[i]
-        game['number'] = i + 1
-        day = datediff(this.startDate, new Date(game.date + 'T12:00:00-04:00'))
+      const d = Array(this.duration)
+      this.weekends.forEach(weekend =>
+        d[weekend] = 'weekend'
+      )
+      this.matchup.games.forEach((game, i) => {
+        game.number = i + 1
+        day = datediff(this.startDate, DateTime.fromISO(game.date, {zone: 'America/Los_Angeles'}))
         d[day] = game
-      }
+      })
       return d
     },
     fwins: function () {
-      var count = 0
-      for (var i = 0; i < this.matchup.games.length; i++) {
-        if (this.matchup.games[i].winner == this.matchup.favorite) count++
-      }
+      if (this.matchup.favorite === null) return 0
+      let count = 0
+      this.matchup.games.forEach((game, i) => {
+        if (game.winner == this.matchup.favorite) count++
+      })
       return count
     },
     uwins: function () {
-      var count = 0
-      for (var i = 0; i < this.matchup.games.length; i++) {
-        if (this.matchup.games[i].winner == this.matchup.underdog) count++
-      }
+      if (this.matchup.underdog === null) return 0
+      let count = 0
+      this.matchup.games.forEach((game, i) => {
+        if (game.winner == this.matchup.underdog) count++
+      })
       return count
     },
     fwon: function () {

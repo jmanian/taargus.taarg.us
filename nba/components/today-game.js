@@ -1,4 +1,4 @@
-var todayGameTemplate = `
+const todayGameTemplate = `
 <div class='col' style='padding-bottom: 20px'>
   <div class='card'>
     <div class='card-header'>
@@ -27,7 +27,7 @@ var todayGameTemplate = `
 </div>
 `
 
-var NTodayGame = {
+const NTodayGame = {
   template: todayGameTemplate,
   props: ['game'],
   computed: {
@@ -56,11 +56,7 @@ var NTodayGame = {
     //   }
     // },
     startTimeShort: function ()  {
-      var time, amPm
-      [time, amPm] = new Date(this.game.timeUTC).toLocaleTimeString().split(' ')
-      // remove the seconds
-      time = time.split(':').slice(0, 2).join(':')
-      return `${time} ${amPm}`
+      return this.game.dateTime.setZone().toLocaleString(DateTime.TIME_SIMPLE)
     },
     timeLabel: function () {
       switch (this.game.state) {

@@ -1,4 +1,4 @@
-var footerTemplate = `
+const footerTemplate = `
 <p class='time-zone-note'>
   All times are in your local time zone, {{ localTimeZone }}.
   <br>
@@ -6,16 +6,13 @@ var footerTemplate = `
 </p>
 `
 
-var NFooter = {
+const NFooter = {
   template: footerTemplate,
   props: ['rounds'],
   computed: {
     localTimeZone: function () {
-      var startDate = new Date(this.rounds[this.rounds.length - 1].startDate)
-      var endDate = new Date(this.rounds[0].endDate)
-
-      var startZone = timeZoneName(startDate)
-      var endZone = timeZoneName(endDate)
+      const startZone = DateTime.fromISO(this.rounds[this.rounds.length - 1].startDate).offsetNameLong
+      const endZone = DateTime.fromISO(this.rounds[0].endDate).offsetNameLong
 
       if (startZone) {
         if (startZone === endZone || !endZone) {
@@ -27,7 +24,7 @@ var NFooter = {
         return endZone
       }
 
-      return Intl.DateTimeFormat().resolvedOptions().timeZone
+      return DateTime.now().offsetNameLong
     }
   }
 }
