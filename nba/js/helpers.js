@@ -5,7 +5,9 @@ function m(id, c, f, u, gs) {
   for (let i = 0; i < numMissing; i++) {
     gs.push(null)
   }
-  const invisible = f === null || u === null
+  // Change this back to hide matchups with missing teams
+  // const invisible = f === null || u === null
+  const invisible = false
   return {
     id: id,
     conference: c,

@@ -26,16 +26,31 @@ const NMatchup = {
   },
   computed: {
     favoriteLabel: function () {
-      return this.matchup.favorite.toUpperCase()
+      if (this.matchup.favorite) {
+        return this.matchup.favorite.toUpperCase()
+      } else {
+        return 'TBD'
+      }
+
     },
     underdogLabel: function () {
-      return this.matchup.underdog.toUpperCase()
+      if (this.matchup.underdog) {
+        return this.matchup.underdog.toUpperCase()
+      } else {
+        return 'TBD'
+      }
     },
     favoriteImageURL: function () {
-      return teamImageURL(this.matchup.favorite)
+      if (this.matchup.favorite) {
+        return teamImageURL(this.matchup.favorite)
+      }
+      return null
     },
     underdogImageURL: function () {
-      return teamImageURL(this.matchup.underdog)
+      if (this.matchup.underdog) {
+        return teamImageURL(this.matchup.underdog)
+      }
+      return null
     },
     scoreLabel: function () {
       if (!this.finished && this.matchup.games.some(g => g.winner === null && g.loading && g.date < DateTime.now().toISODate())) {
