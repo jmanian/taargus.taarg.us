@@ -77,6 +77,7 @@ const NMatchup = {
       return d
     },
     fwins: function () {
+      if (this.matchup.favorite === null) return 0
       let count = 0
       this.matchup.games.forEach((game, i) => {
         if (game.winner == this.matchup.favorite) count++
@@ -84,6 +85,7 @@ const NMatchup = {
       return count
     },
     uwins: function () {
+      if (this.matchup.underdog === null) return 0
       let count = 0
       this.matchup.games.forEach((game, i) => {
         if (game.winner == this.matchup.underdog) count++
