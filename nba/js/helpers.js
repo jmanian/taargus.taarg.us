@@ -5,9 +5,7 @@ function m(id, c, f, u, gs) {
   for (let i = 0; i < numMissing; i++) {
     gs.push(null)
   }
-  // Change this back to hide matchups with missing teams
-  // const invisible = f === null || u === null
-  const invisible = false
+  const teamsKnown = f !== null || u !== null
   return {
     id: id,
     conference: c,
@@ -15,7 +13,7 @@ function m(id, c, f, u, gs) {
     underdog: u,
     fseed: seeds[f],
     useed: seeds[u],
-    invisible: invisible,
+    teamsKnown: teamsKnown,
     scheduleSortKey: null,
     nextGameSortKey: null,
     games: gs.map(g => makeGame(g))

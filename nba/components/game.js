@@ -71,7 +71,7 @@ const NGame = {
         }
       } else if (this.necessary) {
         return 'unscheduled'
-      } else if (this.game.loading) {
+      } else if (this.game.loading && this.favorite && this.underdog) {
         return 'loading'
       } else {
         return 'ifNeeded'

@@ -122,8 +122,8 @@ function fetchGamesForDate(date) {
           }
 
           //
-          if (matchup.invisible && matchup.favorite !== null && matchup.underdog !== null) {
-            matchup.invisible = false
+          if (!matchup.teamsKnown && matchup.favorite !== null && matchup.underdog !== null) {
+            matchup.teamsKnown = true
           }
           // find the game
           g = matchup.games[gameNum - 1]
