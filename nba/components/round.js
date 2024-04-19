@@ -21,7 +21,7 @@ const roundTemplate = `
       </tr>
     </thead>
     <transition-group name='sort-matchups' tag='tbody'>
-      <n-matchup v-for='matchup in sortedMatchups' v-if='!matchup.invisible' :matchup='matchup' :duration='duration' :startDate='startDate' :weekends='weekends' :key='matchup.id'></n-matchup>
+      <n-matchup v-for='matchup in sortedMatchups' :matchup='matchup' :duration='duration' :startDate='startDate' :weekends='weekends' :key='matchup.id'></n-matchup>
     </transition-group>
   </table>
 </div>
@@ -53,7 +53,7 @@ const NRound = {
   },
   computed: {
     visible: function () {
-      return this.round.matchups.find(matchup => !matchup.invisible)
+      return this.round.matchups.some(matchup => matchup.teamsKnown)
     },
     sortingCookieName: function () {
       return `${this.year}-${this.round.number}-sorting`
