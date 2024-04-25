@@ -6,7 +6,7 @@ const seeds = {
   'LAC': 5,
   'DAL': 6,
   'LAL': 7,
-  // 'MIN': 8,
+  'NOP': 8,
   'BOS': 1,
   'NYK': 2,
   'MIL': 3,
@@ -14,7 +14,7 @@ const seeds = {
   'ORL': 5,
   'IND': 6,
   'PHI': 7,
-  // 'MIA': 8
+  'MIA': 8
 }
 
 const rounds = [
@@ -27,7 +27,7 @@ const rounds = [
         '10',
         'West',
         'OKC',
-        null,
+        'NOP',
         [
           '2024-04-21',
           '2024-04-24',
@@ -87,7 +87,7 @@ const rounds = [
         '14',
         'East',
         'BOS',
-        null,
+        'MIA',
         [
           '2024-04-21',
           '2024-04-24',
