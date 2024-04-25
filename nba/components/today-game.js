@@ -7,6 +7,7 @@ const todayGameTemplate = `
     </div>
     <div class='card-body'>
       <span class='badge bg-danger' v-if='playing'>LIVE</span>
+      <span>&nbsp;<span>
       <span :class="{'text-danger': playing}">{{ timeLabel }}</span>
       <span style='float: right;'>{{ network }}</span>
       <br>
