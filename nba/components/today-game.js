@@ -6,8 +6,10 @@ const todayGameTemplate = `
       <span style='float: right;'>{{ seriesStatus }}</span>
     </div>
     <div class='card-body'>
-      <span class='badge bg-danger' v-if='playing'>LIVE</span>
-      <span>&nbsp;<span>
+      <template v-if='playing'>
+        <span class='badge bg-danger'>LIVE</span>
+        <span>&nbsp;</span>
+      </template>
       <span :class="{'text-danger': playing}">{{ timeLabel }}</span>
       <span style='float: right;'>{{ network }}</span>
       <br>
