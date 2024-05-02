@@ -59,9 +59,14 @@ const NRound = {
       return `${this.year}-${this.round.number}-sorting`
     },
     roundName: function () {
-      if (this.round.number < 4) {
-        return 'Round ' + String(this.round.number)
-      } else {
+      switch (this.round.number) {
+      case 1:
+        return 'First Round'
+      case 2:
+        return 'Conference Semifinals'
+      case 3:
+        return 'Conference Finals'
+      case 4:
         return 'Finals'
       }
     },
