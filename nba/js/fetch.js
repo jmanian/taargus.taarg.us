@@ -117,7 +117,7 @@ function fetchGamesForDate(date) {
           }
 
           //
-          if (!matchup.teamsKnown && matchup.favorite !== null && matchup.underdog !== null) {
+          if (!matchup.teamsKnown && (matchup.favorite !== null || matchup.underdog !== null)) {
             matchup.teamsKnown = true
           }
           // find the game
