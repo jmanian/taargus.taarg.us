@@ -7,21 +7,16 @@ const rounds = reactive(initRounds)
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
 rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
 
-const roundStarts = rounds.filter(r => r.startDate !== null)
-                        .map(r => DateTime.fromISO(r.startDate, {zone: 'America/Los_Angeles'}))
-const startFetchDate = DateTime.min(...roundStarts)
-
-const roundEnds = rounds.filter(r => r.endDate !== null)
-                      .map(r => DateTime.fromISO(r.endDate, {zone: 'America/Los_Angeles'}))
-const endFetchDate = DateTime.max(...roundEnds)
+dates.start = DateTime.fromISO(dates.start)
+dates.end = DateTime.fromISO(dates.end)
 
 const refreshDates = {}
 const datesMissingSchedules = new Set()
 let nowLocal = DateTime.now()
 
 function fetchAll() {
-  let thisFetchDate = startFetchDate
-  while (thisFetchDate <= endFetchDate) {
+  let thisFetchDate = dates.start
+  while (thisFetchDate <= dates.end) {
     fetchGamesForDate(thisFetchDate);
     thisFetchDate = thisFetchDate.plus({days: 1});
   }

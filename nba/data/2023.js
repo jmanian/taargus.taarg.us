@@ -17,11 +17,14 @@ const seeds = {
   'MIA': 8
 }
 
+const dates = {
+  start: '2023-04-15',
+  end: '2023-06-18',
+}
+
 const initRounds = [
   {
     number: 1,
-    startDate: '2023-04-15',
-    endDate: '2023-04-30',
     matchups: [
       m(
         '10',
@@ -147,8 +150,6 @@ const initRounds = [
   },
   {
     number: 2,
-    startDate: '2023-04-29',
-    endDate: '2023-05-15',
     matchups: [
       m(
         '20',
@@ -214,8 +215,6 @@ const initRounds = [
   },
   {
     number: 3,
-    startDate: '2023-05-16',
-    endDate: '2023-05-29',
     matchups: [
       m(
         '30',
@@ -251,8 +250,6 @@ const initRounds = [
   },
   {
     number: 4,
-    startDate: '2023-06-01',
-    endDate: '2023-06-18',
     matchups: [
       m(
         '40',

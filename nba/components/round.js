@@ -91,10 +91,23 @@ const NRound = {
           else return 1
         })
       }
-      return this.round.matchups
+      return this.round.matchups.filter(matchup => matchup.teamsKnown)
     },
-    startDate: function () { return DateTime.fromISO(this.round.startDate, {zone: 'America/Los_Angeles'}) },
-    endDate: function () { return DateTime.fromISO(this.round.endDate, {zone: 'America/Los_Angeles'}) },
+    gameDates: function() {
+      return this.round.matchups.flatMap(matchup =>
+        matchup.games.map(game =>
+          game.date
+        )
+      ).filter(d => d)
+    },
+    startDate: function () {
+      const firstDate = this.gameDates.reduce((min, d) => d < min ? d : min)
+      return DateTime.fromISO(firstDate, {zone: 'America/Los_Angeles'})
+    },
+    endDate: function () {
+      const lastDate = this.gameDates.reduce((max, d) => d > max ? d : max)
+      return DateTime.fromISO(lastDate, {zone: 'America/Los_Angeles'})
+    },
     duration: function () { return datediff(this.startDate, this.endDate) + 1 },
     dateLabels: function () {
       const labels = Array(this.duration)

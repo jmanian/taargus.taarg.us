@@ -5,7 +5,7 @@ const pageTemplate = `
   <n-today :games='todayGames' v-if='showTodaysGames'></n-today>
   <n-round v-for='round in rounds' :round='round' :nowLocal='nowLocal' :key='round.id' :year=year></n-round>
   <br>
-  <n-footer :rounds='rounds'></n-footer>
+  <n-footer :dates='dates'></n-footer>
   <n-nav :currentYear='year'></n-nav>
   <p class='attribution'>
     Built by
@@ -22,7 +22,7 @@ const NPage = {
     'n-footer': NFooter,
     'n-nav': NNav
   },
-  props: ['todayGames', 'rounds', 'nowLocal', 'year'],
+  props: ['todayGames', 'rounds', 'nowLocal', 'year', 'dates'],
   computed: {
     showTodaysGames: function () {
       return this.todayGames.length > 0

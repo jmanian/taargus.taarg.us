@@ -1,10 +1,13 @@
 const seeds = {}
 
+const dates = {
+  start: '2021-05-22',
+  end: '2021-07-22',
+}
+
 const initRounds = [
   {
     number: 1,
-    startDate: '2021-05-22',
-    endDate: '2021-06-06',
     matchups: [
       m(
         '10',
@@ -130,8 +133,6 @@ const initRounds = [
   },
   {
     number: 2,
-    startDate: '2021-06-05',
-    endDate: '2021-06-20',
     matchups: [
       m(
         '20',
@@ -197,8 +198,6 @@ const initRounds = [
   },
   {
     number: 3,
-    startDate: '2021-06-20',
-    endDate: '2021-07-05',
     matchups: [
       m(
         '30',
@@ -234,8 +233,6 @@ const initRounds = [
   },
   {
     number: 4,
-    startDate: '2021-07-06',
-    endDate: '2021-07-22',
     matchups: [
       m(
         '40',

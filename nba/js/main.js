@@ -26,6 +26,7 @@ const app = createApp({
       rounds,
       todayGames,
       nowLocal,
+      dates,
     }
   },
   created: function () {

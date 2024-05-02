@@ -8,11 +8,11 @@ const footerTemplate = `
 
 const NFooter = {
   template: footerTemplate,
-  props: ['rounds'],
+  props: ['dates'],
   computed: {
     localTimeZone: function () {
-      const startZone = DateTime.fromISO(this.rounds[this.rounds.length - 1].startDate).offsetNameLong
-      const endZone = DateTime.fromISO(this.rounds[0].endDate).offsetNameLong
+      const startZone = this.dates.start.offsetNameLong
+      const endZone = this.dates.end.offsetNameLong
 
       if (startZone) {
         if (startZone === endZone || !endZone) {
