@@ -1,5 +1,5 @@
 const roundTemplate = `
-<div v-if='visible'>
+<template v-if='visible'>
   <h3>{{ roundName }}</h3>
   <table>
     <thead>
@@ -24,7 +24,7 @@ const roundTemplate = `
       <n-matchup v-for='matchup in sortedMatchups' :matchup='matchup' :duration='duration' :startDate='startDate' :weekends='weekends' :key='matchup.id'></n-matchup>
     </transition-group>
   </table>
-</div>
+</template>
 `
 
 const NRound = {
