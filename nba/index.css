@@ -69,7 +69,6 @@ td.team {
   width: 44px;
   text-align: left;
   font-size: 10pt;
-
 }
 
 td.team.winner {
@@ -109,6 +108,12 @@ td.weekend {
 img.table-img {
   height: 24px;
   width: 24px;
+}
+
+div.empty-table-img {
+  height: 24px;
+  width: 24px;
+  float: left;
 }
 
 td.game {
