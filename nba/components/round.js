@@ -53,7 +53,7 @@ const NRound = {
   },
   computed: {
     visible: function () {
-      return this.round.matchups.some(matchup => matchup.teamsKnown)
+      return this.startDate && this.endDate && this.round.matchups.some(matchup => matchup.teamsKnown)
     },
     sortingCookieName: function () {
       return `${this.year}-${this.round.number}-sorting`
@@ -106,10 +106,12 @@ const NRound = {
       ).filter(d => d)
     },
     startDate: function () {
+      if (this.gameDates.length === 0) return null
       const firstDate = this.gameDates.reduce((min, d) => d < min ? d : min)
       return DateTime.fromISO(firstDate, {zone: 'America/Los_Angeles'})
     },
     endDate: function () {
+      if (this.gameDates.length === 0) return null
       const lastDate = this.gameDates.reduce((max, d) => d > max ? d : max)
       return DateTime.fromISO(lastDate, {zone: 'America/Los_Angeles'})
     },

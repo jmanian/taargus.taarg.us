@@ -78,24 +78,24 @@ function fetchGamesForDate(date) {
       // find the round
       const round = rounds.find(r => r.number === eventData.round)
       if (round !== undefined) {
-
-        // Update round start and end
-        if (round.startDate === null || round.startDate > dateString) {
-          round.startDate = dateString
-        }
-        if (round.endDate === null || round.endDate < dateString) {
-          round.endDate = dateString
-        }
-
-        // find the matchup (only if the API game has both teams)
+        // find the matchup (only if the API game has at least one of the teams)
         let matchup
-        if (eventData.homeTeam && eventData.awayTeam) {
+        if (eventData.homeTeam || eventData.awayTeam) {
           matchup = round.matchups.find(matchup =>
-            (matchup.favorite === eventData.homeTeam || matchup.favorite === eventData.awayTeam) &&
-            (matchup.underdog === eventData.homeTeam || matchup.underdog === eventData.awayTeam)
+            (
+              eventData.homeTeam && (
+                eventData.homeTeam === matchup.favorite ||
+                eventData.homeTeam === matchup.underdog
+              )
+            ) || (
+              eventData.awayTeam && (
+                eventData.awayTeam === matchup.favorite ||
+                eventData.awayTeam === matchup.underdog
+              )
+            )
           )
           if (matchup === null || matchup === undefined) {
-            const id = seriesIdForRoundAndTeam(eventData.round, eventData.homeTeam)
+            const id = seriesIdForRoundAndTeam(eventData.round, eventData.homeTeam || eventData.awayTeam)
             matchup = round.matchups.find(matchup => Number(matchup.id) === id )
           }
         }
