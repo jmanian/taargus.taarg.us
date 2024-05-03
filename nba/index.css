@@ -114,6 +114,8 @@ div.empty-table-img {
   height: 24px;
   width: 24px;
   float: left;
+  border-radius: 12px;
+  background-color: rgb(240, 240, 240);
 }
 
 td.game {
