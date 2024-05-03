@@ -154,7 +154,7 @@ const initRounds = [
       m(
         '20',
         'West',
-        null,
+        'OKC',
         null,
         [
         ]
@@ -170,7 +170,7 @@ const initRounds = [
       m(
         '22',
         'East',
-        null,
+        'BOS',
         null,
         [
         ]
@@ -179,7 +179,7 @@ const initRounds = [
         '23',
         'East',
         null,
-        null,
+        'IND',
         [
         ]
       ),
