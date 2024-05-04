@@ -60,8 +60,8 @@ const NMatchup = {
       }
     },
     teamsHover: function () {
-      if (this.matchup.fseed && this.matchup.useed) {
-        return this.matchup.conference + ' ' + this.matchup.fseed + ' v ' + this.matchup.useed
+      if (this.matchup.fseed || this.matchup.useed) {
+        return this.matchup.conference + ' ' + (this.matchup.fseed || '?') + ' v ' + (this.matchup.useed || '?')
       }
     },
     days: function () {
