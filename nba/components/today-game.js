@@ -59,7 +59,7 @@ const NTodayGame = {
     //   }
     // },
     startTimeShort: function ()  {
-      return this.game.dateTime.setZone().toLocaleString(DateTime.TIME_SIMPLE)
+      return this.game.dateTime.toLocal().toLocaleString(DateTime.TIME_SIMPLE)
     },
     timeLabel: function () {
       switch (this.game.state) {

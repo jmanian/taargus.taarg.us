@@ -90,7 +90,7 @@ const NGame = {
       return 'game' + this.game.number
     },
     localDateTime: function () {
-      return this.game.dateTime.setZone()
+      return this.game.dateTime.toLocal()
     },
     localAmPm: function () {
       return this.localDateTime.toLocaleString(DateTime.TIME_SIMPLE).split(' ', 2)[1]?.toLowerCase()

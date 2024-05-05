@@ -67,7 +67,7 @@ function fetchGamesForDate(date) {
     if (isToday) {
       todayGames.length = 0
     } else if (dateString > now.toISODate()) {
-      possibleRefreshTimes.push(date.startOf('day').setZone())
+      possibleRefreshTimes.push(date.startOf('day').toLocal())
     }
     data.events.forEach(function(event) {
       eventData = parseEvent(event);
@@ -160,9 +160,9 @@ function fetchGamesForDate(date) {
             }
           } else { // game in future
             if (g.dateTime) {
-              possibleRefreshTimes.push(g.dateTime.setZone())
+              possibleRefreshTimes.push(g.dateTime.toLocal())
             } else {
-              possibleRefreshTimes.push(DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'}).setZone())
+              possibleRefreshTimes.push(DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'}).toLocal())
               datesMissingSchedules.add(dateString)
             }
           }
