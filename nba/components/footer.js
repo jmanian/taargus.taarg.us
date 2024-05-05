@@ -1,8 +1,10 @@
 const footerTemplate = `
 <p class='time-zone-note'>
   All times are in your local time zone, {{ localTimeZone }}.
-  <br>
-  However, the dates in the grids are based on the game time in Secaucus Daylight Time.
+  <template v-if='showCaveat'>
+    <br>
+    However, the games are placed in the grid based on the game time in {{ caveatTimeZone }}.
+  </template>
 </p>
 `
 
@@ -11,8 +13,25 @@ const NFooter = {
   props: ['dates'],
   computed: {
     localTimeZone: function () {
-      const startZone = this.dates.start.offsetNameLong
-      const endZone = this.dates.end.offsetNameLong
+      return this.resolveZoneNames('local')
+    },
+
+    // Show the caveat if they're at -2 offset or east.
+    showCaveat: function () {
+      const maxOffset = Math.max(this.dates.start.offset, this.dates.end.offset)
+      console.log(maxOffset)
+      return maxOffset >= -120
+    },
+
+    caveatTimeZone: function () {
+      return this.resolveZoneNames('America/New_York')
+    },
+  },
+
+  methods: {
+    resolveZoneNames: function (zoneName) {
+      const startZone = this.dates.start.setZone(zoneName).offsetNameLong
+      const endZone = this.dates.end.setZone(zoneName).offsetNameLong
 
       if (startZone) {
         if (startZone === endZone || !endZone) {
@@ -24,7 +43,8 @@ const NFooter = {
         return endZone
       }
 
-      return DateTime.now().offsetNameLong
+      return DateTime.now().setZone(zoneName).offsetNameLong
     }
-  }
+
+  },
 }
