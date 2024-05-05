@@ -26,6 +26,7 @@ h3 {
 table.round {
   table-layout: fixed;
   border: 2px solid black;
+  margin-bottom: 20px;
 }
 
 .sort-toggle-enter-active, .sort-toggle-leave-active {
