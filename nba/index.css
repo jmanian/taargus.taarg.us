@@ -23,7 +23,7 @@ h3 {
   padding-bottom: 10px;
 }
 
-table {
+table.round {
   table-layout: fixed;
   border: 2px solid black;
 }
