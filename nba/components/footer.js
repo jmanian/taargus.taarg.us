@@ -1,5 +1,5 @@
 const footerTemplate = `
-<p class='time-zone-note'>
+<p class='fst-italic'>
   All times are in your local time zone, {{ localTimeZone }}.
   <template v-if='showCaveat'>
     <br>
