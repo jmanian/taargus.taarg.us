@@ -14,15 +14,9 @@ img.cardimg {
 
 /* end of today card styles */
 
-h3 {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
 table.round {
   table-layout: fixed;
   border: 2px solid black;
-  margin-bottom: 20px;
 }
 
 .sort-toggle-enter-active, .sort-toggle-leave-active {
@@ -155,10 +149,6 @@ td.game.game7 {
   background-color: #389BBC;
 }
 
-p {
-  padding-top: 10px;
-}
-
 p.attribution {
   font-style: italic;
   color: gray;
@@ -170,7 +160,7 @@ a.attribution {
   text-decoration: underline;
 }
 
-.time-zone-note {
+p.time-zone-note {
   font-style: italic;
 }
 
