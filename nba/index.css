@@ -63,7 +63,8 @@ td.keystone {
 }
 
 td.keystone:hover {
-  background-color: rgb(240, 240, 240);
+  background-color: rgb(244, 244, 244);
+  font-weight: bold;
 }
 
 td.team {
