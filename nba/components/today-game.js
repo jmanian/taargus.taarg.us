@@ -1,6 +1,6 @@
 const todayGameTemplate = `
 <div class='col' style='padding-bottom: 20px'>
-  <div class='card shadow'>
+  <div class='card shadow-sm'>
     <div class='card-header'>
       {{ gameNumber }}
       <span style='float: right;'>{{ seriesStatus }}</span>

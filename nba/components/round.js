@@ -1,7 +1,7 @@
 const roundTemplate = `
 <template v-if='visible'>
-  <h3 class='mt-4 mb-3'><span class="badge text-bg-secondary shadow">{{ roundName }}</span></h3>
-  <table class='round shadow mb-4'>
+  <h3 class='mt-4 mb-3'><span class="badge text-bg-secondary shadow-sm">{{ roundName }}</span></h3>
+  <table class='round shadow-sm mb-4'>
     <thead>
       <tr class='no-hover'>
         <td class='keystone' @click='changeSorting' colspan="4">
