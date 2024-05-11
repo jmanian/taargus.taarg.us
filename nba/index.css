@@ -14,9 +14,15 @@ img.cardimg {
 
 /* end of today card styles */
 
+.table-wrapper {
+  display: inline-block;
+  border: 2px solid black;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
 table.round {
   table-layout: fixed;
-  border: 2px solid black;
 }
 
 .sort-toggle-enter-active, .sort-toggle-leave-active {
