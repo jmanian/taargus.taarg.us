@@ -70,6 +70,7 @@ td.keystone:hover {
 td.team {
   text-align: left;
   font-size: 10pt;
+  min-width: 51px;
 }
 
 td.team.winner {
