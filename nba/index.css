@@ -68,10 +68,12 @@ td.keystone:hover {
 }
 
 td.team {
-  text-align: left;
-  vertical-align: middle;
   font-size: 10pt;
-  min-width: 51px;
+}
+
+div.team {
+  display: flex;
+  align-items: center;
 }
 
 td.team.winner {
