@@ -5,10 +5,9 @@ function addTooltip(el, binding) {
     if (tooltip !== null) {
       tooltip.setContent({'.tooltip-inner': binding.value})
     } else {
-      new bootstrap.Tooltip(el, {
-        title: binding.value,
-        placement: binding.arg,
-      })
+      let args = {title: binding.value}
+      if (binding.arg) args.placement = binding.arg
+      new bootstrap.Tooltip(el, args)
     }
   } else if (tooltip !== null) {
     tooltip.dispose()

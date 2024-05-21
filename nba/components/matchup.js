@@ -1,16 +1,16 @@
 const matchupTemplate = `
 <tr>
-  <td class='team' :class='{ winner: fwon, loser: uwon }' v-tooltip:left="teamsHover">
+  <td class='team' :class='{ winner: fwon, loser: uwon }' v-tooltip="teamsHover">
     <div class='team'>
       <img v-if='favoriteImageURL' class='table-img' :src='favoriteImageURL'>
       <span v-else class='empty-table-img'></span>
       <span>{{ favoriteLabel }} </span>
     </div>
   </td>
-  <td class='v' v-tooltip:left="teamsHover">
+  <td class='v' v-tooltip="teamsHover">
     –
   </td>
-  <td class='team' :class='{ winner: uwon, loser: fwon }' v-tooltip:left="teamsHover">
+  <td class='team' :class='{ winner: uwon, loser: fwon }' v-tooltip="teamsHover">
     <div class='team'>
       <img v-if='underdogImageURL' class='table-img' :src='underdogImageURL'>
       <span v-else class='empty-table-img'></span>
