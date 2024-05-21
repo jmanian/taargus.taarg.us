@@ -1,5 +1,5 @@
 const gameTemplate = `
-<td class='game' user-select="none" v-tooltip:top="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
+<td class='game' user-select="none" v-tooltip="hover" :class="[gameClass, {upset: upset}]" v-if='hasGame'>
   <img class='table-img' :src='winnerImageURL' v-if='played'>
   <div v-else>{{ content }}</div>
 </td>

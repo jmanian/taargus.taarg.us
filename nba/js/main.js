@@ -36,6 +36,7 @@ const app = createApp({
 
 // A custom vue directive for adding tooltips. This allows the tooltips
 // to update along with the underlying element.
+// Use v-tooltip= or v-tooltip:left= etc.
 app.directive('tooltip', {
   mounted: addTooltip,
   updated: addTooltip,
