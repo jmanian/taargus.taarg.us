@@ -75,8 +75,14 @@ function translateEspnTeamCode(code) {
 
 function extractGameNum(notes) {
   const regex = /game ([1-7])/i;
-  const headline = notes.find(note => note.type === 'event').headline;
-  return Number(regex.exec(headline)[1]);
+  const headline = notes.find(note => note.type === 'event')?.headline;
+  if (headline) {
+    const match = regex.exec(headline);
+    if (match) {
+      return Number(match[1]);
+    }
+  }
+  return null;
 }
 
 function findNationalBroadcast(broadcasts) {

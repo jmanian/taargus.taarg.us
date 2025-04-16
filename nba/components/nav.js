@@ -14,7 +14,7 @@ const NNav = {
     'n-nav-year': NNavYear
   },
   data: function () {
-    return {years: ['2024', '2023', '2022', '2021', '2020', '2019', '2018']}
+    return {years: ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018']}
   },
   props: ['currentYear']
 }
