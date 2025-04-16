@@ -169,7 +169,7 @@ function nextGameSortKey(matchup) {
   if (games === undefined || games === null || games.length === 0) return `z-${matchup.id}`
   games = games.filter(g => (g.winner == null && g.loading != true))
   if (games.length === 0) return `y-${scheduleSortKey(matchup)}`
-  return games.map(g => g.dateTime?.toUTC() || g.date || 'z').join()
+  return games.map(g => g.dateTime?.toUTC() || (g.date || '') + 'z').join()
 }
 
 function underdogHome(n) {
