@@ -15,6 +15,11 @@ const datesMissingSchedules = new Set()
 let nowLocal = DateTime.now()
 
 function fetchAll() {
+  const today = DateTime.now().setZone('America/Los_Angeles');
+  if (today < dates.start || today > dates.end) {
+    console.log("fetching today's games");
+    fetchGamesForDate(today);
+  }
   let thisFetchDate = dates.start
   while (thisFetchDate <= dates.end) {
     fetchGamesForDate(thisFetchDate);

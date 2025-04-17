@@ -2,7 +2,7 @@ const todayGameTemplate = `
 <div class='col' style='padding-bottom: 20px'>
   <div class='card shadow-sm'>
     <div class='card-header'>
-      {{ gameNumber }}
+      {{ title }}
       <span style='float: right;'>{{ seriesStatus }}</span>
     </div>
     <div class='card-body'>
@@ -34,8 +34,12 @@ const NTodayGame = {
   template: todayGameTemplate,
   props: ['game'],
   computed: {
-    gameNumber: function () {
-      return "Game " + this.game.gameNum
+    title: function () {
+      if (this.game.gameNum) {
+        return "Game " + this.game.gameNum;
+      } else {
+        return this.game.headline;
+      }
     },
     seriesStatus: function () {
       return this.game.seriesSummary
@@ -81,7 +85,7 @@ const NTodayGame = {
       return teamImageURL(this.game.homeTeam)
     },
     nugget: function () {
-      return this.game.headline
+      return this.game.recap;
     },
     hasNugget: function () {
       return this.nugget !== undefined && this.nugget !== null && this.nugget !== ''

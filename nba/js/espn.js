@@ -6,13 +6,15 @@ function parseEvent(event) {
   const awayTeam = findTeam(competition.competitors, 'away');
   const dateTime = DateTime.fromISO(event.date).setZone('America/Los_Angeles')
   const date = dateTime.toISODate()
+  const headline = competition.notes?.find(note => note.type === 'event')?.headline;
   return {
     round: translateEspnRound(competition.type.abbreviation),
     homeTeam: teamTricode(homeTeam),
     awayTeam: teamTricode(awayTeam),
     homeTeamName: homeTeam.team.name,
     awayTeamName: awayTeam.team.name,
-    gameNum: extractGameNum(competition.notes),
+    gameNum: extractGameNum(headline),
+    headline: headline,
     dateTime: competition.timeValid ? dateTime : null,
     date: date,
     homeScore: Number(homeTeam.score),
@@ -21,8 +23,8 @@ function parseEvent(event) {
     state: event.status.type.state,
     statusDetail: event.status.type.shortDetail.replace('-', '–'),
     clock: event.status.displayClock,
-    seriesSummary: fixSummary(competition.series.summary, homeTeam, awayTeam),
-    headline: findRecap(competition.headlines)
+    seriesSummary: fixSummary(competition.series?.summary, homeTeam, awayTeam),
+    recap: findRecap(competition.headlines)
   }
 }
 
@@ -40,8 +42,8 @@ function translateEspnRound(round) {
 }
 
 function fixSummary(summary, homeTeam, awayTeam) {
-  return summary.replace(homeTeam.team.abbreviation, teamTricode(homeTeam))
-                .replace(awayTeam.team.abbreviation, teamTricode(awayTeam))
+  return summary?.replace(homeTeam.team.abbreviation, teamTricode(homeTeam))
+                ?.replace(awayTeam.team.abbreviation, teamTricode(awayTeam))
 }
 
 function findTeam(competitors, homeAway) {
@@ -73,9 +75,8 @@ function translateEspnTeamCode(code) {
   }
 }
 
-function extractGameNum(notes) {
+function extractGameNum(headline) {
   const regex = /game ([1-7])/i;
-  const headline = notes.find(note => note.type === 'event')?.headline;
   if (headline) {
     const match = regex.exec(headline);
     if (match) {
