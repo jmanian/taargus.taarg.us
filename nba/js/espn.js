@@ -51,6 +51,10 @@ function findTeam(competitors, homeAway) {
 }
 
 function teamTricode(competitor) {
+  // When a team is not yet determined it can say something like "Heat/Hawks"
+  if (competitor.team.abbreviation.includes('/')) {
+    return null;
+  }
   return translateEspnTeamCode(competitor.team.abbreviation);
 }
 
