@@ -14,7 +14,7 @@ function parseEvent(event) {
     homeTeamName: homeTeam.team.name,
     awayTeamName: awayTeam.team.name,
     gameNum: extractGameNum(headline),
-    headline: headline,
+    headline: headline.replaceAll(' - ', ' – '),
     dateTime: competition.timeValid ? dateTime : null,
     date: date,
     homeScore: Number(homeTeam.score),
