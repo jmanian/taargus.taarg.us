@@ -5,7 +5,7 @@ const seeds = {
   'DEN': 4,
   'LAC': 5,
   'MIN': 6,
-  // 'GSW': 7,
+  'GSW': 7,
   // '': 8,
   'CLE': 1,
   'BOS': 2,
