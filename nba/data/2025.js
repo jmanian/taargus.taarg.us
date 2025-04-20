@@ -6,7 +6,7 @@ const seeds = {
   'LAC': 5,
   'MIN': 6,
   'GSW': 7,
-  // '': 8,
+  'MEM': 8,
   'CLE': 1,
   'BOS': 2,
   'NYK': 3,
@@ -14,7 +14,7 @@ const seeds = {
   'MIL': 5,
   'DET': 6,
   'ORL': 7,
-  // '': 8
+  'MIA': 8
 }
 
 const dates = {
