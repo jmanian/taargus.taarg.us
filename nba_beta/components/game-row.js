@@ -1,24 +1,22 @@
 const gameRowTemplate = `
 <div class="game-row">
-  <div class="teams">
-    <div class="team-line">
-      <img class="team-logo" :src="awayImageURL">
-      <span class="team-name">{{ game.awayTeamName }}</span>
-    </div>
-    <div class="team-line">
-      <img class="team-logo" :src="homeImageURL">
-      <span class="team-name">{{ game.homeTeamName }}</span>
-    </div>
+  <div class="team-side away-side">
+    <img class="team-logo" :src="awayImageURL">
+    <span class="team-name">{{ game.awayTeamName }}</span>
   </div>
-  <div style="min-width: 20px;"></div>
-  <div class="scores">
-    <div class="score" v-if="started">{{ game.awayScore }}</div>
-    <div class="score" v-if="started">{{ game.homeScore }}</div>
+
+  <div class="score away-score" :class="{'losing-score': isAwayLosing}">{{ started ? game.awayScore : '' }}</div>
+
+  <div class="game-center">
+    <span class="game-time" :class="{'live-time': playing}">{{ timeLabel }}</span>
+    <span class="network">{{ game.network || '&nbsp;' }}</span>
   </div>
-  <div class="game-status">
-    <span v-if="playing" class="badge bg-danger">LIVE</span>
-    <span :class="{'text-danger fw-bold': playing}">{{ timeLabel }}</span>
-    <span v-if="game.network" class="network">{{ game.network }}</span>
+
+  <div class="score home-score" :class="{'losing-score': isHomeLosing}">{{ started ? game.homeScore : '' }}</div>
+
+  <div class="team-side home-side">
+    <img class="team-logo" :src="homeImageURL">
+    <span class="team-name">{{ game.homeTeamName }}</span>
   </div>
 </div>
 `
@@ -38,6 +36,12 @@ const GameRow = {
     },
     finished: function () {
       return this.game.state === 'post'
+    },
+    isAwayLosing: function () {
+      return this.finished && this.game.awayScore < this.game.homeScore
+    },
+    isHomeLosing: function () {
+      return this.finished && this.game.homeScore < this.game.awayScore
     },
     startTimeShort: function () {
       const DateTime = luxon.DateTime
