@@ -3,7 +3,7 @@ const gameRowTemplate = `
   <div class="team-side away-side">
     <img v-if="awayImageURL" class="team-logo" :src="awayImageURL">
     <div v-else class="team-logo-placeholder"></div>
-    <span class="team-name">{{ game.awayTeamName }}</span>
+    <span class="team-name">{{ displayAwayName }}</span>
     <span class="team-record">{{ game.awayRecord }}</span>
   </div>
 
@@ -19,7 +19,7 @@ const gameRowTemplate = `
   <div class="team-side home-side">
     <img v-if="homeImageURL" class="team-logo" :src="homeImageURL">
     <div v-else class="team-logo-placeholder"></div>
-    <span class="team-name">{{ game.homeTeamName }}</span>
+    <span class="team-name">{{ displayHomeName }}</span>
     <span class="team-record">{{ game.homeRecord }}</span>
   </div>
 </div>
@@ -28,8 +28,22 @@ const gameRowTemplate = `
 const GameRow = {
   template: gameRowTemplate,
   props: ['game'],
+  data() {
+    return {
+      isMobile: window.innerWidth <= 768
+    }
+  },
   mounted() {
     console.log('GameRow mounted:', this.game)
+    window.addEventListener('resize', this.handleResize)
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.handleResize)
+  },
+  methods: {
+    handleResize() {
+      this.isMobile = window.innerWidth <= 768
+    }
   },
   computed: {
     started: function () {
@@ -65,6 +79,12 @@ const GameRow = {
     },
     homeImageURL: function () {
       return teamImageURL(this.game.homeTeam)
+    },
+    displayAwayName: function () {
+      return this.isMobile ? shortenTeamName(this.game.awayTeamName) : this.game.awayTeamName
+    },
+    displayHomeName: function () {
+      return this.isMobile ? shortenTeamName(this.game.homeTeamName) : this.game.homeTeamName
     }
   }
 }

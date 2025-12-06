@@ -11,6 +11,13 @@ body {
   max-width: 700px;
 }
 
+@media (max-width: 768px) {
+  .dates-container {
+    margin: 12px auto 0;
+    gap: 12px;
+  }
+}
+
 .date-box {
   background-color: white;
   border-radius: 8px;
@@ -112,6 +119,14 @@ body {
   min-height: 68px;
 }
 
+@media (max-width: 768px) {
+  .game-row {
+    padding: 16px 4px;
+    gap: 4px;
+    grid-template-columns: minmax(60px, 1fr) 35px 80px 35px minmax(60px, 1fr);
+  }
+}
+
 .game-row:last-child {
   border-bottom: none;
 }
@@ -149,6 +164,12 @@ body {
   font-weight: 500;
 }
 
+@media (max-width: 768px) {
+  .team-name {
+    font-size: 14px;
+  }
+}
+
 .team-record {
   font-size: 11px;
   color: #6c757d;
@@ -179,6 +200,13 @@ body {
   text-align: center;
 }
 
+@media (max-width: 768px) {
+  .score {
+    font-size: 18px;
+    min-width: 28px;
+  }
+}
+
 .away-score {
   text-align: right;
 }
@@ -197,6 +225,12 @@ body {
   font-weight: 500;
   white-space: nowrap;
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .game-time {
+    font-size: 12px;
+  }
 }
 
 .live-time {
