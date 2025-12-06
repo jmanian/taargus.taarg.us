@@ -24,7 +24,8 @@
             v-for="dateData in dates"
             :key="dateData.dateString"
             :date-data="dateData"
-            :is-today="dateData.dateString === todayString">
+            :is-today="dateData.dateString === todayString"
+            :is-past="dateData.dateString < todayString">
           </date-box>
         </div>
       </div>

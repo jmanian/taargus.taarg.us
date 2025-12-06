@@ -1,26 +1,34 @@
 const dateBoxTemplate = `
-<div class="date-box" :class="{'date-box-today': isToday}">
-  <div class="date-header">
+<div class="date-box" :class="{'date-box-today': isToday, 'date-box-collapsed': !isOpen}">
+  <div class="date-header" @click="toggleOpen">
     {{ dateHeader }}
+    <span class="toggle-icon">{{ isOpen ? '▼' : '▶' }}</span>
   </div>
-  <div class="games-list">
-    <game-row
-      v-for="game in dateData.games"
-      :key="game.id"
-      :game="game">
-    </game-row>
-    <div v-if="dateData.games.length === 0" class="no-games">
-      No games scheduled
+  <transition name="slide">
+    <div class="games-list" v-show="isOpen">
+      <game-row
+        v-for="game in dateData.games"
+        :key="game.id"
+        :game="game">
+      </game-row>
+      <div v-if="dateData.games.length === 0" class="no-games">
+        No games scheduled
+      </div>
     </div>
-  </div>
+  </transition>
 </div>
 `
 
 const DateBox = {
   template: dateBoxTemplate,
-  props: ['dateData', 'isToday'],
+  props: ['dateData', 'isToday', 'isPast'],
   components: {
     'game-row': GameRow
+  },
+  data() {
+    return {
+      isOpen: !this.isPast
+    }
   },
   computed: {
     dateHeader: function () {
@@ -29,6 +37,11 @@ const DateBox = {
       const dayOfWeek = date.toFormat('EEE')
       const monthDay = date.toFormat('MMM d')
       return `${dayOfWeek}, ${monthDay}`
+    }
+  },
+  methods: {
+    toggleOpen() {
+      this.isOpen = !this.isOpen
     }
   },
   updated() {
