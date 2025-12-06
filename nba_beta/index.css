@@ -35,6 +35,18 @@ body {
   align-items: center;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.game-count {
+  font-size: 13px;
+  font-weight: 400;
+  color: #6c757d;
+}
+
 .date-box:not(.date-box-collapsed) .date-header {
   border-bottom: 1px solid #dee2e6;
 }
@@ -58,6 +70,10 @@ body {
 }
 
 .date-box-today .toggle-icon {
+  color: white;
+}
+
+.date-box-today .game-count {
   color: white;
 }
 

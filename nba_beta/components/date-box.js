@@ -1,8 +1,11 @@
 const dateBoxTemplate = `
 <div class="date-box" :class="{'date-box-today': isToday, 'date-box-collapsed': !isOpen}">
   <div class="date-header" @click="toggleOpen">
-    {{ dateHeader }}
-    <span class="toggle-icon">{{ isOpen ? '▼' : '▶' }}</span>
+    <span>{{ dateHeader }}</span>
+    <span class="header-right">
+      <span class="game-count">{{ gameCountText }}</span>
+      <span class="toggle-icon">{{ isOpen ? '▼' : '▶' }}</span>
+    </span>
   </div>
   <transition name="slide">
     <div class="games-list" v-show="isOpen">
@@ -37,6 +40,10 @@ const DateBox = {
       const dayOfWeek = date.toFormat('EEE')
       const monthDay = date.toFormat('MMM d')
       return `${dayOfWeek}, ${monthDay}`
+    },
+    gameCountText: function () {
+      const count = this.dateData.games.length
+      return count === 1 ? '1 game' : `${count} games`
     },
     sortedGames: function () {
       return [...this.dateData.games].sort((a, b) => {
