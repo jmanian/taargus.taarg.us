@@ -1,7 +1,8 @@
 const gameRowTemplate = `
 <div class="game-row">
   <div class="team-side away-side">
-    <img class="team-logo" :src="awayImageURL">
+    <img v-if="awayImageURL" class="team-logo" :src="awayImageURL">
+    <div v-else class="team-logo-placeholder"></div>
     <span class="team-name">{{ game.awayTeamName }}</span>
     <span class="team-record">{{ game.awayRecord }}</span>
   </div>
@@ -16,7 +17,8 @@ const gameRowTemplate = `
   <div class="score home-score" :class="{'losing-score': isHomeLosing}">{{ started ? game.homeScore : '' }}</div>
 
   <div class="team-side home-side">
-    <img class="team-logo" :src="homeImageURL">
+    <img v-if="homeImageURL" class="team-logo" :src="homeImageURL">
+    <div v-else class="team-logo-placeholder"></div>
     <span class="team-name">{{ game.homeTeamName }}</span>
     <span class="team-record">{{ game.homeRecord }}</span>
   </div>

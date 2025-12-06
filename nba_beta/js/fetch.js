@@ -58,3 +58,36 @@ function fetchAll() {
 
 fetchAll()
 setInterval(fetchAll, 30000) // Refresh every 30 seconds
+
+function loadPrevious() {
+  const firstDate = DateTime.fromISO(dates[0].dateString, {zone: 'America/Los_Angeles'})
+
+  for (let i = 1; i <= 7; i++) {
+    const date = firstDate.minus({ days: i })
+    const dateString = date.toISODate()
+    dates.unshift({
+      dateString: dateString,
+      games: []
+    })
+  }
+
+  // Fetch in reverse order so the dates array is populated correctly
+  for (let i = 1; i <= 7; i++) {
+    const date = firstDate.minus({ days: i })
+    fetchGamesForDate(date)
+  }
+}
+
+function loadMore() {
+  const lastDate = DateTime.fromISO(dates[dates.length - 1].dateString, {zone: 'America/Los_Angeles'})
+
+  for (let i = 1; i <= 7; i++) {
+    const date = lastDate.plus({ days: i })
+    const dateString = date.toISODate()
+    dates.push({
+      dateString: dateString,
+      games: []
+    })
+    fetchGamesForDate(date)
+  }
+}

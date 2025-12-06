@@ -8,6 +8,7 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
     <link rel="stylesheet" type="text/css" href="index.css" />
+    <link id="favicon" rel="icon" type="image/x-icon" href="../nba/favicon.ico" />
   </head>
   <body>
 
@@ -18,8 +19,8 @@
     <!-- root element -->
     <div id="app">
       <div class="container-fluid p-4">
-        <h1 class="mb-4">NBA Schedule</h1>
         <div class="dates-container">
+          <a href="#" @click.prevent="loadPrevious" class="load-link">← Load previous week</a>
           <date-box
             v-for="dateData in dates"
             :key="dateData.dateString"
@@ -27,6 +28,7 @@
             :is-today="dateData.dateString === todayString"
             :is-past="dateData.dateString < todayString">
           </date-box>
+          <a href="#" @click.prevent="loadMore" class="load-link">Load more →</a>
         </div>
       </div>
     </div>

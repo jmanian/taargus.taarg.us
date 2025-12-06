@@ -11,7 +11,7 @@ const dateBoxTemplate = `
         :key="game.id"
         :game="game">
       </game-row>
-      <div v-if="dateData.games.length === 0" class="no-games">
+      <div v-if="sortedGames.length === 0" class="no-games">
         No games scheduled
       </div>
     </div>

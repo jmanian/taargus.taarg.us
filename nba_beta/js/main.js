@@ -4,7 +4,9 @@ const app = createApp({
   setup() {
     return {
       dates: dates,
-      todayString: todayString
+      todayString: todayString,
+      loadPrevious: loadPrevious,
+      loadMore: loadMore
     }
   },
   components: {
