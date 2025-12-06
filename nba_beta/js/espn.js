@@ -13,6 +13,8 @@ function parseEvent(event) {
     awayTeam: teamTricode(awayTeam),
     homeTeamName: homeTeam.team.name,
     awayTeamName: awayTeam.team.name,
+    homeRecord: getOverallRecord(homeTeam),
+    awayRecord: getOverallRecord(awayTeam),
     headline: headline?.replaceAll(' - ', ' – '),
     dateTime: competition.timeValid ? dateTime : null,
     date: date,
@@ -23,6 +25,11 @@ function parseEvent(event) {
     statusDetail: event.status.type.shortDetail.replace('-', '–'),
     clock: event.status.displayClock
   }
+}
+
+function getOverallRecord(competitor) {
+  const overallRecord = competitor.records?.find(r => r.name === 'overall');
+  return overallRecord?.summary || '';
 }
 
 function findTeam(competitors, homeAway) {

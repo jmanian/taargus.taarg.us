@@ -3,6 +3,7 @@ const gameRowTemplate = `
   <div class="team-side away-side">
     <img class="team-logo" :src="awayImageURL">
     <span class="team-name">{{ game.awayTeamName }}</span>
+    <span class="team-record">{{ game.awayRecord }}</span>
   </div>
 
   <div class="score away-score" :class="{'losing-score': isAwayLosing}">{{ started ? game.awayScore : '' }}</div>
@@ -17,6 +18,7 @@ const gameRowTemplate = `
   <div class="team-side home-side">
     <img class="team-logo" :src="homeImageURL">
     <span class="team-name">{{ game.homeTeamName }}</span>
+    <span class="team-record">{{ game.homeRecord }}</span>
   </div>
 </div>
 `
