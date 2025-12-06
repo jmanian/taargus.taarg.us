@@ -4,13 +4,16 @@ const gameRowTemplate = `
     <div class="team-line">
       <img class="team-logo" :src="awayImageURL">
       <span class="team-name">{{ game.awayTeamName }}</span>
-      <span class="score" v-if="started">{{ game.awayScore }}</span>
     </div>
     <div class="team-line">
       <img class="team-logo" :src="homeImageURL">
       <span class="team-name">{{ game.homeTeamName }}</span>
-      <span class="score" v-if="started">{{ game.homeScore }}</span>
     </div>
+  </div>
+  <div style="min-width: 20px;"></div>
+  <div class="scores">
+    <div class="score" v-if="started">{{ game.awayScore }}</div>
+    <div class="score" v-if="started">{{ game.homeScore }}</div>
   </div>
   <div class="game-status">
     <span v-if="playing" class="badge bg-danger">LIVE</span>
