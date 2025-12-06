@@ -7,7 +7,7 @@ const dateBoxTemplate = `
   <transition name="slide">
     <div class="games-list" v-show="isOpen">
       <game-row
-        v-for="game in dateData.games"
+        v-for="game in sortedGames"
         :key="game.id"
         :game="game">
       </game-row>
@@ -37,6 +37,18 @@ const DateBox = {
       const dayOfWeek = date.toFormat('EEE')
       const monthDay = date.toFormat('MMM d')
       return `${dayOfWeek}, ${monthDay}`
+    },
+    sortedGames: function () {
+      return [...this.dateData.games].sort((a, b) => {
+        // Live games first
+        if (a.state === 'in' && b.state !== 'in') return -1
+        if (a.state !== 'in' && b.state === 'in') return 1
+
+        // Both live or both not live - sort by start time
+        const aTime = a.dateTime?.toMillis() || 0
+        const bTime = b.dateTime?.toMillis() || 0
+        return aTime - bTime
+      })
     }
   },
   methods: {
