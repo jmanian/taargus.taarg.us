@@ -144,15 +144,15 @@ body {
 }
 
 .team-logo {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   flex-shrink: 0;
 }
 
 .team-logo-placeholder {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 2px solid #dee2e6;
   background-color: white;
@@ -160,14 +160,9 @@ body {
 }
 
 .team-name {
-  font-size: 15px;
-  font-weight: 500;
-}
-
-@media (max-width: 768px) {
-  .team-name {
-    font-size: 14px;
-  }
+  font-size: 11px;
+  font-weight: 400;
+  color: #212529;
 }
 
 .team-record {
