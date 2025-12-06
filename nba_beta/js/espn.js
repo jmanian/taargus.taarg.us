@@ -20,7 +20,7 @@ function parseEvent(event) {
     date: date,
     homeScore: Number(homeTeam.score),
     awayScore: Number(awayTeam.score),
-    network: findNationalBroadcast(competition.broadcasts),
+    network: getBroadcastInfo(competition.broadcasts),
     state: event.status.type.state,
     statusDetail: event.status.type.shortDetail.replace('-', '–'),
     clock: event.status.displayClock
@@ -69,4 +69,20 @@ function findNationalBroadcast(broadcasts) {
   if (broadcast) {
     return broadcast.names[0];
   }
+}
+
+function getBroadcastInfo(broadcasts) {
+  // First check for national broadcast
+  const national = broadcasts.find(bc => bc.market.toLowerCase() === 'national')
+  if (national) {
+    return national.names[0];
+  }
+
+  // Otherwise, look for League Pass
+  const allNetworks = broadcasts
+    .filter(bc => bc.names && bc.names.length > 0)
+    .flatMap(bc => bc.names);
+
+  const leaguePass = allNetworks.find(name => name.includes('League Pass'));
+  return leaguePass ? 'League Pass' : '';
 }
