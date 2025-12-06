@@ -10,7 +10,7 @@ const gameRowTemplate = `
   <div class="score away-score" :class="{'losing-score': isAwayLosing}">{{ started ? game.awayScore : '' }}</div>
 
   <div class="game-center">
-    <span class="game-time" :class="{'live-time': playing}">{{ timeLabel }}</span>
+    <span class="game-time" :class="{'live-time': playing, 'pre-game': !started}">{{ timeLabel }}</span>
     <span class="network">{{ game.network || '&nbsp;' }}</span>
   </div>
 

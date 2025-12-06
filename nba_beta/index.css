@@ -227,9 +227,19 @@ body {
   text-align: center;
 }
 
+.game-time.pre-game {
+  font-size: 24px;
+  font-weight: 700;
+  color: #212529;
+}
+
 @media (max-width: 768px) {
   .game-time {
     font-size: 12px;
+  }
+
+  .game-time.pre-game {
+    font-size: 18px;
   }
 }
 
