@@ -1,8 +1,8 @@
-const { reactive } = Vue
+const { reactive, ref } = Vue
 
 // Initialize dates array with one week of data
 const dates = reactive([])
-const todayString = DateTime.now().setZone('America/Los_Angeles').toISODate()
+const todayString = ref(DateTime.now().setZone('America/Los_Angeles').toISODate())
 
 function initializeDates() {
   const today = DateTime.now().setZone('America/Los_Angeles')
@@ -57,7 +57,36 @@ function fetchAll() {
 }
 
 fetchAll()
-setInterval(fetchAll, 30000) // Refresh every 30 seconds
+
+// Smart polling: only update dates with live games or today's date
+function pollForUpdates() {
+  const todayNow = DateTime.now().setZone('America/Los_Angeles').toISODate()
+
+  // Update todayString if date has changed
+  if (todayString.value !== todayNow) {
+    todayString.value = todayNow
+  }
+
+  const datesToUpdate = new Set()
+
+  // Poll any date that has live games
+  dates.forEach(dateObj => {
+    if (dateObj.games.some(game => game.state === 'in')) {
+      datesToUpdate.add(dateObj.dateString)
+    }
+  })
+
+  // Always poll today (even if no live games)
+  datesToUpdate.add(todayNow)
+
+  // Fetch updates for these dates
+  datesToUpdate.forEach(dateString => {
+    const date = DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'})
+    fetchGamesForDate(date)
+  })
+}
+
+setInterval(pollForUpdates, 30000) // Poll every 30 seconds
 
 function loadPrevious() {
   const firstDate = DateTime.fromISO(dates[0].dateString, {zone: 'America/Los_Angeles'})
