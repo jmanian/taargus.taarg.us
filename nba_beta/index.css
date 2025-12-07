@@ -3,6 +3,13 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+@media (max-width: 768px) {
+  .container-fluid {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
 .dates-container {
   display: flex;
   flex-direction: column;
