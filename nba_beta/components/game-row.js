@@ -34,7 +34,6 @@ const GameRow = {
     }
   },
   mounted() {
-    console.log('GameRow mounted:', this.game)
     window.addEventListener('resize', this.handleResize)
   },
   beforeUnmount() {

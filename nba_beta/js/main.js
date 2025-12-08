@@ -12,11 +12,6 @@ const app = createApp({
   components: {
     'date-box': DateBox,
     'game-row': GameRow
-  },
-  mounted() {
-    console.log('App mounted')
-    console.log('dates:', this.dates)
-    console.log('todayString:', this.todayString)
   }
 })
 

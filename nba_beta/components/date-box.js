@@ -62,8 +62,5 @@ const DateBox = {
     toggleOpen() {
       this.isOpen = !this.isOpen
     }
-  },
-  updated() {
-    console.log('DateBox updated:', this.dateData.dateString, 'games:', this.dateData.games.length)
   }
 }

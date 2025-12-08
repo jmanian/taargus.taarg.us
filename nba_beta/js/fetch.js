@@ -27,23 +27,20 @@ function fetchGamesForDate(date) {
   const url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
 
   jQuery.getJSON(url, function (data) {
-    console.log('Fetched data for', dateString, ':', data)
     const gamesForDate = []
 
     if (data.events && data.events.length > 0) {
       data.events.forEach(function(event) {
         const eventData = parseEvent(event)
-        console.log('Parsed event:', eventData)
         gamesForDate.push(eventData)
       })
-    } else {
-      console.log('No events for', dateString)
     }
 
     const dateObj = dates.find(d => d.dateString === dateString)
     if (dateObj) {
       dateObj.games = gamesForDate
-      console.log('Updated dateObj for', dateString, 'with', gamesForDate.length, 'games')
+      const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
+      console.log(`[${now}] Loaded ${dateString}: ${gamesForDate.length} games`)
     }
   }).fail(function(jqXHR, textStatus, errorThrown) {
     console.error('Failed to fetch data for', dateString, ':', textStatus, errorThrown)
@@ -65,7 +62,6 @@ function pollForUpdates() {
 
   // Update todayString if date has changed
   if (todayStringRef.value !== todayNow) {
-    console.log('Updating todayString from', todayStringRef.value, 'to', todayNow)
     todayStringRef.value = todayNow
   }
 
