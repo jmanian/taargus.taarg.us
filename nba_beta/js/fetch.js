@@ -2,7 +2,7 @@ const { reactive, ref, computed } = Vue
 
 // Read initial state from URL
 const urlParams = new URLSearchParams(window.location.search)
-const initialTeam = urlParams.get('team') || ''
+const initialTeams = urlParams.get('teams') ? urlParams.get('teams').split(',') : []
 const initialDate = urlParams.get('date') || null
 
 // Initialize dates array with one week of data
@@ -11,7 +11,8 @@ const selectedDateData = reactive([])
 const todayStringRef = ref(DateTime.now().setZone('America/Los_Angeles').toISODate())
 const todayString = computed(() => todayStringRef.value)
 const selectedDate = ref(initialDate)
-const selectedTeam = ref(initialTeam)
+const selectedTeams = ref(initialTeams)
+const teamDropdownOpen = ref(false)
 let isNavigating = false
 
 function initializeDates() {
@@ -158,8 +159,7 @@ function clearDateSelection() {
 }
 
 function clearTeamSelection() {
-  selectedTeam.value = ''
-  updateURL()
+  selectedTeams.value = []
 }
 
 function updateURL() {
@@ -168,8 +168,8 @@ function updateURL() {
 
   const params = new URLSearchParams()
 
-  if (selectedTeam.value) {
-    params.set('team', selectedTeam.value)
+  if (selectedTeams.value.length > 0) {
+    params.set('teams', selectedTeams.value.join(','))
   }
 
   if (selectedDate.value) {
@@ -182,7 +182,10 @@ function updateURL() {
 
   // Use pushState to create history entries that work with back/forward
   if (window.location.href !== window.location.origin + newURL) {
-    window.history.pushState({ team: selectedTeam.value, date: selectedDate.value }, '', newURL)
+    window.history.pushState({
+      teams: selectedTeams.value.length > 0 ? selectedTeams.value.join(',') : null,
+      date: selectedDate.value
+    }, '', newURL)
   }
 }
 

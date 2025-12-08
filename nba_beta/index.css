@@ -50,6 +50,7 @@ body {
 }
 
 .filter-group {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -57,9 +58,15 @@ body {
   padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid #e9ecef;
-  height: 35px;
+  min-height: 35px;
   box-sizing: border-box;
+  cursor: pointer;
 }
+
+.filter-group:hover {
+  background-color: #e9ecef;
+}
+
 
 .filter-label {
   font-size: 13px;
@@ -70,28 +77,79 @@ body {
   line-height: 1;
 }
 
-.filter-group-empty {
-  cursor: pointer;
-}
 
-.filter-group-empty:hover {
-  background-color: #e9ecef;
-}
-
-.filter-group-selected {
-  cursor: pointer;
-}
-
-.filter-group-selected:hover {
-  background-color: #e9ecef;
-}
-
-.filter-select {
+.team-dropdown {
   position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  width: 0;
-  height: 0;
+  top: calc(100% + 4px);
+  left: 0;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 200px;
+  max-width: 300px;
+}
+
+.team-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.dropdown-close {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+}
+
+.dropdown-close:hover {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.team-dropdown-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.team-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.team-option:hover {
+  background-color: #f8f9fa;
+}
+
+.team-option input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.team-option-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .filter-value {
@@ -120,6 +178,61 @@ body {
 .filter-clear:hover {
   background-color: #ced4da;
   color: #495057;
+}
+
+.filter-chip-single {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #0d6efd;
+  color: white;
+  padding: 4px 6px 4px 4px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.team-logos {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.team-logo-small {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 2px;
+  background-color: white;
+}
+
+.team-count {
+  white-space: nowrap;
+  padding: 0 2px;
+}
+
+.chip-clear {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.chip-clear:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .date-input {

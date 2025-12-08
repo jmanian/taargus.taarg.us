@@ -11,15 +11,15 @@ const app = createApp({
       const sourceDates = selectedDate.value ? selectedDateData : dates
 
       // If no team filter, return all dates
-      if (!selectedTeam.value) {
+      if (selectedTeams.value.length === 0) {
         return sourceDates
       }
 
-      // Filter games by team
+      // Filter games by teams
       const filtered = sourceDates.map(dateObj => ({
         ...dateObj,
         games: dateObj.games.filter(game =>
-          game.homeTeam === selectedTeam.value || game.awayTeam === selectedTeam.value
+          selectedTeams.value.includes(game.homeTeam) || selectedTeams.value.includes(game.awayTeam)
         )
       }))
 
@@ -61,30 +61,18 @@ const app = createApp({
       }
     }
 
-    const openTeamPicker = () => {
-      if (teamSelect.value) {
-        // Different browsers need different approaches
-        teamSelect.value.focus()
-
-        // Try to open the dropdown
-        if (teamSelect.value.showPicker) {
-          teamSelect.value.showPicker()
-        } else {
-          // Fallback for browsers that don't support showPicker
-          const event = new MouseEvent('mousedown', {
-            bubbles: true,
-            cancelable: true,
-            view: window
-          })
-          teamSelect.value.dispatchEvent(event)
-        }
-      }
+    const toggleTeamDropdown = () => {
+      teamDropdownOpen.value = !teamDropdownOpen.value
     }
 
-    const handleTeamClick = (e) => {
-      // Don't open picker if clicking the clear button
-      if (e.target.closest('.filter-clear')) return
-      openTeamPicker()
+    const handleTeamFilterClick = (e) => {
+      // Don't open dropdown if clicking the clear button
+      if (e && e.target && e.target.closest && e.target.closest('.chip-clear')) return
+      toggleTeamDropdown()
+    }
+
+    const getTeamLogoURL = (teamAbbr) => {
+      return teamImageURL(teamAbbr)
     }
 
     const handleDateClick = (e) => {
@@ -97,13 +85,14 @@ const app = createApp({
       dates: displayedDates,
       todayString: todayString,
       selectedDate: selectedDate,
-      selectedTeam: selectedTeam,
+      selectedTeams: selectedTeams,
+      teamDropdownOpen: teamDropdownOpen,
       teamList: teamList,
       formatSelectedDate: formatSelectedDate,
       dateInput: dateInput,
-      teamSelect: teamSelect,
-      openTeamPicker: openTeamPicker,
-      handleTeamClick: handleTeamClick,
+      toggleTeamDropdown: toggleTeamDropdown,
+      handleTeamFilterClick: handleTeamFilterClick,
+      getTeamLogoURL: getTeamLogoURL,
       handleDateClick: handleDateClick,
       loadPrevious: loadPrevious,
       loadMore: loadMore,
@@ -122,7 +111,7 @@ const app = createApp({
       }
       updateURL()
     },
-    selectedTeam() {
+    selectedTeams() {
       updateURL()
     }
   },
@@ -132,15 +121,22 @@ const app = createApp({
       fetchSelectedDate(selectedDate.value)
     }
 
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (teamDropdownOpen.value && e.target && e.target.closest && !e.target.closest('.filter-group')) {
+        teamDropdownOpen.value = false
+      }
+    })
+
     // Handle browser back/forward
     window.addEventListener('popstate', (event) => {
       isNavigating = true
 
       const params = new URLSearchParams(window.location.search)
-      const newTeam = params.get('team') || ''
+      const newTeams = params.get('teams') ? params.get('teams').split(',') : []
       const newDate = params.get('date') || null
 
-      selectedTeam.value = newTeam
+      selectedTeams.value = newTeams
 
       if (newDate) {
         selectedDate.value = newDate
