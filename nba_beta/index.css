@@ -103,14 +103,14 @@ body {
 }
 
 .filter-clear {
-  background: none;
+  background-color: #dee2e6;
   border: none;
   color: #6c757d;
   cursor: pointer;
   padding: 0;
-  width: 16px;
-  height: 16px;
-  font-size: 12px;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,7 +118,7 @@ body {
 }
 
 .filter-clear:hover {
-  background-color: #dee2e6;
+  background-color: #ced4da;
   color: #495057;
 }
 
