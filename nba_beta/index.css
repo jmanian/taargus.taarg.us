@@ -3,10 +3,13 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+.custom-padding {
+  padding: 1.5rem;
+}
+
 @media (max-width: 768px) {
-  .container-fluid {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
+  .custom-padding {
+    padding: 1rem 8px !important;
   }
 }
 
@@ -30,6 +33,14 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .date-selector-row {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 12px;
+  }
 }
 
 .date-picker-container {
@@ -389,6 +400,12 @@ body {
   color: #0d6efd;
   text-decoration: none;
   font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .load-link {
+    text-align: left;
+  }
 }
 
 .load-link:hover {
