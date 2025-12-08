@@ -70,16 +70,24 @@ function pollForUpdates() {
   }
 
   const datesToUpdate = new Set()
+  const now = DateTime.now().setZone('America/Los_Angeles')
 
-  // Poll any date that has live games
+  // Poll any date that has active games or games that should have started
   dates.forEach(dateObj => {
-    if (dateObj.games.some(game => game.state === 'in')) {
+    const shouldPoll = dateObj.games.some(game => {
+      // Game is currently in progress
+      if (game.state === 'in') return true
+
+      // Game hasn't started yet but scheduled start time is in the past
+      if (game.state === 'pre' && game.dateTime && game.dateTime < now) return true
+
+      return false
+    })
+
+    if (shouldPoll) {
       datesToUpdate.add(dateObj.dateString)
     }
   })
-
-  // Always poll today (even if no live games)
-  datesToUpdate.add(todayNow)
 
   // Fetch updates for these dates
   datesToUpdate.forEach(dateString => {
