@@ -35,26 +35,76 @@ body {
 .date-picker-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
-.team-filter {
-  padding: 6px 10px;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  font-size: 14px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: white;
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.filter-label {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.filter-group-empty {
   cursor: pointer;
 }
 
-.calendar-btn {
+.filter-group-empty:hover {
+  background-color: #e9ecef;
+}
+
+.filter-group-selected {
+  cursor: pointer;
+}
+
+.filter-group-selected:hover {
+  background-color: #e9ecef;
+}
+
+.filter-select {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.filter-value {
+  font-size: 14px;
+  color: #212529;
+  font-weight: 500;
+  padding: 2px 4px;
+}
+
+.filter-clear {
   background: none;
   border: none;
-  font-size: 20px;
+  color: #6c757d;
   cursor: pointer;
-  padding: 4px;
-  line-height: 1;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+}
+
+.filter-clear:hover {
+  background-color: #dee2e6;
+  color: #495057;
 }
 
 .date-picker-hidden {
@@ -63,32 +113,6 @@ body {
   pointer-events: none;
   width: 0;
   height: 0;
-}
-
-.selected-date-display {
-  font-size: 14px;
-  font-weight: 500;
-  color: #495057;
-}
-
-.clear-date-btn {
-  background-color: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  line-height: 1;
-}
-
-.clear-date-btn:hover {
-  background-color: #5a6268;
 }
 
 .date-box {

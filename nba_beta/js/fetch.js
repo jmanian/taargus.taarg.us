@@ -142,6 +142,10 @@ function clearDateSelection() {
   selectedDateData.length = 0
 }
 
+function clearTeamSelection() {
+  selectedTeam.value = ''
+}
+
 function fetchSelectedDate(dateString) {
   const date = DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'})
 

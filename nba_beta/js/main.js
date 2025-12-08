@@ -41,11 +41,44 @@ const app = createApp({
     })
 
     const dateInput = Vue.ref(null)
+    const teamSelect = Vue.ref(null)
 
     const openDatePicker = () => {
       if (dateInput.value) {
         dateInput.value.showPicker()
       }
+    }
+
+    const openTeamPicker = () => {
+      if (teamSelect.value) {
+        // Different browsers need different approaches
+        teamSelect.value.focus()
+
+        // Try to open the dropdown
+        if (teamSelect.value.showPicker) {
+          teamSelect.value.showPicker()
+        } else {
+          // Fallback for browsers that don't support showPicker
+          const event = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+            view: window
+          })
+          teamSelect.value.dispatchEvent(event)
+        }
+      }
+    }
+
+    const handleTeamClick = (e) => {
+      // Don't open picker if clicking the clear button
+      if (e.target.closest('.filter-clear')) return
+      openTeamPicker()
+    }
+
+    const handleDateClick = (e) => {
+      // Don't open picker if clicking the clear button
+      if (e.target.closest('.filter-clear')) return
+      openDatePicker()
     }
 
     return {
@@ -56,10 +89,15 @@ const app = createApp({
       teamList: teamList,
       formatSelectedDate: formatSelectedDate,
       dateInput: dateInput,
+      teamSelect: teamSelect,
       openDatePicker: openDatePicker,
+      openTeamPicker: openTeamPicker,
+      handleTeamClick: handleTeamClick,
+      handleDateClick: handleDateClick,
       loadPrevious: loadPrevious,
       loadMore: loadMore,
-      clearDateSelection: clearDateSelection
+      clearDateSelection: clearDateSelection,
+      clearTeamSelection: clearTeamSelection
     }
   },
   components: {

@@ -26,16 +26,23 @@
               <a v-if="!selectedDate" href="#" @click.prevent="loadPrevious" class="load-link">↑ Load previous week</a>
             </div>
             <div class="date-picker-container">
-              <select v-model="selectedTeam" class="team-filter">
-                <option value="">All teams</option>
-                <option v-for="team in teamList" :key="team.abbreviation" :value="team.abbreviation">
-                  {{ team.simpleName }}
-                </option>
-              </select>
-              <button @click="openDatePicker" class="calendar-btn">📅</button>
-              <input type="date" v-model="selectedDate" ref="dateInput" class="date-picker-hidden" />
-              <span v-if="selectedDate" class="selected-date-display">{{ formatSelectedDate }}</span>
-              <button v-if="selectedDate" @click="clearDateSelection" class="clear-date-btn">✕</button>
+              <div class="filter-group" :class="{'filter-group-empty': !selectedTeam, 'filter-group-selected': selectedTeam}" @click="handleTeamClick">
+                <label class="filter-label">Team</label>
+                <span v-if="selectedTeam" class="filter-value">{{ teamList.find(t => t.abbreviation === selectedTeam)?.simpleName }}</span>
+                <button v-if="selectedTeam" @click.stop="clearTeamSelection" class="filter-clear">✕</button>
+                <select v-model="selectedTeam" ref="teamSelect" class="filter-select">
+                  <option value=""></option>
+                  <option v-for="team in teamList" :key="team.abbreviation" :value="team.abbreviation">
+                    {{ team.simpleName }}
+                  </option>
+                </select>
+              </div>
+              <div class="filter-group" :class="{'filter-group-empty': !selectedDate, 'filter-group-selected': selectedDate}" @click="handleDateClick">
+                <label class="filter-label">Date</label>
+                <span v-if="selectedDate" class="filter-value">{{ formatSelectedDate }}</span>
+                <input type="date" v-model="selectedDate" ref="dateInput" class="date-picker-hidden" />
+                <button v-if="selectedDate" @click.stop="clearDateSelection" class="filter-clear">✕</button>
+              </div>
             </div>
           </div>
           <date-box
