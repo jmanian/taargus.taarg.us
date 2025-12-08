@@ -88,7 +88,7 @@ function pollForUpdates() {
   })
 }
 
-setInterval(pollForUpdates, 30000) // Poll every 30 seconds
+setInterval(pollForUpdates, 15000) // Poll every 15 seconds
 
 // Update when tab becomes visible again
 document.addEventListener('visibilitychange', function() {
