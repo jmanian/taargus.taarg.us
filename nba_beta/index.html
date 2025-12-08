@@ -31,7 +31,6 @@
                 <span v-if="selectedTeam" class="filter-value">{{ teamList.find(t => t.abbreviation === selectedTeam)?.simpleName }}</span>
                 <button v-if="selectedTeam" @click.stop="clearTeamSelection" class="filter-clear">✕</button>
                 <select v-model="selectedTeam" ref="teamSelect" class="filter-select">
-                  <option value=""></option>
                   <option v-for="team in teamList" :key="team.abbreviation" :value="team.abbreviation">
                     {{ team.simpleName }}
                   </option>
