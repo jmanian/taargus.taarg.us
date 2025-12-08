@@ -23,7 +23,8 @@ function initializeDates() {
     const dateString = date.toISODate()
     dates.push({
       dateString: dateString,
-      games: []
+      games: [],
+      loading: true
     })
   }
 }
@@ -48,11 +49,16 @@ function fetchGamesForDate(date) {
     const dateObj = dates.find(d => d.dateString === dateString)
     if (dateObj) {
       dateObj.games = gamesForDate
+      dateObj.loading = false
       const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
       console.log(`[${now}] Loaded ${dateString}: ${gamesForDate.length} games`)
     }
   }).fail(function(jqXHR, textStatus, errorThrown) {
     console.error('Failed to fetch data for', dateString, ':', textStatus, errorThrown)
+    const dateObj = dates.find(d => d.dateString === dateString)
+    if (dateObj) {
+      dateObj.loading = false
+    }
   })
 }
 
@@ -118,7 +124,8 @@ function loadPrevious() {
     const dateString = date.toISODate()
     dates.unshift({
       dateString: dateString,
-      games: []
+      games: [],
+      loading: true
     })
   }
 
@@ -137,7 +144,8 @@ function loadMore() {
     const dateString = date.toISODate()
     dates.push({
       dateString: dateString,
-      games: []
+      games: [],
+      loading: true
     })
     fetchGamesForDate(date)
   }
@@ -185,7 +193,8 @@ function fetchSelectedDate(dateString) {
   selectedDateData.length = 0
   selectedDateData.push({
     dateString: dateString,
-    games: []
+    games: [],
+    loading: true
   })
 
   // Fetch data for it
@@ -210,10 +219,15 @@ function fetchGamesForDateIntoArray(date, targetArray) {
     const dateObj = targetArray.find(d => d.dateString === dateString)
     if (dateObj) {
       dateObj.games = gamesForDate
+      dateObj.loading = false
       const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
       console.log(`[${now}] Loaded ${dateString}: ${gamesForDate.length} games`)
     }
   }).fail(function(jqXHR, textStatus, errorThrown) {
     console.error('Failed to fetch data for', dateString, ':', textStatus, errorThrown)
+    const dateObj = targetArray.find(d => d.dateString === dateString)
+    if (dateObj) {
+      dateObj.loading = false
+    }
   })
 }

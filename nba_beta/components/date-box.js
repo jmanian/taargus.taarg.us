@@ -14,7 +14,10 @@ const dateBoxTemplate = `
         :key="game.id"
         :game="game">
       </game-row>
-      <div v-if="sortedGames.length === 0" class="no-games">
+      <div v-if="dateData.loading" class="no-games">
+        Loading...
+      </div>
+      <div v-else-if="sortedGames.length === 0" class="no-games">
         No games scheduled
       </div>
     </div>
@@ -42,6 +45,9 @@ const DateBox = {
       return `${dayOfWeek}, ${monthDay}`
     },
     gameCountText: function () {
+      if (this.dateData.loading) {
+        return 'Loading...'
+      }
       const count = this.dateData.games.length
       return count === 1 ? '1 game' : `${count} games`
     },
