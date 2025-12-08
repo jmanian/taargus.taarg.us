@@ -2,8 +2,10 @@ const { reactive, ref, computed } = Vue
 
 // Initialize dates array with one week of data
 const dates = reactive([])
+const selectedDateData = reactive([])
 const todayStringRef = ref(DateTime.now().setZone('America/Los_Angeles').toISODate())
 const todayString = computed(() => todayStringRef.value)
+const selectedDate = ref(null)
 
 function initializeDates() {
   const today = DateTime.now().setZone('America/Los_Angeles')
@@ -132,4 +134,49 @@ function loadMore() {
     })
     fetchGamesForDate(date)
   }
+}
+
+function clearDateSelection() {
+  selectedDate.value = null
+  selectedDateData.length = 0
+}
+
+function fetchSelectedDate(dateString) {
+  const date = DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'})
+
+  // Clear and set the selected date data
+  selectedDateData.length = 0
+  selectedDateData.push({
+    dateString: dateString,
+    games: []
+  })
+
+  // Fetch data for it
+  fetchGamesForDateIntoArray(date, selectedDateData)
+}
+
+function fetchGamesForDateIntoArray(date, targetArray) {
+  const dateString = date.toISODate()
+  const endpointDate = date.toISODate({format: 'basic'})
+  const url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
+
+  jQuery.getJSON(url, function (data) {
+    const gamesForDate = []
+
+    if (data.events && data.events.length > 0) {
+      data.events.forEach(function(event) {
+        const eventData = parseEvent(event)
+        gamesForDate.push(eventData)
+      })
+    }
+
+    const dateObj = targetArray.find(d => d.dateString === dateString)
+    if (dateObj) {
+      dateObj.games = gamesForDate
+      const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
+      console.log(`[${now}] Loaded ${dateString}: ${gamesForDate.length} games`)
+    }
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    console.error('Failed to fetch data for', dateString, ':', textStatus, errorThrown)
+  })
 }

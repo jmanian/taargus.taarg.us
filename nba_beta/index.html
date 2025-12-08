@@ -21,7 +21,17 @@
     <div id="app">
       <div class="container-fluid p-4">
         <div class="dates-container">
-          <a href="#" @click.prevent="loadPrevious" class="load-link">↑ Load previous week</a>
+          <div class="date-selector-row">
+            <div class="left-side">
+              <a v-if="!selectedDate" href="#" @click.prevent="loadPrevious" class="load-link">↑ Load previous week</a>
+            </div>
+            <div class="date-picker-container">
+              <button @click="openDatePicker" class="calendar-btn">📅</button>
+              <input type="date" v-model="selectedDate" ref="dateInput" class="date-picker-hidden" />
+              <span v-if="selectedDate" class="selected-date-display">{{ formatSelectedDate }}</span>
+              <button v-if="selectedDate" @click="clearDateSelection" class="clear-date-btn">✕</button>
+            </div>
+          </div>
           <date-box
             v-for="dateData in dates"
             :key="dateData.dateString"
@@ -29,7 +39,7 @@
             :is-today="dateData.dateString === todayString"
             :is-past="dateData.dateString < todayString">
           </date-box>
-          <a href="#" @click.prevent="loadMore" class="load-link">Load more ↓</a>
+          <a v-if="!selectedDate" href="#" @click.prevent="loadMore" class="load-link">Load more ↓</a>
         </div>
       </div>
     </div>
