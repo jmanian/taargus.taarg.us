@@ -1,8 +1,9 @@
-const { reactive, ref } = Vue
+const { reactive, ref, computed } = Vue
 
 // Initialize dates array with one week of data
 const dates = reactive([])
-const todayString = ref(DateTime.now().setZone('America/Los_Angeles').toISODate())
+const todayStringRef = ref(DateTime.now().setZone('America/Los_Angeles').toISODate())
+const todayString = computed(() => todayStringRef.value)
 
 function initializeDates() {
   const today = DateTime.now().setZone('America/Los_Angeles')
@@ -63,8 +64,9 @@ function pollForUpdates() {
   const todayNow = DateTime.now().setZone('America/Los_Angeles').toISODate()
 
   // Update todayString if date has changed
-  if (todayString.value !== todayNow) {
-    todayString.value = todayNow
+  if (todayStringRef.value !== todayNow) {
+    console.log('Updating todayString from', todayStringRef.value, 'to', todayNow)
+    todayStringRef.value = todayNow
   }
 
   const datesToUpdate = new Set()
@@ -87,6 +89,13 @@ function pollForUpdates() {
 }
 
 setInterval(pollForUpdates, 30000) // Poll every 30 seconds
+
+// Update when tab becomes visible again
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    pollForUpdates()
+  }
+})
 
 function loadPrevious() {
   const firstDate = DateTime.fromISO(dates[0].dateString, {zone: 'America/Los_Angeles'})
