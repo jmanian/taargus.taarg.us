@@ -13,10 +13,3 @@ function teamId(tricode) {
   }
   return teamData[tricode].teamId;
 }
-
-function shortenTeamName(name) {
-  const shortNames = {
-    'Trail Blazers': 'Blazers'
-  };
-  return shortNames[name] || name;
-}
