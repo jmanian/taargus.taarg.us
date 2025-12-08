@@ -109,7 +109,43 @@ const app = createApp({
       if (newDate) {
         fetchSelectedDate(newDate)
       }
+      updateURL()
+    },
+    selectedTeam() {
+      updateURL()
     }
+  },
+  mounted() {
+    // If there's an initial date from URL, fetch it
+    if (selectedDate.value) {
+      fetchSelectedDate(selectedDate.value)
+    }
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', (event) => {
+      isNavigating = true
+
+      const params = new URLSearchParams(window.location.search)
+      const newTeam = params.get('team') || ''
+      const newDate = params.get('date') || null
+
+      selectedTeam.value = newTeam
+
+      if (newDate) {
+        selectedDate.value = newDate
+        if (!selectedDateData.some(d => d.dateString === newDate)) {
+          fetchSelectedDate(newDate)
+        }
+      } else {
+        selectedDate.value = null
+        selectedDateData.length = 0
+      }
+
+      // Re-enable URL updates after a tick
+      setTimeout(() => {
+        isNavigating = false
+      }, 0)
+    })
   }
 })
 

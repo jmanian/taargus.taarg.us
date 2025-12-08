@@ -1,12 +1,18 @@
 const { reactive, ref, computed } = Vue
 
+// Read initial state from URL
+const urlParams = new URLSearchParams(window.location.search)
+const initialTeam = urlParams.get('team') || ''
+const initialDate = urlParams.get('date') || null
+
 // Initialize dates array with one week of data
 const dates = reactive([])
 const selectedDateData = reactive([])
 const todayStringRef = ref(DateTime.now().setZone('America/Los_Angeles').toISODate())
 const todayString = computed(() => todayStringRef.value)
-const selectedDate = ref(null)
-const selectedTeam = ref('')
+const selectedDate = ref(initialDate)
+const selectedTeam = ref(initialTeam)
+let isNavigating = false
 
 function initializeDates() {
   const today = DateTime.now().setZone('America/Los_Angeles')
@@ -140,10 +146,36 @@ function loadMore() {
 function clearDateSelection() {
   selectedDate.value = null
   selectedDateData.length = 0
+  updateURL()
 }
 
 function clearTeamSelection() {
   selectedTeam.value = ''
+  updateURL()
+}
+
+function updateURL() {
+  // Don't update URL during browser navigation
+  if (isNavigating) return
+
+  const params = new URLSearchParams()
+
+  if (selectedTeam.value) {
+    params.set('team', selectedTeam.value)
+  }
+
+  if (selectedDate.value) {
+    params.set('date', selectedDate.value)
+  }
+
+  const newURL = params.toString()
+    ? `${window.location.pathname}?${params.toString()}`
+    : window.location.pathname
+
+  // Use pushState to create history entries that work with back/forward
+  if (window.location.href !== window.location.origin + newURL) {
+    window.history.pushState({ team: selectedTeam.value, date: selectedDate.value }, '', newURL)
+  }
 }
 
 function fetchSelectedDate(dateString) {
