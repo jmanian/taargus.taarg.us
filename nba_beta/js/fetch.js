@@ -6,6 +6,7 @@ const selectedDateData = reactive([])
 const todayStringRef = ref(DateTime.now().setZone('America/Los_Angeles').toISODate())
 const todayString = computed(() => todayStringRef.value)
 const selectedDate = ref(null)
+const selectedTeam = ref('')
 
 function initializeDates() {
   const today = DateTime.now().setZone('America/Los_Angeles')
