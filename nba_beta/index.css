@@ -43,9 +43,11 @@ body {
   align-items: center;
   gap: 6px;
   background-color: #f8f9fa;
-  padding: 4px 8px;
+  padding: 6px 8px;
   border-radius: 6px;
   border: 1px solid #e9ecef;
+  height: 35px;
+  box-sizing: border-box;
 }
 
 .filter-label {
@@ -54,6 +56,7 @@ body {
   margin: 0;
   font-weight: 500;
   pointer-events: none;
+  line-height: 1;
 }
 
 .filter-group-empty {
@@ -84,7 +87,8 @@ body {
   font-size: 14px;
   color: #212529;
   font-weight: 500;
-  padding: 2px 4px;
+  padding: 0 4px;
+  line-height: 1;
 }
 
 .filter-clear {
@@ -107,10 +111,31 @@ body {
   color: #495057;
 }
 
-.date-picker-hidden {
+.date-input {
+  border: none;
+  background: none;
+  font-size: 14px;
+  padding: 2px 4px;
+  cursor: pointer;
+  color: #212529;
+  font-weight: 500;
+  outline: none;
+  width: auto;
+  max-width: 120px;
+}
+
+.date-input-hidden {
   position: absolute;
   opacity: 0;
   pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.date-input-always-hidden {
+  position: absolute;
+  opacity: 0;
+  pointer-events: auto;
   width: 0;
   height: 0;
 }

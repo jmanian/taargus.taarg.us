@@ -45,7 +45,19 @@ const app = createApp({
 
     const openDatePicker = () => {
       if (dateInput.value) {
-        dateInput.value.showPicker()
+        // Try showPicker first (desktop Chrome, Firefox)
+        if (dateInput.value.showPicker) {
+          try {
+            dateInput.value.showPicker()
+            return
+          } catch (e) {
+            // Fall through to focus/click
+          }
+        }
+
+        // Fallback for mobile Safari and others
+        dateInput.value.focus()
+        dateInput.value.click()
       }
     }
 
@@ -90,7 +102,6 @@ const app = createApp({
       formatSelectedDate: formatSelectedDate,
       dateInput: dateInput,
       teamSelect: teamSelect,
-      openDatePicker: openDatePicker,
       openTeamPicker: openTeamPicker,
       handleTeamClick: handleTeamClick,
       handleDateClick: handleDateClick,
