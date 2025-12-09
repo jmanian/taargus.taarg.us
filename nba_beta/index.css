@@ -603,6 +603,25 @@ body {
   font-weight: 500;
 }
 
+.recap-section {
+  grid-column: 1 / -1;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #495057;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .recap-section {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}
+
 .expand-enter-active,
 .expand-leave-active {
   transition: all 0.3s ease;
@@ -619,6 +638,6 @@ body {
 
 .expand-enter-to,
 .expand-leave-from {
-  max-height: 200px;
+  max-height: 300px;
   opacity: 1;
 }

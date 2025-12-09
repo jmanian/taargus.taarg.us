@@ -47,7 +47,8 @@ function parseEvent(event) {
     clock: event.status.displayClock,
     spread: odds?.details,
     spreadFormatted: spreadFormatted,
-    total: odds?.overUnder
+    total: odds?.overUnder,
+    recap: findRecap(competition.headlines)
   }
 }
 
@@ -109,4 +110,15 @@ function getBroadcastInfo(broadcasts) {
 
   const leaguePass = allNetworks.find(name => name.includes('League Pass'));
   return leaguePass ? 'League Pass' : '';
+}
+
+function findRecap(headlines) {
+  if (headlines) {
+    const headline = headlines.find(hl => hl.type.toLowerCase() === 'recap')
+    if (headline) {
+      const description = headline.description
+      // Strip "— " from the beginning if it exists
+      return description?.startsWith('— ') ? description.slice(2) : description
+    }
+  }
 }

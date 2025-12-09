@@ -36,6 +36,9 @@ const gameRowTemplate = `
           <span class="odds-value">{{ game.total }}</span>
         </div>
       </div>
+      <div v-if="game.recap" class="recap-section">
+        {{ game.recap }}
+      </div>
     </div>
   </transition>
 </div>
