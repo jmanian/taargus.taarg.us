@@ -155,6 +155,13 @@ const app = createApp({
       }
     })
 
+    // Close dropdown when pressing Esc
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && teamDropdownOpen.value) {
+        teamDropdownOpen.value = false
+      }
+    })
+
     // Handle browser back/forward
     window.addEventListener('popstate', (event) => {
       isNavigating = true
