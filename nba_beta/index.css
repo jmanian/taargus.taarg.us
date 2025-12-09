@@ -384,6 +384,9 @@ body {
   gap: 12px;
   align-items: center;
   min-height: 68px;
+}
+
+.game-row.expandable {
   cursor: pointer;
 }
 

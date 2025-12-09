@@ -1,5 +1,5 @@
 const gameRowTemplate = `
-<div class="game-row" :class="{'expanded': isExpanded}" @click="toggleExpand">
+<div class="game-row" :class="{'expanded': isExpanded, 'expandable': hasExpandableContent}" @click="hasExpandableContent && toggleExpand()">
   <div class="team-side away-side">
     <img v-if="awayImageURL" class="team-logo" :src="awayImageURL">
     <div v-else class="team-logo-placeholder"></div>
@@ -101,6 +101,9 @@ const GameRow = {
     },
     homeImageURL: function () {
       return teamImageURL(this.game.homeTeam)
+    },
+    hasExpandableContent: function () {
+      return !!(this.game.spreadFormatted || this.game.total || this.game.recap)
     }
   }
 }
