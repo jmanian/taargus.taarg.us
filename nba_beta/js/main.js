@@ -50,7 +50,9 @@ const app = createApp({
       const searchLower = teamSearchTerm.value.toLowerCase()
       return teamList.filter(team =>
         team.simpleName.toLowerCase().includes(searchLower) ||
-        team.abbreviation.toLowerCase().includes(searchLower)
+        team.abbreviation.toLowerCase().includes(searchLower) ||
+        team.location.toLowerCase().includes(searchLower) ||
+        team.teamName.toLowerCase().includes(searchLower)
       )
     })
 
