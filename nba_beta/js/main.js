@@ -42,6 +42,17 @@ const app = createApp({
 
     const dateInput = Vue.ref(null)
     const teamSelect = Vue.ref(null)
+    const teamSearchInput = Vue.ref(null)
+    const teamSearchTerm = Vue.ref('')
+
+    const filteredTeamList = Vue.computed(() => {
+      if (!teamSearchTerm.value) return teamList
+      const searchLower = teamSearchTerm.value.toLowerCase()
+      return teamList.filter(team =>
+        team.simpleName.toLowerCase().includes(searchLower) ||
+        team.abbreviation.toLowerCase().includes(searchLower)
+      )
+    })
 
     const openDatePicker = () => {
       if (dateInput.value) {
@@ -81,6 +92,19 @@ const app = createApp({
       openDatePicker()
     }
 
+    // Watch teamDropdownOpen to focus search input when opened
+    Vue.watch(teamDropdownOpen, (isOpen) => {
+      if (!isOpen) {
+        teamSearchTerm.value = ''
+      } else {
+        Vue.nextTick(() => {
+          if (teamSearchInput.value) {
+            teamSearchInput.value.focus()
+          }
+        })
+      }
+    })
+
     return {
       dates: displayedDates,
       todayString: todayString,
@@ -88,6 +112,9 @@ const app = createApp({
       selectedTeams: selectedTeams,
       teamDropdownOpen: teamDropdownOpen,
       teamList: teamList,
+      filteredTeamList: filteredTeamList,
+      teamSearchTerm: teamSearchTerm,
+      teamSearchInput: teamSearchInput,
       formatSelectedDate: formatSelectedDate,
       dateInput: dateInput,
       toggleTeamDropdown: toggleTeamDropdown,
