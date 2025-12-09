@@ -105,6 +105,13 @@ const app = createApp({
       }
     })
 
+    // Watch selectedTeams to clear search when selection changes
+    Vue.watch(selectedTeams, () => {
+      if (teamDropdownOpen.value) {
+        teamSearchTerm.value = ''
+      }
+    })
+
     return {
       dates: displayedDates,
       todayString: todayString,
