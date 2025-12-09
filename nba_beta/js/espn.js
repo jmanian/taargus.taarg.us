@@ -8,6 +8,26 @@ function parseEvent(event) {
   const date = dateTime.toISODate()
   const headline = competition.notes?.find(note => note.type === 'event')?.headline;
   const odds = competition.odds?.[0];
+
+  // Build spread string with full team name
+  let spreadFormatted = null;
+  if (odds?.spread) {
+    let favoriteTeamName = null;
+    let spreadValue = odds.spread;
+
+    if (odds.homeTeamOdds?.favorite) {
+      favoriteTeamName = odds.homeTeamOdds?.team?.name;
+    } else if (odds.awayTeamOdds?.favorite) {
+      favoriteTeamName = odds.awayTeamOdds?.team?.name;
+      // When away team is favorite, flip the spread sign
+      spreadValue = odds.spread * -1;
+    }
+
+    if (favoriteTeamName) {
+      spreadFormatted = `${favoriteTeamName} ${spreadValue}`;
+    }
+  }
+
   return {
     id: event.id,
     homeTeam: teamTricode(homeTeam),
@@ -26,6 +46,7 @@ function parseEvent(event) {
     statusDetail: event.status.type.shortDetail.replace('-', '–'),
     clock: event.status.displayClock,
     spread: odds?.details,
+    spreadFormatted: spreadFormatted,
     total: odds?.overUnder
   }
 }

@@ -26,13 +26,13 @@ const gameRowTemplate = `
 
   <transition name="expand">
     <div v-if="isExpanded" class="game-details">
-      <div v-if="game.spread || game.total" class="odds-section">
-        <div v-if="game.spread" class="odds-item">
-          <span class="odds-label">Spread:</span>
-          <span class="odds-value">{{ game.spread }}</span>
+      <div v-if="game.spreadFormatted || game.total" class="odds-section">
+        <div v-if="game.spreadFormatted" class="odds-item">
+          <span class="odds-label">Spread</span>
+          <span class="odds-value">{{ game.spreadFormatted }}</span>
         </div>
         <div v-if="game.total" class="odds-item">
-          <span class="odds-label">Total:</span>
+          <span class="odds-label">Total</span>
           <span class="odds-value">{{ game.total }}</span>
         </div>
       </div>
