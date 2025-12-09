@@ -28,6 +28,9 @@ function parseEvent(event) {
     }
   }
 
+  const gameState = event.status.type.state;
+  const gameStarted = gameState !== 'pre';
+
   return {
     id: event.id,
     homeTeam: teamTricode(homeTeam),
@@ -42,13 +45,17 @@ function parseEvent(event) {
     homeScore: Number(homeTeam.score),
     awayScore: Number(awayTeam.score),
     network: getBroadcastInfo(competition.broadcasts),
-    state: event.status.type.state,
+    state: gameState,
     statusDetail: event.status.type.shortDetail.replace('-', '–'),
     clock: event.status.displayClock,
     spread: odds?.details,
     spreadFormatted: spreadFormatted,
     total: odds?.overUnder,
-    recap: findRecap(competition.headlines)
+    recap: findRecap(competition.headlines),
+    homeStats: getTeamStats(homeTeam, gameStarted),
+    awayStats: getTeamStats(awayTeam, gameStarted),
+    homeLeaders: getTeamLeaders(homeTeam),
+    awayLeaders: getTeamLeaders(awayTeam)
   }
 }
 
@@ -121,4 +128,46 @@ function findRecap(headlines) {
       return description?.startsWith('— ') ? description.slice(2) : description
     }
   }
+}
+
+function getTeamStats(competitor, gameStarted) {
+  if (!competitor.statistics) return null;
+
+  const stats = competitor.statistics;
+  const findStat = (name) => {
+    const stat = stats.find(s => s.name === name);
+    return stat?.displayValue || null;
+  };
+
+  return {
+    fgPct: findStat('fieldGoalPct'),
+    threePct: findStat('threePointFieldGoalPct'),
+    rebounds: gameStarted ? findStat('rebounds') : findStat('avgRebounds'),
+    assists: gameStarted ? findStat('assists') : findStat('avgAssists')
+  };
+}
+
+function getTeamLeaders(competitor) {
+  if (!competitor.leaders) return null;
+
+  const leaders = competitor.leaders;
+
+  const pointsLeader = leaders.find(l => l.name === 'points');
+  const reboundsLeader = leaders.find(l => l.name === 'rebounds');
+  const assistsLeader = leaders.find(l => l.name === 'assists');
+
+  return {
+    points: pointsLeader?.leaders?.[0] ? {
+      name: pointsLeader.leaders[0].athlete.shortName,
+      value: pointsLeader.leaders[0].displayValue
+    } : null,
+    rebounds: reboundsLeader?.leaders?.[0] ? {
+      name: reboundsLeader.leaders[0].athlete.shortName,
+      value: reboundsLeader.leaders[0].displayValue
+    } : null,
+    assists: assistsLeader?.leaders?.[0] ? {
+      name: assistsLeader.leaders[0].athlete.shortName,
+      value: assistsLeader.leaders[0].displayValue
+    } : null
+  };
 }

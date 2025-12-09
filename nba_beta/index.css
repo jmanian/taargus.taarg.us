@@ -663,6 +663,141 @@ body {
 
 .expand-enter-to,
 .expand-leave-from {
-  max-height: 300px;
+  max-height: 600px;
   opacity: 1;
+}
+
+.stats-section {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.stats-header {
+  font-size: 11px;
+  color: #6c757d;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.stats-table th {
+  font-size: 11px;
+  color: #6c757d;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.stats-table th:first-child {
+  text-align: left;
+}
+
+.stats-table td {
+  padding: 6px 8px;
+  text-align: center;
+  color: #212529;
+  font-weight: 500;
+}
+
+.stats-table td.team-abbr {
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+}
+
+.stats-table tbody tr:nth-child(odd) {
+  background-color: white;
+}
+
+@media (max-width: 768px) {
+  .stats-section {
+    padding: 10px 12px;
+  }
+
+  .stats-table {
+    font-size: 12px;
+  }
+
+  .stats-table th {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+
+  .stats-table td {
+    padding: 6px 6px;
+  }
+}
+
+.leaders-section {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.leaders-header {
+  font-size: 11px;
+  color: #6c757d;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.team-leaders {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .team-leaders {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+.team-leader-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.leader-team-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 2px;
+}
+
+.leader-line {
+  font-size: 12px;
+  color: #212529;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .leaders-section {
+    padding: 10px 12px;
+  }
+
+  .leader-team-name {
+    font-size: 11px;
+  }
+
+  .leader-line {
+    font-size: 11px;
+  }
 }

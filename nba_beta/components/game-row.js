@@ -45,6 +45,53 @@ const gameRowTemplate = `
       <div v-if="game.recap" class="recap-section">
         {{ game.recap }}
       </div>
+      <div v-if="hasStats" class="stats-section">
+        <div class="stats-header">TEAM STATS</div>
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>FG%</th>
+              <th>3P%</th>
+              <th>REB</th>
+              <th>AST</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="team-abbr">{{ game.awayTeam }}</td>
+              <td>{{ game.awayStats.fgPct }}</td>
+              <td>{{ game.awayStats.threePct }}</td>
+              <td>{{ game.awayStats.rebounds }}</td>
+              <td>{{ game.awayStats.assists }}</td>
+            </tr>
+            <tr>
+              <td class="team-abbr">{{ game.homeTeam }}</td>
+              <td>{{ game.homeStats.fgPct }}</td>
+              <td>{{ game.homeStats.threePct }}</td>
+              <td>{{ game.homeStats.rebounds }}</td>
+              <td>{{ game.homeStats.assists }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div v-if="hasLeaders" class="leaders-section">
+        <div class="leaders-header">TOP PERFORMERS</div>
+        <div class="team-leaders">
+          <div class="team-leader-group">
+            <div class="leader-team-name">{{ game.awayTeam }}</div>
+            <div v-for="leader in formatLeaders(game.awayLeaders)" :key="leader.name" class="leader-line">
+              {{ leader.name }} {{ leader.stats }}
+            </div>
+          </div>
+          <div class="team-leader-group">
+            <div class="leader-team-name">{{ game.homeTeam }}</div>
+            <div v-for="leader in formatLeaders(game.homeLeaders)" :key="leader.name" class="leader-line">
+              {{ leader.name }} {{ leader.stats }}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </transition>
 </div>
@@ -71,6 +118,42 @@ const GameRow = {
     },
     toggleExpand() {
       this.isExpanded = !this.isExpanded
+    },
+    formatLeaders(leaders) {
+      if (!leaders) return []
+
+      // Create a map of players and their stats
+      const playerMap = new Map()
+
+      if (leaders.points) {
+        const name = leaders.points.name
+        if (!playerMap.has(name)) {
+          playerMap.set(name, [])
+        }
+        playerMap.get(name).push(`${leaders.points.value} PTS`)
+      }
+
+      if (leaders.rebounds) {
+        const name = leaders.rebounds.name
+        if (!playerMap.has(name)) {
+          playerMap.set(name, [])
+        }
+        playerMap.get(name).push(`${leaders.rebounds.value} REB`)
+      }
+
+      if (leaders.assists) {
+        const name = leaders.assists.name
+        if (!playerMap.has(name)) {
+          playerMap.set(name, [])
+        }
+        playerMap.get(name).push(`${leaders.assists.value} AST`)
+      }
+
+      // Convert map to array of formatted leaders
+      return Array.from(playerMap.entries()).map(([name, stats]) => ({
+        name: name,
+        stats: stats.join(', ')
+      }))
     }
   },
   computed: {
@@ -109,7 +192,15 @@ const GameRow = {
       return teamImageURL(this.game.homeTeam)
     },
     hasExpandableContent: function () {
-      return !!(this.game.spreadFormatted || this.game.total || this.game.recap)
+      return !!(this.game.spreadFormatted || this.game.total || this.game.recap || this.hasStats || this.hasLeaders)
+    },
+    hasStats: function () {
+      return !!(this.game.homeStats && this.game.awayStats)
+    },
+    hasLeaders: function () {
+      const homeHasData = this.game.homeLeaders && (this.game.homeLeaders.points || this.game.homeLeaders.rebounds || this.game.homeLeaders.assists)
+      const awayHasData = this.game.awayLeaders && (this.game.awayLeaders.points || this.game.awayLeaders.rebounds || this.game.awayLeaders.assists)
+      return homeHasData || awayHasData
     }
   }
 }
