@@ -1,5 +1,5 @@
 const gameRowTemplate = `
-<div class="game-row">
+<div class="game-row" :class="{'expanded': isExpanded}" @click="toggleExpand">
   <div class="team-side away-side">
     <img v-if="awayImageURL" class="team-logo" :src="awayImageURL">
     <div v-else class="team-logo-placeholder"></div>
@@ -23,6 +23,21 @@ const gameRowTemplate = `
     <span class="team-name">{{ game.homeTeamName }}</span>
     <span class="team-record">{{ game.homeRecord }}</span>
   </div>
+
+  <transition name="expand">
+    <div v-if="isExpanded" class="game-details">
+      <div v-if="game.spread || game.total" class="odds-section">
+        <div v-if="game.spread" class="odds-item">
+          <span class="odds-label">Spread:</span>
+          <span class="odds-value">{{ game.spread }}</span>
+        </div>
+        <div v-if="game.total" class="odds-item">
+          <span class="odds-label">Total:</span>
+          <span class="odds-value">{{ game.total }}</span>
+        </div>
+      </div>
+    </div>
+  </transition>
 </div>
 `
 
@@ -31,7 +46,8 @@ const GameRow = {
   props: ['game'],
   data() {
     return {
-      isMobile: window.innerWidth <= 768
+      isMobile: window.innerWidth <= 768,
+      isExpanded: false
     }
   },
   mounted() {
@@ -43,6 +59,9 @@ const GameRow = {
   methods: {
     handleResize() {
       this.isMobile = window.innerWidth <= 768
+    },
+    toggleExpand() {
+      this.isExpanded = !this.isExpanded
     }
   },
   computed: {

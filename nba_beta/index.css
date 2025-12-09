@@ -384,6 +384,7 @@ body {
   gap: 12px;
   align-items: center;
   min-height: 68px;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {
@@ -565,4 +566,59 @@ body {
   .headline {
     font-size: 12px;
   }
+}
+
+.game-details {
+  grid-column: 1 / -1;
+  padding: 12px 0 0 0;
+  border-top: 1px solid #e9ecef;
+  margin-top: 12px;
+}
+
+.odds-section {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.odds-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.odds-label {
+  font-size: 11px;
+  color: #6c757d;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.odds-value {
+  font-size: 14px;
+  color: #212529;
+  font-weight: 500;
+}
+
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.expand-enter-to,
+.expand-leave-from {
+  max-height: 200px;
+  opacity: 1;
 }

@@ -7,6 +7,7 @@ function parseEvent(event) {
   const dateTime = DateTime.fromISO(event.date).setZone('America/Los_Angeles')
   const date = dateTime.toISODate()
   const headline = competition.notes?.find(note => note.type === 'event')?.headline;
+  const odds = competition.odds?.[0];
   return {
     id: event.id,
     homeTeam: teamTricode(homeTeam),
@@ -23,7 +24,9 @@ function parseEvent(event) {
     network: getBroadcastInfo(competition.broadcasts),
     state: event.status.type.state,
     statusDetail: event.status.type.shortDetail.replace('-', '–'),
-    clock: event.status.displayClock
+    clock: event.status.displayClock,
+    spread: odds?.details,
+    total: odds?.overUnder
   }
 }
 
