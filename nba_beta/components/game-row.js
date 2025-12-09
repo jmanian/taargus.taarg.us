@@ -24,6 +24,12 @@ const gameRowTemplate = `
     <span class="team-record">{{ game.homeRecord }}</span>
   </div>
 
+  <div v-if="hasExpandableContent" class="expand-indicator">
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+  </div>
+
   <transition name="expand">
     <div v-if="isExpanded" class="game-details">
       <div v-if="game.spreadFormatted || game.total" class="odds-section">

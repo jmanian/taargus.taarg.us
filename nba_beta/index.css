@@ -384,10 +384,27 @@ body {
   gap: 12px;
   align-items: center;
   min-height: 68px;
+  position: relative;
 }
 
 .game-row.expandable {
   cursor: pointer;
+}
+
+.expand-indicator {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 3px;
+}
+
+.expand-indicator .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #dee2e6;
 }
 
 @media (max-width: 768px) {
@@ -395,6 +412,11 @@ body {
     padding: 16px 4px;
     gap: 4px;
     grid-template-columns: minmax(60px, 1fr) 35px 80px 35px minmax(60px, 1fr);
+  }
+
+  .expand-indicator .dot {
+    width: 3px;
+    height: 3px;
   }
 }
 
