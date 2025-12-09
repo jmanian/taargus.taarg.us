@@ -410,6 +410,7 @@ body {
   justify-self: center;
 }
 
+
 .team-logo {
   width: 40px;
   height: 40px;
@@ -440,7 +441,7 @@ body {
 
 .game-center {
   display: grid;
-  grid-template-rows: 1fr auto 1fr;
+  grid-template-rows: 1fr auto auto auto 1fr;
   justify-items: center;
   justify-self: center;
   align-self: stretch;
@@ -452,6 +453,11 @@ body {
 
 .network {
   grid-row: 3;
+  align-self: start;
+}
+
+.headline {
+  grid-row: 4;
   align-self: start;
 }
 
@@ -545,4 +551,18 @@ body {
 .load-link:hover {
   text-decoration: underline;
   color: #0b5ed7;
+}
+
+.headline {
+  text-align: center;
+  font-size: 13px;
+  color: #6c757d;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .headline {
+    font-size: 12px;
+  }
 }

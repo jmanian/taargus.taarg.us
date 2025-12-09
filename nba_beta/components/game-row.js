@@ -12,6 +12,7 @@ const gameRowTemplate = `
   <div class="game-center">
     <span class="game-time" :class="{'live-time': playing, 'pre-game': !started}">{{ timeLabel }}</span>
     <span class="network">{{ game.network || '&nbsp;' }}</span>
+    <span v-if="game.headline" class="headline">{{ game.headline }}</span>
   </div>
 
   <div class="score home-score" :class="{'losing-score': isHomeLosing}">{{ started ? game.homeScore : '' }}</div>
