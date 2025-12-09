@@ -605,6 +605,10 @@ body {
   justify-content: center;
   gap: 24px;
   flex-wrap: wrap;
+  padding: 12px 16px;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
 }
 
 .odds-item {
@@ -628,12 +632,19 @@ body {
   font-weight: 500;
 }
 
+@media (max-width: 768px) {
+  .odds-section {
+    padding: 10px 12px;
+  }
+}
+
 .recap-section {
   grid-column: 1 / -1;
   margin-top: 12px;
   padding: 12px 16px;
-  background-color: #f8f9fa;
+  background-color: white;
   border-radius: 6px;
+  border: 1px solid #e9ecef;
   font-size: 13px;
   line-height: 1.5;
   color: #495057;
@@ -670,8 +681,9 @@ body {
 .stats-section {
   margin-top: 12px;
   padding: 12px 16px;
-  background-color: #f8f9fa;
+  background-color: white;
   border-radius: 6px;
+  border: 1px solid #e9ecef;
 }
 
 .stats-header {
@@ -717,7 +729,7 @@ body {
 }
 
 .stats-table tbody tr:nth-child(odd) {
-  background-color: white;
+  background-color: #f8f9fa;
 }
 
 @media (max-width: 768px) {
@@ -742,8 +754,9 @@ body {
 .leaders-section {
   margin-top: 12px;
   padding: 12px 16px;
-  background-color: #f8f9fa;
+  background-color: white;
   border-radius: 6px;
+  border: 1px solid #e9ecef;
 }
 
 .leaders-header {
