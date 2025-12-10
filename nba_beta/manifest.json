@@ -1,11 +1,11 @@
 {
   "name": "NBA Games",
-  "short_name": "NBA",
-  "description": "NBA Games tracker",
+  "short_name": "NBA Games",
+  "description": "NBA Game schedules and scores",
   "start_url": "/nba_beta/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#f5f5f5",
+  "theme_color": "#f5f5f5",
   "icons": [
     {
       "src": "apple-touch-icon.png",
