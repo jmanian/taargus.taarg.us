@@ -774,12 +774,6 @@ body {
   gap: 16px;
 }
 
-@media (max-width: 768px) {
-  .team-leaders {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
 
 .team-leader-group {
   display: flex;
