@@ -31,15 +31,15 @@ const gameRowTemplate = `
           <div class="game-flow-tabs">
             <button
               class="game-flow-tab"
-              :class="{'active': chartMode === 'score'}"
-              @click.stop="setChartMode('score')">
-              Score Flow
+              :class="{'active': chartMode === 'lead'}"
+              @click.stop="setChartMode('lead')">
+              Lead
             </button>
             <button
               class="game-flow-tab"
-              :class="{'active': chartMode === 'lead'}"
-              @click.stop="setChartMode('lead')">
-              Lead Tracker
+              :class="{'active': chartMode === 'score'}"
+              @click.stop="setChartMode('score')">
+              Scores
             </button>
           </div>
         </div>
@@ -121,7 +121,7 @@ const GameRow = {
       gameFlowData: null,
       gameFlowLoading: false,
       teamColors: null,
-      chartMode: localStorage.getItem('gameFlowChartMode') || 'score' // 'score' or 'lead'
+      chartMode: localStorage.getItem('gameFlowChartMode') || 'lead' // 'score' or 'lead'
     }
   },
   mounted() {
