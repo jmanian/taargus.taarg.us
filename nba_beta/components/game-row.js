@@ -44,7 +44,14 @@ const gameRowTemplate = `
           </div>
         </div>
         <div v-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
-        <canvas v-else-if="gameFlowData" ref="gameFlowCanvas" class="game-flow-canvas"></canvas>
+        <div v-else-if="gameFlowData" class="game-flow-chart-container">
+          <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousemove="handleCanvasHover" @mouseleave="handleCanvasLeave"></canvas>
+          <div v-if="hoveredPlay" class="game-flow-tooltip">
+            <div class="tooltip-time">{{ hoveredPlay.time }} - {{ hoveredPlay.quarter }}</div>
+            <div class="tooltip-score">{{ hoveredPlay.awayTeam }} {{ hoveredPlay.awayScore }} - {{ hoveredPlay.homeTeam }} {{ hoveredPlay.homeScore }}</div>
+            <div class="tooltip-description">{{ hoveredPlay.description }}</div>
+          </div>
+        </div>
       </div>
       <div v-if="game.spreadFormatted || game.total" class="odds-section">
         <div v-if="game.spreadFormatted" class="odds-item">
@@ -121,7 +128,9 @@ const GameRow = {
       gameFlowData: null,
       gameFlowLoading: false,
       teamColors: null,
-      chartMode: localStorage.getItem('gameFlowChartMode') || 'lead' // 'score' or 'lead'
+      chartMode: localStorage.getItem('gameFlowChartMode') || 'lead', // 'score' or 'lead'
+      hoveredPlay: null,
+      hoveredPlayIndex: null
     }
   },
   mounted() {
@@ -167,6 +176,82 @@ const GameRow = {
     setChartMode(mode) {
       this.chartMode = mode
       localStorage.setItem('gameFlowChartMode', mode)
+      this.redrawChart()
+    },
+    handleCanvasHover(event) {
+      const canvas = this.$refs.gameFlowCanvas
+      if (!canvas || !this.gameFlowData) return
+
+      const rect = canvas.getBoundingClientRect()
+      const mouseX = event.clientX - rect.left
+      const padding = { left: 40, right: 40 }
+      const chartWidth = canvas.offsetWidth - padding.left - padding.right
+
+      const relativeX = mouseX - padding.left
+
+      // If mouse is outside chart area, don't show tooltip
+      if (relativeX < 0 || relativeX > chartWidth) {
+        this.hoveredPlay = null
+        this.hoveredPlayIndex = null
+        this.redrawChart()
+        return
+      }
+
+      // Calculate x-positions for all plays based on game time
+      const maxTime = this.gameFlowData[this.gameFlowData.length - 1].time
+      const xScale = (time) => (time / maxTime) * chartWidth
+
+      // Create zones for each play based on midpoints between adjacent plays
+      // This ensures every play is accessible
+      let selectedIndex = 1
+
+      for (let i = 1; i < this.gameFlowData.length; i++) {
+        const currentX = xScale(this.gameFlowData[i].time)
+
+        // Determine zone boundaries
+        let zoneStart, zoneEnd
+
+        if (i === 1) {
+          // First play: zone starts at 0
+          zoneStart = 0
+        } else {
+          // Zone starts at midpoint with previous play
+          const prevX = xScale(this.gameFlowData[i - 1].time)
+          zoneStart = (prevX + currentX) / 2
+        }
+
+        if (i === this.gameFlowData.length - 1) {
+          // Last play: zone extends to end
+          zoneEnd = chartWidth
+        } else {
+          // Zone ends at midpoint with next play
+          const nextX = xScale(this.gameFlowData[i + 1].time)
+          zoneEnd = (currentX + nextX) / 2
+        }
+
+        // Check if mouse is in this zone
+        if (relativeX >= zoneStart && relativeX < zoneEnd) {
+          selectedIndex = i
+          break
+        }
+      }
+
+      const play = this.gameFlowData[selectedIndex]
+      this.hoveredPlayIndex = selectedIndex
+      this.hoveredPlay = {
+        time: play.clock,
+        quarter: play.periodDisplay,
+        awayTeam: this.game.awayTeam,
+        homeTeam: this.game.homeTeam,
+        awayScore: play.awayScore,
+        homeScore: play.homeScore,
+        description: play.description
+      }
+      this.redrawChart()
+    },
+    handleCanvasLeave() {
+      this.hoveredPlay = null
+      this.hoveredPlayIndex = null
       this.redrawChart()
     },
     async fetchGameFlow() {
@@ -238,7 +323,10 @@ const GameRow = {
             time: totalSeconds,
             awayScore: play.awayScore,
             homeScore: play.homeScore,
-            period: period
+            period: period,
+            clock: clock,
+            periodDisplay: play.period?.displayValue || '',
+            description: play.text || ''
           })
         }
       })
@@ -332,7 +420,8 @@ const GameRow = {
       ctx.setLineDash([])
 
       // Draw away team line (as steps)
-      ctx.strokeStyle = this.teamColors ? `#${this.teamColors.away}` : '#1e40af'
+      const awayColor = this.teamColors ? `#${this.teamColors.away}` : '#1e40af'
+      ctx.strokeStyle = awayColor
       ctx.lineWidth = 2
       ctx.beginPath()
       this.gameFlowData.forEach((point, i) => {
@@ -351,7 +440,8 @@ const GameRow = {
       ctx.stroke()
 
       // Draw home team line (as steps)
-      ctx.strokeStyle = this.teamColors ? `#${this.teamColors.home}` : '#dc2626'
+      const homeColor = this.teamColors ? `#${this.teamColors.home}` : '#dc2626'
+      ctx.strokeStyle = homeColor
       ctx.lineWidth = 2
       ctx.beginPath()
       this.gameFlowData.forEach((point, i) => {
@@ -368,6 +458,30 @@ const GameRow = {
         }
       })
       ctx.stroke()
+
+      // Highlight hovered segment
+      if (this.hoveredPlayIndex !== null && this.hoveredPlayIndex > 0) {
+        const i = this.hoveredPlayIndex
+        const point = this.gameFlowData[i]
+        const prevPoint = this.gameFlowData[i - 1]
+        const x = xScale(point.time)
+
+        // Highlight away team vertical segment
+        ctx.strokeStyle = awayColor
+        ctx.lineWidth = 4
+        ctx.beginPath()
+        ctx.moveTo(x, yScale(prevPoint.awayScore))
+        ctx.lineTo(x, yScale(point.awayScore))
+        ctx.stroke()
+
+        // Highlight home team vertical segment
+        ctx.strokeStyle = homeColor
+        ctx.lineWidth = 4
+        ctx.beginPath()
+        ctx.moveTo(x, yScale(prevPoint.homeScore))
+        ctx.lineTo(x, yScale(point.homeScore))
+        ctx.stroke()
+      }
 
       // Draw axis labels
       ctx.fillStyle = '#666'
@@ -560,6 +674,31 @@ const GameRow = {
         }
       })
       ctx.stroke()
+
+      // Highlight hovered segment on lead tracker
+      if (this.hoveredPlayIndex !== null && this.hoveredPlayIndex > 0) {
+        const i = this.hoveredPlayIndex
+        const point = leadData[i]
+        const prevPoint = leadData[i - 1]
+        const x = xScale(point.time)
+
+        // Determine color based on the lead
+        let highlightColor
+        if (point.lead > 0) {
+          highlightColor = awayColor
+        } else if (point.lead < 0) {
+          highlightColor = homeColor
+        } else {
+          highlightColor = '#666'
+        }
+
+        ctx.strokeStyle = highlightColor
+        ctx.lineWidth = 3
+        ctx.beginPath()
+        ctx.moveTo(x, yScale(prevPoint.lead))
+        ctx.lineTo(x, yScale(point.lead))
+        ctx.stroke()
+      }
 
       // Draw axis labels
       ctx.fillStyle = '#666'

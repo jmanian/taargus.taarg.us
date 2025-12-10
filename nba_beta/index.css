@@ -866,14 +866,61 @@ body {
   font-size: 13px;
 }
 
+.game-flow-chart-container {
+  position: relative;
+}
+
+.game-flow-tooltip {
+  position: absolute;
+  top: -60px;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  pointer-events: none;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.tooltip-time {
+  font-size: 11px;
+  color: #6c757d;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.tooltip-score {
+  font-size: 14px;
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 4px;
+}
+
+.tooltip-description {
+  font-size: 12px;
+  color: #495057;
+  line-height: 1.4;
+}
+
 .game-flow-canvas {
   width: 100%;
   display: block;
   border-radius: 4px;
+  cursor: crosshair;
 }
 
 @media (max-width: 768px) {
   .game-flow-section {
     padding: 10px 12px;
+  }
+
+  .tooltip-description {
+    font-size: 11px;
   }
 }
