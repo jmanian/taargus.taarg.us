@@ -130,7 +130,8 @@ const GameRow = {
       teamColors: null,
       chartMode: localStorage.getItem('gameFlowChartMode') || 'lead', // 'score' or 'lead'
       hoveredPlay: null,
-      hoveredPlayIndex: null
+      hoveredPlayIndex: null,
+      resizeTimeout: null
     }
   },
   mounted() {
@@ -152,6 +153,26 @@ const GameRow = {
   methods: {
     handleResize() {
       this.isMobile = window.innerWidth <= 768
+
+      // Debounce resize events
+      if (this.resizeTimeout) {
+        clearTimeout(this.resizeTimeout)
+      }
+
+      // Redraw chart if it's currently visible
+      if (this.isExpanded && this.gameFlowData) {
+        // Clear canvas inline styles to let it resize
+        const canvas = this.$refs.gameFlowCanvas
+        if (canvas) {
+          canvas.style.width = ''
+          canvas.style.height = ''
+        }
+
+        // Wait for DOM to settle after resize
+        this.resizeTimeout = setTimeout(() => {
+          this.drawGameFlow()
+        }, 200)
+      }
     },
     toggleExpand() {
       this.isExpanded = !this.isExpanded
