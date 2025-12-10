@@ -46,7 +46,7 @@ const gameRowTemplate = `
         <div v-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
         <div v-else-if="gameFlowData" class="game-flow-chart-container">
           <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousemove="handleCanvasHover" @mouseleave="handleCanvasLeave"></canvas>
-          <div v-if="hoveredPlay" class="game-flow-tooltip">
+          <div v-if="hoveredPlay && !isMobile" class="game-flow-tooltip">
             <div class="tooltip-time">{{ hoveredPlay.time }} - {{ hoveredPlay.quarter }}</div>
             <div class="tooltip-score">{{ hoveredPlay.awayTeam }} {{ hoveredPlay.awayScore }} - {{ hoveredPlay.homeTeam }} {{ hoveredPlay.homeScore }}</div>
             <div class="tooltip-description">{{ hoveredPlay.description }}</div>
@@ -179,6 +179,7 @@ const GameRow = {
       this.redrawChart()
     },
     handleCanvasHover(event) {
+      if (this.isMobile) return
       const canvas = this.$refs.gameFlowCanvas
       if (!canvas || !this.gameFlowData) return
 
@@ -250,6 +251,7 @@ const GameRow = {
       this.redrawChart()
     },
     handleCanvasLeave() {
+      if (this.isMobile) return
       this.hoveredPlay = null
       this.hoveredPlayIndex = null
       this.redrawChart()
