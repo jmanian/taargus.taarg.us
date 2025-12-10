@@ -32,13 +32,13 @@ const gameRowTemplate = `
             <button
               class="game-flow-tab"
               :class="{'active': chartMode === 'score'}"
-              @click.stop="chartMode = 'score'; redrawChart()">
+              @click.stop="setChartMode('score')">
               Score Flow
             </button>
             <button
               class="game-flow-tab"
               :class="{'active': chartMode === 'lead'}"
-              @click.stop="chartMode = 'lead'; redrawChart()">
+              @click.stop="setChartMode('lead')">
               Lead Tracker
             </button>
           </div>
@@ -121,7 +121,7 @@ const GameRow = {
       gameFlowData: null,
       gameFlowLoading: false,
       teamColors: null,
-      chartMode: 'score' // 'score' or 'lead'
+      chartMode: localStorage.getItem('gameFlowChartMode') || 'score' // 'score' or 'lead'
     }
   },
   mounted() {
@@ -163,6 +163,11 @@ const GameRow = {
       this.$nextTick(() => {
         this.drawGameFlow()
       })
+    },
+    setChartMode(mode) {
+      this.chartMode = mode
+      localStorage.setItem('gameFlowChartMode', mode)
+      this.redrawChart()
     },
     async fetchGameFlow() {
       this.gameFlowLoading = true
