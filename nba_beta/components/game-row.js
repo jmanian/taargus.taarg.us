@@ -27,7 +27,22 @@ const gameRowTemplate = `
   <transition name="expand">
     <div v-if="isExpanded" class="game-details">
       <div v-if="showGameFlow" class="game-flow-section">
-        <div class="game-flow-header">GAME FLOW</div>
+        <div class="game-flow-header-container">
+          <div class="game-flow-tabs">
+            <button
+              class="game-flow-tab"
+              :class="{'active': chartMode === 'score'}"
+              @click.stop="chartMode = 'score'; redrawChart()">
+              Score Flow
+            </button>
+            <button
+              class="game-flow-tab"
+              :class="{'active': chartMode === 'lead'}"
+              @click.stop="chartMode = 'lead'; redrawChart()">
+              Lead Tracker
+            </button>
+          </div>
+        </div>
         <div v-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
         <canvas v-else-if="gameFlowData" ref="gameFlowCanvas" class="game-flow-canvas"></canvas>
       </div>
@@ -105,7 +120,8 @@ const GameRow = {
       isExpanded: false,
       gameFlowData: null,
       gameFlowLoading: false,
-      teamColors: null
+      teamColors: null,
+      chartMode: 'score' // 'score' or 'lead'
     }
   },
   mounted() {
@@ -142,6 +158,11 @@ const GameRow = {
           this.drawGameFlow()
         })
       }
+    },
+    redrawChart() {
+      this.$nextTick(() => {
+        this.drawGameFlow()
+      })
     },
     async fetchGameFlow() {
       this.gameFlowLoading = true
@@ -220,6 +241,13 @@ const GameRow = {
       return dataPoints
     },
     drawGameFlow() {
+      if (this.chartMode === 'lead') {
+        this.drawLeadTracker()
+      } else {
+        this.drawScoreFlow()
+      }
+    },
+    drawScoreFlow() {
       const canvas = this.$refs.gameFlowCanvas
       if (!canvas || !this.gameFlowData || this.gameFlowData.length === 0) return
 
@@ -367,6 +395,204 @@ const GameRow = {
         const y = yScale(score)
         ctx.fillText(score.toString(), padding.left - 10, y + 4)
       }
+    },
+    drawLeadTracker() {
+      const canvas = this.$refs.gameFlowCanvas
+      if (!canvas || !this.gameFlowData || this.gameFlowData.length === 0) return
+
+      const ctx = canvas.getContext('2d')
+      const dpr = window.devicePixelRatio || 1
+
+      // Set canvas size
+      const width = canvas.offsetWidth
+      const height = 300
+      canvas.width = width * dpr
+      canvas.height = height * dpr
+      canvas.style.width = width + 'px'
+      canvas.style.height = height + 'px'
+      ctx.scale(dpr, dpr)
+
+      // Chart dimensions
+      const padding = { top: 20, right: 40, bottom: 40, left: 40 }
+      const chartWidth = width - padding.left - padding.right
+      const chartHeight = height - padding.top - padding.bottom
+
+      // Calculate lead differential for each point
+      const leadData = this.gameFlowData.map(point => ({
+        time: point.time,
+        lead: point.awayScore - point.homeScore, // positive = away leading, negative = home leading
+        period: point.period
+      }))
+
+      // Find max lead (in either direction) for determining y-axis range
+      const maxLead = Math.max(...leadData.map(d => Math.abs(d.lead)))
+      const maxLeadRounded = Math.ceil(maxLead / 5) * 5 // Round up to nearest 5
+      const maxTime = leadData[leadData.length - 1].time
+
+      // Scales
+      const xScale = (time) => padding.left + (time / maxTime) * chartWidth
+      const yScale = (lead) => padding.top + chartHeight / 2 - (lead / maxLeadRounded) * (chartHeight / 2)
+
+      // Scale for gradient (capped at 30)
+      const yScaleGradient = (lead) => {
+        const clampedLead = Math.max(-30, Math.min(30, lead))
+        return padding.top + chartHeight / 2 - (clampedLead / 30) * (chartHeight / 2)
+      }
+
+      // Draw grid lines at 5-point intervals
+      ctx.strokeStyle = '#e0e0e0'
+      ctx.lineWidth = 1
+      const numLines = maxLeadRounded / 5
+      for (let i = -numLines; i <= numLines; i++) {
+        const lead = i * 5
+        const y = yScale(lead)
+        ctx.beginPath()
+        ctx.moveTo(padding.left, y)
+        ctx.lineTo(width - padding.right, y)
+        ctx.stroke()
+      }
+
+      // Draw center line (0 lead) thicker
+      ctx.strokeStyle = '#666'
+      ctx.lineWidth = 2
+      const centerY = yScale(0)
+      ctx.beginPath()
+      ctx.moveTo(padding.left, centerY)
+      ctx.lineTo(width - padding.right, centerY)
+      ctx.stroke()
+
+      // Draw quarter lines
+      ctx.strokeStyle = '#d0d0d0'
+      ctx.lineWidth = 1
+      ctx.setLineDash([3, 3])
+      for (let quarter = 1; quarter <= 3; quarter++) {
+        const x = xScale(quarter * 12 * 60)
+        ctx.beginPath()
+        ctx.moveTo(x, padding.top)
+        ctx.lineTo(x, height - padding.bottom)
+        ctx.stroke()
+      }
+
+      // Draw OT lines if game went to overtime
+      const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
+      if (maxPeriod > 4) {
+        for (let otNum = 1; otNum <= maxPeriod - 4; otNum++) {
+          const x = xScale(4 * 12 * 60 + (otNum - 1) * 5 * 60)
+          ctx.beginPath()
+          ctx.moveTo(x, padding.top)
+          ctx.lineTo(x, height - padding.bottom)
+          ctx.stroke()
+        }
+      }
+      ctx.setLineDash([])
+
+      // Draw filled area chart
+      ctx.beginPath()
+      ctx.moveTo(xScale(leadData[0].time), yScale(0))
+
+      leadData.forEach((point, i) => {
+        const x = xScale(point.time)
+        const y = yScale(point.lead)
+        if (i === 0) {
+          ctx.lineTo(x, y)
+        } else {
+          const prevY = yScale(leadData[i - 1].lead)
+          ctx.lineTo(x, prevY)
+          ctx.lineTo(x, y)
+        }
+      })
+
+      ctx.lineTo(xScale(leadData[leadData.length - 1].time), yScale(0))
+      ctx.closePath()
+
+      // Fill with gradient (capped at 30-point lead = 100% opacity)
+      const awayColor = this.teamColors ? `#${this.teamColors.away}` : '#1e40af'
+      const homeColor = this.teamColors ? `#${this.teamColors.home}` : '#dc2626'
+
+      // Create gradient based on 30-point scale
+      const gradient = ctx.createLinearGradient(0, yScaleGradient(30), 0, yScaleGradient(-30))
+      gradient.addColorStop(0, awayColor + 'CC') // 80% opacity at +30
+      gradient.addColorStop(0.5, '#ffffff00') // transparent at center (0)
+      gradient.addColorStop(1, homeColor + 'CC') // 80% opacity at -30
+      ctx.fillStyle = gradient
+      ctx.fill()
+
+      // Draw the lead line with color matching team in lead
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      leadData.forEach((point, i) => {
+        const x = xScale(point.time)
+        const y = yScale(point.lead)
+
+        if (i === 0) {
+          ctx.moveTo(x, y)
+        } else {
+          // Draw segment with color based on who's leading
+          const prevLead = leadData[i - 1].lead
+          const currentLead = point.lead
+          const prevY = yScale(prevLead)
+
+          // If crossing the axis (lead change), use the color of the team gaining the lead
+          // Otherwise use the color of the team currently leading
+          let segmentColor
+          if ((prevLead > 0 && currentLead < 0) || (prevLead < 0 && currentLead > 0)) {
+            // Lead changed - use current lead's color
+            segmentColor = currentLead > 0 ? awayColor : homeColor
+          } else if (prevLead > 0 || currentLead > 0) {
+            segmentColor = awayColor
+          } else if (prevLead < 0 || currentLead < 0) {
+            segmentColor = homeColor
+          } else {
+            segmentColor = '#666'
+          }
+
+          ctx.strokeStyle = segmentColor
+          ctx.beginPath()
+          ctx.moveTo(xScale(leadData[i - 1].time), prevY)
+          ctx.lineTo(x, prevY)
+          ctx.lineTo(x, y)
+          ctx.stroke()
+        }
+      })
+      ctx.stroke()
+
+      // Draw axis labels
+      ctx.fillStyle = '#666'
+      ctx.font = '12px sans-serif'
+      ctx.textAlign = 'center'
+
+      // Quarter labels
+      const quarterLabels = ['1st', '2nd', '3rd', '4th']
+      quarterLabels.forEach((label, i) => {
+        const x = xScale((i + 0.5) * 12 * 60)
+        ctx.fillText(label, x, height - 10)
+      })
+
+      // OT labels if game went to overtime
+      if (maxPeriod > 4) {
+        const numOvertimes = maxPeriod - 4
+        for (let otNum = 1; otNum <= numOvertimes; otNum++) {
+          const otStart = 4 * 12 * 60 + (otNum - 1) * 5 * 60
+          const otEnd = otNum === numOvertimes ? maxTime : (4 * 12 * 60 + otNum * 5 * 60)
+          const x = xScale((otStart + otEnd) / 2)
+          const label = otNum === 1 ? 'OT' : `OT${otNum}`
+          ctx.fillText(label, x, height - 10)
+        }
+      }
+
+      // Lead labels (y-axis)
+      ctx.textAlign = 'right'
+      for (let i = -numLines; i <= numLines; i++) {
+        const lead = i * 5
+        const y = yScale(lead)
+        ctx.fillText(Math.abs(lead).toString(), padding.left - 10, y + 4)
+      }
+
+      // Team labels on y-axis (to the right of the axis numbers)
+      ctx.textAlign = 'left'
+      ctx.font = 'bold 11px sans-serif'
+      ctx.fillText(this.game.awayTeam, padding.left + 5, padding.top + 12)
+      ctx.fillText(this.game.homeTeam, padding.left + 5, height - padding.bottom - 8)
     },
     formatLeaders(leaders) {
       if (!leaders) return []
