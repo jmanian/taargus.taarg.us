@@ -135,6 +135,13 @@ const GameRow = {
       if (this.isExpanded && !this.gameFlowData && !this.gameFlowLoading && this.finished) {
         this.fetchGameFlow()
       }
+
+      // Redraw chart if we already have data
+      if (this.isExpanded && this.gameFlowData) {
+        this.$nextTick(() => {
+          this.drawGameFlow()
+        })
+      }
     },
     async fetchGameFlow() {
       this.gameFlowLoading = true
