@@ -419,10 +419,12 @@ const GameRow = {
       }
       ctx.setLineDash([])
 
-      // Draw away team line (as steps)
+      // Draw away team line (as steps) with rounded corners
       const awayColor = this.teamColors ? `#${this.teamColors.away}` : '#1e40af'
       ctx.strokeStyle = awayColor
       ctx.lineWidth = 2
+      ctx.lineJoin = 'round'
+      ctx.lineCap = 'butt'
       ctx.beginPath()
       this.gameFlowData.forEach((point, i) => {
         const x = xScale(point.time)
@@ -439,10 +441,12 @@ const GameRow = {
       })
       ctx.stroke()
 
-      // Draw home team line (as steps)
+      // Draw home team line (as steps) with rounded corners
       const homeColor = this.teamColors ? `#${this.teamColors.home}` : '#dc2626'
       ctx.strokeStyle = homeColor
       ctx.lineWidth = 2
+      ctx.lineJoin = 'round'
+      ctx.lineCap = 'butt'
       ctx.beginPath()
       this.gameFlowData.forEach((point, i) => {
         const x = xScale(point.time)
@@ -637,43 +641,77 @@ const GameRow = {
       ctx.fill()
 
       // Draw the lead line with color matching team in lead
+      // Group consecutive segments by color for continuous paths
       ctx.lineWidth = 1.5
-      ctx.beginPath()
+      ctx.lineJoin = 'round'
+      ctx.lineCap = 'butt'
+
+      let currentPath = null
+      let currentColor = null
+
       leadData.forEach((point, i) => {
+        if (i === 0) {
+          currentPath = { color: null, segments: [] }
+          return
+        }
+
         const x = xScale(point.time)
         const y = yScale(point.lead)
+        const prevLead = leadData[i - 1].lead
+        const currentLead = point.lead
+        const prevY = yScale(prevLead)
+        const prevX = xScale(leadData[i - 1].time)
 
-        if (i === 0) {
-          ctx.moveTo(x, y)
+        // Use color based on the lead AFTER this play (current point)
+        let segmentColor
+        if (currentLead > 0) {
+          segmentColor = awayColor
+        } else if (currentLead < 0) {
+          segmentColor = homeColor
         } else {
-          // Draw segment with color based on who's leading
-          const prevLead = leadData[i - 1].lead
-          const currentLead = point.lead
-          const prevY = yScale(prevLead)
-
-          // If crossing the axis (lead change), use the color of the team gaining the lead
-          // Otherwise use the color of the team currently leading
-          let segmentColor
-          if ((prevLead > 0 && currentLead < 0) || (prevLead < 0 && currentLead > 0)) {
-            // Lead changed - use current lead's color
-            segmentColor = currentLead > 0 ? awayColor : homeColor
-          } else if (prevLead > 0 || currentLead > 0) {
-            segmentColor = awayColor
-          } else if (prevLead < 0 || currentLead < 0) {
-            segmentColor = homeColor
-          } else {
-            segmentColor = '#666'
-          }
-
-          ctx.strokeStyle = segmentColor
-          ctx.beginPath()
-          ctx.moveTo(xScale(leadData[i - 1].time), prevY)
-          ctx.lineTo(x, prevY)
-          ctx.lineTo(x, y)
-          ctx.stroke()
+          segmentColor = '#666'
         }
+
+        // If color changed, draw accumulated path and start new one
+        if (currentColor && segmentColor !== currentColor) {
+          ctx.strokeStyle = currentColor
+          ctx.beginPath()
+          currentPath.segments.forEach((seg, idx) => {
+            if (idx === 0) {
+              ctx.moveTo(seg.x1, seg.y1)
+            } else {
+              ctx.lineTo(seg.x1, seg.y1)
+            }
+            ctx.lineTo(seg.x2, seg.y2)
+            ctx.lineTo(seg.x3, seg.y3)
+          })
+          ctx.stroke()
+          currentPath = { color: segmentColor, segments: [] }
+        }
+
+        currentColor = segmentColor
+        currentPath.segments.push({
+          x1: prevX, y1: prevY,
+          x2: x, y2: prevY,
+          x3: x, y3: y
+        })
       })
-      ctx.stroke()
+
+      // Draw final accumulated path
+      if (currentPath && currentPath.segments.length > 0) {
+        ctx.strokeStyle = currentColor
+        ctx.beginPath()
+        currentPath.segments.forEach((seg, idx) => {
+          if (idx === 0) {
+            ctx.moveTo(seg.x1, seg.y1)
+          } else {
+            ctx.lineTo(seg.x1, seg.y1)
+          }
+          ctx.lineTo(seg.x2, seg.y2)
+          ctx.lineTo(seg.x3, seg.y3)
+        })
+        ctx.stroke()
+      }
 
       // Highlight hovered segment on lead tracker
       if (this.hoveredPlayIndex !== null && this.hoveredPlayIndex > 0) {
