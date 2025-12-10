@@ -241,9 +241,11 @@ const GameRow = {
       const chartHeight = height - padding.top - padding.bottom
 
       // Find max score for scaling
-      const maxScore = Math.max(
+      const actualMaxScore = Math.max(
         ...this.gameFlowData.map(d => Math.max(d.awayScore, d.homeScore))
       )
+      // Round up to nearest 25
+      const maxScore = Math.ceil(actualMaxScore / 25) * 25
       const maxTime = this.gameFlowData[this.gameFlowData.length - 1].time
 
       console.log('Drawing chart:', {
@@ -258,11 +260,13 @@ const GameRow = {
       const xScale = (time) => padding.left + (time / maxTime) * chartWidth
       const yScale = (score) => padding.top + chartHeight - (score / maxScore) * chartHeight
 
-      // Draw grid lines
+      // Draw grid lines at 25-point intervals
       ctx.strokeStyle = '#e0e0e0'
       ctx.lineWidth = 1
-      for (let i = 0; i <= 4; i++) {
-        const y = padding.top + (chartHeight / 4) * i
+      const numLines = maxScore / 25
+      for (let i = 0; i <= numLines; i++) {
+        const score = i * 25
+        const y = yScale(score)
         ctx.beginPath()
         ctx.moveTo(padding.left, y)
         ctx.lineTo(width - padding.right, y)
@@ -348,11 +352,11 @@ const GameRow = {
         }
       }
 
-      // Score labels (y-axis)
+      // Score labels (y-axis) - show every 25 points
       ctx.textAlign = 'right'
-      for (let i = 0; i <= 4; i++) {
-        const score = Math.round((maxScore / 4) * (4 - i))
-        const y = padding.top + (chartHeight / 4) * i
+      for (let i = 0; i <= numLines; i++) {
+        const score = i * 25
+        const y = yScale(score)
         ctx.fillText(score.toString(), padding.left - 10, y + 4)
       }
     },
