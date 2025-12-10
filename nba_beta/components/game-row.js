@@ -277,6 +277,31 @@ const GameRow = {
       this.hoveredPlayIndex = null
       this.redrawChart()
     },
+    areColorsSimilar(hex1, hex2) {
+      // Convert hex to RGB
+      const hexToRgb = (hex) => {
+        const clean = hex.replace('#', '')
+        return {
+          r: parseInt(clean.substring(0, 2), 16),
+          g: parseInt(clean.substring(2, 4), 16),
+          b: parseInt(clean.substring(4, 6), 16)
+        }
+      }
+
+      const color1 = hexToRgb(hex1)
+      const color2 = hexToRgb(hex2)
+
+      // Calculate Euclidean distance in RGB space
+      const distance = Math.sqrt(
+        Math.pow(color1.r - color2.r, 2) +
+        Math.pow(color1.g - color2.g, 2) +
+        Math.pow(color1.b - color2.b, 2)
+      )
+
+      // Colors are similar if distance is less than 130 (out of max ~441)
+      // This threshold can be adjusted based on testing
+      return distance < 130
+    },
     async fetchGameFlow() {
       this.gameFlowLoading = true
       try {
@@ -289,9 +314,20 @@ const GameRow = {
         // Extract team colors from boxscore
         if (data.boxscore?.teams) {
           const teams = data.boxscore.teams
+          const awayTeam = teams.find(t => t.homeAway === 'away')?.team
+          const homeTeam = teams.find(t => t.homeAway === 'home')?.team
+
+          let awayColor = awayTeam?.color || '1e40af'
+          let homeColor = homeTeam?.color || 'dc2626'
+
+          // If colors are too similar, use alternate color for away team
+          if (awayTeam?.alternateColor && homeTeam?.color && this.areColorsSimilar(awayColor, homeColor)) {
+            awayColor = awayTeam.alternateColor
+          }
+
           this.teamColors = {
-            away: teams.find(t => t.homeAway === 'away')?.team?.color || '1e40af',
-            home: teams.find(t => t.homeAway === 'home')?.team?.color || 'dc2626'
+            away: awayColor,
+            home: homeColor
           }
         }
 
