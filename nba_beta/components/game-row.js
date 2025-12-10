@@ -298,7 +298,7 @@ const GameRow = {
       }
       ctx.setLineDash([])
 
-      // Draw away team line
+      // Draw away team line (as steps)
       ctx.strokeStyle = this.teamColors ? `#${this.teamColors.away}` : '#1e40af'
       ctx.lineWidth = 2
       ctx.beginPath()
@@ -308,12 +308,16 @@ const GameRow = {
         if (i === 0) {
           ctx.moveTo(x, y)
         } else {
+          const prevY = yScale(this.gameFlowData[i - 1].awayScore)
+          // Draw horizontal line at previous score level
+          ctx.lineTo(x, prevY)
+          // Draw vertical line to new score
           ctx.lineTo(x, y)
         }
       })
       ctx.stroke()
 
-      // Draw home team line
+      // Draw home team line (as steps)
       ctx.strokeStyle = this.teamColors ? `#${this.teamColors.home}` : '#dc2626'
       ctx.lineWidth = 2
       ctx.beginPath()
@@ -323,6 +327,10 @@ const GameRow = {
         if (i === 0) {
           ctx.moveTo(x, y)
         } else {
+          const prevY = yScale(this.gameFlowData[i - 1].homeScore)
+          // Draw horizontal line at previous score level
+          ctx.lineTo(x, prevY)
+          // Draw vertical line to new score
           ctx.lineTo(x, y)
         }
       })
