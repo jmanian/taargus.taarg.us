@@ -289,10 +289,11 @@ body {
   background-color: #f8f9fa;
   border-radius: 12px;
   overflow: hidden;
+  border: 1px solid #dee2e6;
 }
 
 .date-box-today {
-  background-color: #e7f1ff;
+  border: 2px solid #0d6efd;
 }
 
 .date-header {
