@@ -807,3 +807,39 @@ body {
     font-size: 11px;
   }
 }
+
+.game-flow-section {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.game-flow-header {
+  font-size: 11px;
+  color: #6c757d;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.game-flow-loading {
+  text-align: center;
+  color: #6c757d;
+  padding: 40px;
+  font-size: 13px;
+}
+
+.game-flow-canvas {
+  width: 100%;
+  display: block;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .game-flow-section {
+    padding: 10px 12px;
+  }
+}

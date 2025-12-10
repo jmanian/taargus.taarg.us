@@ -26,6 +26,11 @@ const gameRowTemplate = `
 
   <transition name="expand">
     <div v-if="isExpanded" class="game-details">
+      <div v-if="showGameFlow" class="game-flow-section">
+        <div class="game-flow-header">GAME FLOW</div>
+        <div v-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
+        <canvas v-else-if="gameFlowData" ref="gameFlowCanvas" class="game-flow-canvas"></canvas>
+      </div>
       <div v-if="game.spreadFormatted || game.total" class="odds-section">
         <div v-if="game.spreadFormatted" class="odds-item">
           <span class="odds-label">Spread</span>
@@ -97,7 +102,10 @@ const GameRow = {
   data() {
     return {
       isMobile: window.innerWidth <= 768,
-      isExpanded: false
+      isExpanded: false,
+      gameFlowData: null,
+      gameFlowLoading: false,
+      teamColors: null
     }
   },
   mounted() {
@@ -106,12 +114,207 @@ const GameRow = {
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize)
   },
+  watch: {
+    gameFlowData(newVal) {
+      if (newVal && newVal.length > 0) {
+        this.$nextTick(() => {
+          console.log('Watch triggered, canvas ref:', this.$refs.gameFlowCanvas)
+          this.drawGameFlow()
+        })
+      }
+    }
+  },
   methods: {
     handleResize() {
       this.isMobile = window.innerWidth <= 768
     },
     toggleExpand() {
       this.isExpanded = !this.isExpanded
+
+      // Fetch game flow data when expanding if we haven't already
+      if (this.isExpanded && !this.gameFlowData && !this.gameFlowLoading && this.finished) {
+        this.fetchGameFlow()
+      }
+    },
+    async fetchGameFlow() {
+      this.gameFlowLoading = true
+      try {
+        const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=${this.game.id}`
+        const response = await fetch(url)
+        const data = await response.json()
+
+        console.log('Game flow data received:', data.plays?.length, 'plays')
+
+        // Extract team colors from boxscore
+        if (data.boxscore?.teams) {
+          const teams = data.boxscore.teams
+          this.teamColors = {
+            away: teams.find(t => t.homeAway === 'away')?.team?.color || '1e40af',
+            home: teams.find(t => t.homeAway === 'home')?.team?.color || 'dc2626'
+          }
+        }
+
+        if (data.plays && data.plays.length > 0) {
+          this.gameFlowData = this.processGameFlowData(data.plays)
+          console.log('Processed game flow data:', this.gameFlowData.length, 'points')
+          // The watch will handle drawing when the canvas is rendered
+        } else {
+          console.log('No plays data available')
+        }
+      } catch (error) {
+        console.error('Failed to fetch game flow:', error)
+      } finally {
+        this.gameFlowLoading = false
+      }
+    },
+    processGameFlowData(plays) {
+      // Filter to only scoring plays and collect data points
+      const dataPoints = []
+
+      plays.forEach(play => {
+        if (play.awayScore !== undefined && play.homeScore !== undefined) {
+          // Convert clock to seconds elapsed in game
+          const period = play.period?.number || 1
+          const clock = play.clock?.displayValue || '0:00'
+
+          // Parse clock - handle formats like "11:31", "0:45.2", "0.0"
+          let minutes = 0
+          let seconds = 0
+
+          if (clock.includes(':')) {
+            const parts = clock.split(':')
+            minutes = parseInt(parts[0]) || 0
+            seconds = parseFloat(parts[1]) || 0
+          } else {
+            // Handle formats like "0.0" (just seconds)
+            seconds = parseFloat(clock) || 0
+          }
+
+          const secondsIntoQuarter = (12 * 60) - (minutes * 60 + seconds)
+          const totalSeconds = ((period - 1) * 12 * 60) + secondsIntoQuarter
+
+          dataPoints.push({
+            time: totalSeconds,
+            awayScore: play.awayScore,
+            homeScore: play.homeScore,
+            period: period
+          })
+        }
+      })
+
+      return dataPoints
+    },
+    drawGameFlow() {
+      const canvas = this.$refs.gameFlowCanvas
+      if (!canvas || !this.gameFlowData || this.gameFlowData.length === 0) return
+
+      const ctx = canvas.getContext('2d')
+      const dpr = window.devicePixelRatio || 1
+
+      // Set canvas size
+      const width = canvas.offsetWidth
+      const height = 300
+      canvas.width = width * dpr
+      canvas.height = height * dpr
+      canvas.style.width = width + 'px'
+      canvas.style.height = height + 'px'
+      ctx.scale(dpr, dpr)
+
+      // Chart dimensions
+      const padding = { top: 20, right: 40, bottom: 40, left: 40 }
+      const chartWidth = width - padding.left - padding.right
+      const chartHeight = height - padding.top - padding.bottom
+
+      // Find max score for scaling
+      const maxScore = Math.max(
+        ...this.gameFlowData.map(d => Math.max(d.awayScore, d.homeScore))
+      )
+      const maxTime = this.gameFlowData[this.gameFlowData.length - 1].time
+
+      console.log('Drawing chart:', {
+        dataPoints: this.gameFlowData.length,
+        maxScore,
+        maxTime,
+        firstPoint: this.gameFlowData[0],
+        lastPoint: this.gameFlowData[this.gameFlowData.length - 1]
+      })
+
+      // Scales
+      const xScale = (time) => padding.left + (time / maxTime) * chartWidth
+      const yScale = (score) => padding.top + chartHeight - (score / maxScore) * chartHeight
+
+      // Draw grid lines
+      ctx.strokeStyle = '#e0e0e0'
+      ctx.lineWidth = 1
+      for (let i = 0; i <= 4; i++) {
+        const y = padding.top + (chartHeight / 4) * i
+        ctx.beginPath()
+        ctx.moveTo(padding.left, y)
+        ctx.lineTo(width - padding.right, y)
+        ctx.stroke()
+      }
+
+      // Draw quarter lines
+      ctx.strokeStyle = '#d0d0d0'
+      ctx.setLineDash([3, 3])
+      for (let quarter = 1; quarter <= 3; quarter++) {
+        const x = xScale(quarter * 12 * 60)
+        ctx.beginPath()
+        ctx.moveTo(x, padding.top)
+        ctx.lineTo(x, height - padding.bottom)
+        ctx.stroke()
+      }
+      ctx.setLineDash([])
+
+      // Draw away team line
+      ctx.strokeStyle = this.teamColors ? `#${this.teamColors.away}` : '#1e40af'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      this.gameFlowData.forEach((point, i) => {
+        const x = xScale(point.time)
+        const y = yScale(point.awayScore)
+        if (i === 0) {
+          ctx.moveTo(x, y)
+        } else {
+          ctx.lineTo(x, y)
+        }
+      })
+      ctx.stroke()
+
+      // Draw home team line
+      ctx.strokeStyle = this.teamColors ? `#${this.teamColors.home}` : '#dc2626'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      this.gameFlowData.forEach((point, i) => {
+        const x = xScale(point.time)
+        const y = yScale(point.homeScore)
+        if (i === 0) {
+          ctx.moveTo(x, y)
+        } else {
+          ctx.lineTo(x, y)
+        }
+      })
+      ctx.stroke()
+
+      // Draw axis labels
+      ctx.fillStyle = '#666'
+      ctx.font = '12px sans-serif'
+      ctx.textAlign = 'center'
+
+      // Quarter labels
+      const quarterLabels = ['1st', '2nd', '3rd', '4th']
+      quarterLabels.forEach((label, i) => {
+        const x = xScale((i + 0.5) * 12 * 60)
+        ctx.fillText(label, x, height - 10)
+      })
+
+      // Score labels (y-axis)
+      ctx.textAlign = 'right'
+      for (let i = 0; i <= 4; i++) {
+        const score = Math.round((maxScore / 4) * (4 - i))
+        const y = padding.top + (chartHeight / 4) * i
+        ctx.fillText(score.toString(), padding.left - 10, y + 4)
+      }
     },
     formatLeaders(leaders) {
       if (!leaders) return []
@@ -195,6 +398,9 @@ const GameRow = {
       const homeHasData = this.game.homeLeaders && (this.game.homeLeaders.points || this.game.homeLeaders.rebounds || this.game.homeLeaders.assists)
       const awayHasData = this.game.awayLeaders && (this.game.awayLeaders.points || this.game.awayLeaders.rebounds || this.game.awayLeaders.assists)
       return homeHasData || awayHasData
+    },
+    showGameFlow: function () {
+      return this.finished
     }
   }
 }
