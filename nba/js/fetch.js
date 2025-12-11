@@ -1,199 +1,277 @@
-const { reactive } = Vue
+const { reactive, ref, computed } = Vue
 
-const todayGames = reactive([])
-const rounds = reactive(initRounds)
+// Read initial state from URL
+const urlParams = new URLSearchParams(window.location.search)
+const initialTeams = urlParams.get('teams') ? urlParams.get('teams').split(',') : []
+const initialDate = urlParams.get('date') || null
 
-// initialize sort keys
-rounds.forEach(round => round.matchups.forEach(matchup => matchup.scheduleSortKey = scheduleSortKey(matchup)))
-rounds.forEach(round => round.matchups.forEach(matchup => matchup.nextGameSortKey = nextGameSortKey(matchup)))
+// Initialize dates array with one week of data
+const dates = reactive([])
+const selectedDateData = reactive([])
+const todayStringRef = ref(DateTime.now().setZone('America/Los_Angeles').toISODate())
+const todayString = computed(() => todayStringRef.value)
+const selectedDate = ref(initialDate)
+const selectedTeams = ref(initialTeams)
+const teamDropdownOpen = ref(false)
+const refreshTrigger = ref(0)
+const chartMode = ref(localStorage.getItem('gameFlowChartMode') || 'lead')
+let isNavigating = false
 
-dates.start = DateTime.fromISO(dates.start)
-dates.end = DateTime.fromISO(dates.end)
+function initializeDates() {
+  const today = DateTime.now().setZone('America/Los_Angeles')
+  const startDate = today.minus({ days: 1 })
 
-const refreshDates = {}
-const datesMissingSchedules = new Set()
-let nowLocal = DateTime.now()
-
-function fetchAll() {
-  const today = DateTime.now().setZone('America/Los_Angeles');
-  if (today < dates.start || today > dates.end) {
-    console.log("fetching today's games");
-    fetchGamesForDate(today);
-  }
-  let thisFetchDate = dates.start
-  while (thisFetchDate <= dates.end) {
-    fetchGamesForDate(thisFetchDate);
-    thisFetchDate = thisFetchDate.plus({days: 1});
-  }
-}
-fetchAll()
-setInterval(refresh, 5000)
-
-function refresh() {
-  console.log('beginning refresh')
-  nowLocal = DateTime.now()
-  for (const dateString in refreshDates) {
-    const {refreshTime, date} = refreshDates[dateString]
-    // console.log(`should refresh ${dateString} at ${refreshTime}`)
-    if (refreshTime.diffNow() <= 0) {
-      console.log(`refreshing ${dateString} now`)
-      delete refreshDates[dateString]
-      fetchGamesForDate(date)
-    }
+  for (let i = 0; i < 7; i++) {
+    const date = startDate.plus({ days: i })
+    const dateString = date.toISODate()
+    dates.push({
+      dateString: dateString,
+      games: [],
+      loading: true
+    })
   }
 }
 
-function scheduleRefreshOfMissingDates() {
-  for (const dateString of datesMissingSchedules) {
-    const date = DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'})
-    const refreshTime = DateTime.now()
-    datesMissingSchedules.delete(dateString)
-    console.log(`scheduled refresh of ${dateString} at ${refreshTime} for missing dates`)
-    refreshDates[dateString] = {
-      refreshTime,
-      date
-    }
-  }
-}
+initializeDates()
 
 function fetchGamesForDate(date) {
   const dateString = date.toISODate()
-  delete refreshDates[dateString]
-  datesMissingSchedules.delete(dateString)
-
   const endpointDate = date.toISODate({format: 'basic'})
   const url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
 
-  jQuery.getJSON(url, function (data) {
-    const now = DateTime.now().setZone('America/Los_Angeles')
-    const possibleRefreshTimes = []
-    let gameFinished = false
-    const isToday = dateString == now.toISODate()
-    if (isToday) {
-      todayGames.length = 0
-    } else if (dateString > now.toISODate()) {
-      possibleRefreshTimes.push(date.startOf('day').toLocal())
+  jQuery.ajax({
+    url: url,
+    dataType: 'json',
+    cache: false,
+    success: function (data) {
+    const gamesForDate = []
+
+    if (data.events && data.events.length > 0) {
+      data.events.forEach(function(event) {
+        const eventData = parseEvent(event)
+        gamesForDate.push(eventData)
+      })
     }
-    data.events.forEach(function(event) {
-      eventData = parseEvent(event);
 
-      if (isToday) {
-        todayGames.push(eventData)
+    const dateObj = dates.find(d => d.dateString === dateString)
+    if (dateObj) {
+      dateObj.games = gamesForDate
+      dateObj.loading = false
+      const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
+      console.log(`[${now}] Loaded ${dateString}: ${gamesForDate.length} games`)
+    }
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.error('Failed to fetch data for', dateString, ':', textStatus, errorThrown)
+      const dateObj = dates.find(d => d.dateString === dateString)
+      if (dateObj) {
+        dateObj.loading = false
       }
-      // find the round
-      const round = rounds.find(r => r.number === eventData.round)
-      if (round !== undefined) {
-        // find the matchup (only if the API game has at least one of the teams)
-        let matchup
-        if (eventData.homeTeam || eventData.awayTeam) {
-          matchup = round.matchups.find(matchup =>
-            (
-              eventData.homeTeam && (
-                eventData.homeTeam === matchup.favorite ||
-                eventData.homeTeam === matchup.underdog
-              )
-            ) || (
-              eventData.awayTeam && (
-                eventData.awayTeam === matchup.favorite ||
-                eventData.awayTeam === matchup.underdog
-              )
-            )
-          )
-          if (matchup === null || matchup === undefined) {
-            const id = seriesIdForRoundAndTeam(eventData.round, eventData.homeTeam || eventData.awayTeam)
-            matchup = round.matchups.find(matchup => Number(matchup.id) === id )
-          }
-        }
-        if (matchup !== undefined) {
-          const gameNum = eventData.gameNum
-          // fill some matchup data
+    }
+  })
+}
 
-          // Set teams and seeds
-          if (matchup.favorite === null || matchup.underdog === null) {
-            if (underdogHome(gameNum)) {
-              matchup.favorite = eventData.awayTeam
-              matchup.underdog = eventData.homeTeam
-            } else {
-              matchup.favorite = eventData.homeTeam
-              matchup.underdog = eventData.awayTeam
-            }
-            matchup.fseed = seeds[matchup.favorite]
-            matchup.useed = seeds[matchup.underdog]
-          }
+function fetchAll() {
+  dates.forEach(dateObj => {
+    const date = DateTime.fromISO(dateObj.dateString, {zone: 'America/Los_Angeles'})
+    fetchGamesForDate(date)
+  })
+  // Trigger refresh in all game-row components
+  refreshTrigger.value++
+}
 
-          //
-          if (!matchup.teamsKnown && (matchup.favorite !== null || matchup.underdog !== null)) {
-            matchup.teamsKnown = true
-          }
-          // find the game
-          g = matchup.games[gameNum - 1]
-          // fill the start date and time
-          if (g.date === null) {
-            g.date = dateString
-            matchup.scheduleSortKey = scheduleSortKey(matchup)
-          }
-          if (g.dateTime === null) {
-            g.dateTime = eventData.dateTime
-          }
-          // fill the network
-          g.network = eventData.network;
+fetchAll()
 
-          // fill the scores, clock, and winner
-          const priorState = g.state
-          g.state = eventData.state
-          g.statusDetail = eventData.statusDetail
-          if (g.state !== 'pre') { // game started
-            if (underdogHome(gameNum)) {
-              g.fscore = eventData.awayScore
-              g.uscore = eventData.homeScore
-            } else {
-              g.fscore = eventData.homeScore
-              g.uscore = eventData.awayScore
-            }
-            if (g.state === 'in') { // game ongoing
-              g.clock = eventData.clock;
-              possibleRefreshTimes.push(DateTime.now())
-            } else if (g.state === 'post') { // game finished
-              if (eventData.awayScore > eventData.homeScore) {
-                g.winner = eventData.awayTeam
-              } else {
-                g.winner = eventData.homeTeam
-              }
-              if (priorState && priorState !== 'post') {
-                gameFinished = true
-              }
-            }
-          } else { // game in future
-            if (g.dateTime) {
-              possibleRefreshTimes.push(g.dateTime.toLocal())
-            } else {
-              possibleRefreshTimes.push(DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'}).toLocal())
-              datesMissingSchedules.add(dateString)
-            }
-          }
-          // mark as not loading
-          g.loading = false
+// Smart polling: only update dates with live games or today's date
+function pollForUpdates(includeSelectedDate = false) {
+  const todayNow = DateTime.now().setZone('America/Los_Angeles').toISODate()
 
-          // update sort keys for this matchup based on new data (game time)
-          matchup.scheduleSortKey = scheduleSortKey(matchup)
-          matchup.nextGameSortKey = nextGameSortKey(matchup)
-        }
-      }
+  // Update todayString if date has changed
+  if (todayStringRef.value !== todayNow) {
+    todayStringRef.value = todayNow
+  }
+
+  const datesToUpdate = new Set()
+  const now = DateTime.now().setZone('America/Los_Angeles')
+
+  // Poll any date that has active games or games that should have started
+  dates.forEach(dateObj => {
+    const shouldPoll = dateObj.games.some(game => {
+      // Game is currently in progress
+      if (game.state === 'in') return true
+
+      // Game hasn't started yet but scheduled start time is in the past
+      if (game.state === 'pre' && game.dateTime && game.dateTime < now) return true
+
+      return false
     })
 
-    if (gameFinished) {
-      // New games tend to get scheduled when a series finishes,
-      // so when a game has just finished refetch everything.
-      console.log('game finished, scheduling refreshes')
-      scheduleRefreshOfMissingDates()
+    if (shouldPoll) {
+      datesToUpdate.add(dateObj.dateString)
+    }
+  })
+
+  // Also check selectedDateData if requested
+  if (includeSelectedDate) {
+    selectedDateData.forEach(dateObj => {
+      // Skip if we're already updating this date in the main dates array
+      if (datesToUpdate.has(dateObj.dateString)) {
+        return
+      }
+
+      const shouldPoll = dateObj.games.some(game => {
+        if (game.state === 'in') return true
+        if (game.state === 'pre' && game.dateTime && game.dateTime < now) return true
+        return false
+      })
+
+      if (shouldPoll) {
+        const date = DateTime.fromISO(dateObj.dateString, {zone: 'America/Los_Angeles'})
+        fetchGamesForDateIntoArray(date, selectedDateData)
+      }
+    })
+  }
+
+  // Fetch updates for these dates
+  datesToUpdate.forEach(dateString => {
+    const date = DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'})
+    fetchGamesForDate(date)
+  })
+
+  // Trigger refresh in game-row components if we updated anything
+  if (datesToUpdate.size > 0 || includeSelectedDate) {
+    refreshTrigger.value++
+  }
+}
+
+setInterval(pollForUpdates, 15000) // Poll every 15 seconds
+
+// Update when tab becomes visible again
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    pollForUpdates()
+  }
+})
+
+function loadPrevious() {
+  const firstDate = DateTime.fromISO(dates[0].dateString, {zone: 'America/Los_Angeles'})
+
+  for (let i = 1; i <= 7; i++) {
+    const date = firstDate.minus({ days: i })
+    const dateString = date.toISODate()
+    dates.unshift({
+      dateString: dateString,
+      games: [],
+      loading: true
+    })
+  }
+
+  // Fetch in reverse order so the dates array is populated correctly
+  for (let i = 1; i <= 7; i++) {
+    const date = firstDate.minus({ days: i })
+    fetchGamesForDate(date)
+  }
+}
+
+function loadMore() {
+  const lastDate = DateTime.fromISO(dates[dates.length - 1].dateString, {zone: 'America/Los_Angeles'})
+
+  for (let i = 1; i <= 7; i++) {
+    const date = lastDate.plus({ days: i })
+    const dateString = date.toISODate()
+    dates.push({
+      dateString: dateString,
+      games: [],
+      loading: true
+    })
+    fetchGamesForDate(date)
+  }
+}
+
+function clearDateSelection() {
+  selectedDate.value = null
+  selectedDateData.length = 0
+  updateURL()
+}
+
+function clearTeamSelection() {
+  selectedTeams.value = []
+}
+
+function updateURL() {
+  // Don't update URL during browser navigation
+  if (isNavigating) return
+
+  const params = new URLSearchParams()
+
+  if (selectedTeams.value.length > 0) {
+    params.set('teams', selectedTeams.value.join(','))
+  }
+
+  if (selectedDate.value) {
+    params.set('date', selectedDate.value)
+  }
+
+  const newURL = params.toString()
+    ? `${window.location.pathname}?${params.toString()}`
+    : window.location.pathname
+
+  // Use pushState to create history entries that work with back/forward
+  if (window.location.href !== window.location.origin + newURL) {
+    window.history.pushState({
+      teams: selectedTeams.value.length > 0 ? selectedTeams.value.join(',') : null,
+      date: selectedDate.value
+    }, '', newURL)
+  }
+}
+
+function fetchSelectedDate(dateString) {
+  const date = DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'})
+
+  // Clear and set the selected date data
+  selectedDateData.length = 0
+  selectedDateData.push({
+    dateString: dateString,
+    games: [],
+    loading: true
+  })
+
+  // Fetch data for it
+  fetchGamesForDateIntoArray(date, selectedDateData)
+}
+
+function fetchGamesForDateIntoArray(date, targetArray) {
+  const dateString = date.toISODate()
+  const endpointDate = date.toISODate({format: 'basic'})
+  const url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
+
+  jQuery.ajax({
+    url: url,
+    dataType: 'json',
+    cache: false,
+    success: function (data) {
+    const gamesForDate = []
+
+    if (data.events && data.events.length > 0) {
+      data.events.forEach(function(event) {
+        const eventData = parseEvent(event)
+        gamesForDate.push(eventData)
+      })
     }
 
-    if (possibleRefreshTimes.length > 0) {
-      const refreshTime = DateTime.min(...possibleRefreshTimes)
-      console.log(`scheduled refresh of ${dateString} at ${refreshTime}`)
-      refreshDates[dateString] = {
-        refreshTime,
-        date
+    const dateObj = targetArray.find(d => d.dateString === dateString)
+    if (dateObj) {
+      dateObj.games = gamesForDate
+      dateObj.loading = false
+      const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
+      console.log(`[${now}] Loaded ${dateString}: ${gamesForDate.length} games`)
+    }
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.error('Failed to fetch data for', dateString, ':', textStatus, errorThrown)
+      const dateObj = targetArray.find(d => d.dateString === dateString)
+      if (dateObj) {
+        dateObj.loading = false
       }
     }
   })
