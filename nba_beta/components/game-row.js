@@ -428,6 +428,8 @@ const GameRow = {
         const response = await fetch(url)
         const data = await response.json()
 
+        const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
+        console.log(`[${now}] Loaded event ${this.game.id}: ${data.plays?.length || 0} plays`)
         console.log('Game flow data received:', data.plays?.length, 'plays')
 
         // Extract team colors from boxscore
