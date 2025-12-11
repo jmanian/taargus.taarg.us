@@ -83,7 +83,9 @@
             :date-data="dateData"
             :is-today="dateData.dateString === todayString"
             :is-past="dateData.dateString < todayString"
-            :refresh-trigger="refreshTrigger">
+            :refresh-trigger="refreshTrigger"
+            :chart-mode="chartMode"
+            @chart-mode-change="handleChartModeChange">
           </date-box>
           <a v-if="!selectedDate" href="#" @click.prevent="loadMore" class="load-link">Load more ↓</a>
         </div>

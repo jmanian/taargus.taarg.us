@@ -14,6 +14,7 @@ const selectedDate = ref(initialDate)
 const selectedTeams = ref(initialTeams)
 const teamDropdownOpen = ref(false)
 const refreshTrigger = ref(0)
+const chartMode = ref(localStorage.getItem('gameFlowChartMode') || 'lead')
 let isNavigating = false
 
 function initializeDates() {

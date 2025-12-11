@@ -13,7 +13,9 @@ const dateBoxTemplate = `
         v-for="game in sortedGames"
         :key="game.id"
         :game="game"
-        :refresh-trigger="refreshTrigger">
+        :refresh-trigger="refreshTrigger"
+        :chart-mode="chartMode"
+        @chart-mode-change="$emit('chart-mode-change', $event)">
       </game-row>
       <div v-if="dateData.loading" class="no-games">
         Loading...
@@ -28,7 +30,8 @@ const dateBoxTemplate = `
 
 const DateBox = {
   template: dateBoxTemplate,
-  props: ['dateData', 'isToday', 'isPast', 'refreshTrigger'],
+  props: ['dateData', 'isToday', 'isPast', 'refreshTrigger', 'chartMode'],
+  emits: ['chart-mode-change'],
   components: {
     'game-row': GameRow
   },

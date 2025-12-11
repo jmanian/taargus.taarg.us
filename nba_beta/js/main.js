@@ -120,6 +120,11 @@ const app = createApp({
       pollForUpdates(true)
     }
 
+    const handleChartModeChange = (mode) => {
+      chartMode.value = mode
+      localStorage.setItem('gameFlowChartMode', mode)
+    }
+
     return {
       dates: displayedDates,
       todayString: todayString,
@@ -141,7 +146,9 @@ const app = createApp({
       clearDateSelection: clearDateSelection,
       clearTeamSelection: clearTeamSelection,
       forceRefresh: forceRefresh,
-      refreshTrigger: refreshTrigger
+      refreshTrigger: refreshTrigger,
+      chartMode: chartMode,
+      handleChartModeChange: handleChartModeChange
     }
   },
   components: {

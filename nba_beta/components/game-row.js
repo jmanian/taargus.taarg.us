@@ -210,7 +210,8 @@ const gameRowTemplate = `
 
 const GameRow = {
   template: gameRowTemplate,
-  props: ['game', 'refreshTrigger'],
+  props: ['game', 'refreshTrigger', 'chartMode'],
+  emits: ['chart-mode-change'],
   data() {
     return {
       isMobile: window.innerWidth <= 768,
@@ -220,7 +221,6 @@ const GameRow = {
       boxScoreData: null,
       boxScoreActiveTeam: 'away', // 'away' or 'home'
       teamColors: null,
-      chartMode: localStorage.getItem('gameFlowChartMode') || 'lead', // 'score' or 'lead'
       hoveredPlay: null,
       hoveredPlayIndex: null,
       resizeTimeout: null
@@ -254,6 +254,12 @@ const GameRow = {
       // Only refresh if card is currently expanded
       if (newVal !== oldVal && this.isExpanded && this.gameFlowData && !this.gameFlowLoading && this.started) {
         this.fetchGameFlow()
+      }
+    },
+    chartMode(newVal, oldVal) {
+      // When chart mode changes from outside (other game cards), redraw the chart
+      if (newVal !== oldVal && this.isExpanded && this.gameFlowData) {
+        this.redrawChart()
       }
     }
   },
@@ -302,8 +308,7 @@ const GameRow = {
       })
     },
     setChartMode(mode) {
-      this.chartMode = mode
-      localStorage.setItem('gameFlowChartMode', mode)
+      this.$emit('chart-mode-change', mode)
       this.redrawChart()
     },
     getMaxTime() {
