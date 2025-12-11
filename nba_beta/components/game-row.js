@@ -724,7 +724,7 @@ const GameRow = {
       // Draw away team line (as steps) with rounded corners
       const awayColor = this.teamColors ? `#${this.teamColors.away}` : '#1e40af'
       ctx.strokeStyle = awayColor
-      ctx.lineWidth = 2
+      ctx.lineWidth = this.isMobile ? 1.5 : 2
       ctx.lineJoin = 'round'
       ctx.lineCap = 'butt'
       ctx.beginPath()
@@ -746,7 +746,7 @@ const GameRow = {
       // Draw home team line (as steps) with rounded corners
       const homeColor = this.teamColors ? `#${this.teamColors.home}` : '#dc2626'
       ctx.strokeStyle = homeColor
-      ctx.lineWidth = 2
+      ctx.lineWidth = this.isMobile ? 1.5 : 2
       ctx.lineJoin = 'round'
       ctx.lineCap = 'butt'
       ctx.beginPath()
@@ -774,7 +774,7 @@ const GameRow = {
 
         // Highlight away team vertical segment
         ctx.strokeStyle = awayColor
-        ctx.lineWidth = 4
+        ctx.lineWidth = this.isMobile ? 3 : 4
         ctx.beginPath()
         ctx.moveTo(x, yScale(prevPoint.awayScore))
         ctx.lineTo(x, yScale(point.awayScore))
@@ -782,7 +782,7 @@ const GameRow = {
 
         // Highlight home team vertical segment
         ctx.strokeStyle = homeColor
-        ctx.lineWidth = 4
+        ctx.lineWidth = this.isMobile ? 3 : 4
         ctx.beginPath()
         ctx.moveTo(x, yScale(prevPoint.homeScore))
         ctx.lineTo(x, yScale(point.homeScore))
@@ -944,7 +944,7 @@ const GameRow = {
 
       // Draw the lead line with color matching team in lead
       // Group consecutive segments by color for continuous paths
-      ctx.lineWidth = 1.5
+      ctx.lineWidth = this.isMobile ? 1 : 1.5
       ctx.lineJoin = 'round'
       ctx.lineCap = 'butt'
 
@@ -1033,7 +1033,7 @@ const GameRow = {
         }
 
         ctx.strokeStyle = highlightColor
-        ctx.lineWidth = 3
+        ctx.lineWidth = this.isMobile ? 2 : 3
         ctx.beginPath()
         ctx.moveTo(x, yScale(prevPoint.lead))
         ctx.lineTo(x, yScale(point.lead))
