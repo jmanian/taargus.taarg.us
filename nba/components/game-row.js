@@ -722,7 +722,7 @@ const GameRow = {
       const yScale = (score) => padding.top + chartHeight - (score / maxScore) * chartHeight
 
       // Draw grid lines at 25-point intervals
-      ctx.strokeStyle = '#e0e0e0'
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)'
       ctx.lineWidth = 1
       const numLines = maxScore / 25
       for (let i = 0; i <= numLines; i++) {
@@ -735,7 +735,7 @@ const GameRow = {
       }
 
       // Draw quarter lines
-      ctx.strokeStyle = '#d0d0d0'
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)'
       ctx.setLineDash([3, 3])
       for (let quarter = 1; quarter <= 3; quarter++) {
         const x = xScale(quarter * 12 * 60)
@@ -828,7 +828,7 @@ const GameRow = {
       }
 
       // Draw axis labels
-      ctx.fillStyle = '#666'
+      ctx.fillStyle = '#495057'
       ctx.font = '12px sans-serif'
       ctx.textAlign = 'center'
 
@@ -904,7 +904,7 @@ const GameRow = {
       }
 
       // Draw grid lines at 5-point intervals
-      ctx.strokeStyle = '#e0e0e0'
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)'
       ctx.lineWidth = 1
       const numLines = maxLeadRounded / 5
       for (let i = -numLines; i <= numLines; i++) {
@@ -917,7 +917,7 @@ const GameRow = {
       }
 
       // Draw center line (0 lead) thicker
-      ctx.strokeStyle = '#666'
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)'
       ctx.lineWidth = 2
       const centerY = yScale(0)
       ctx.beginPath()
@@ -926,7 +926,7 @@ const GameRow = {
       ctx.stroke()
 
       // Draw quarter lines
-      ctx.strokeStyle = '#d0d0d0'
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)'
       ctx.lineWidth = 1
       ctx.setLineDash([3, 3])
       for (let quarter = 1; quarter <= 3; quarter++) {
@@ -1010,7 +1010,7 @@ const GameRow = {
         } else if (currentLead < 0) {
           segmentColor = homeColor
         } else {
-          segmentColor = '#666'
+          segmentColor = 'rgba(0, 0, 0, 0.3)'
         }
 
         // If color changed, draw accumulated path and start new one
@@ -1068,7 +1068,7 @@ const GameRow = {
         } else if (point.lead < 0) {
           highlightColor = homeColor
         } else {
-          highlightColor = '#666'
+          highlightColor = 'rgba(0, 0, 0, 0.3)'
         }
 
         ctx.strokeStyle = highlightColor
@@ -1080,7 +1080,7 @@ const GameRow = {
       }
 
       // Draw axis labels
-      ctx.fillStyle = '#666'
+      ctx.fillStyle = '#495057'
       ctx.font = '12px sans-serif'
       ctx.textAlign = 'center'
 
