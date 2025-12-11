@@ -13,6 +13,7 @@ const todayString = computed(() => todayStringRef.value)
 const selectedDate = ref(initialDate)
 const selectedTeams = ref(initialTeams)
 const teamDropdownOpen = ref(false)
+const refreshTrigger = ref(0)
 let isNavigating = false
 
 function initializeDates() {
@@ -37,7 +38,11 @@ function fetchGamesForDate(date) {
   const endpointDate = date.toISODate({format: 'basic'})
   const url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
 
-  jQuery.getJSON(url, function (data) {
+  jQuery.ajax({
+    url: url,
+    dataType: 'json',
+    cache: false,
+    success: function (data) {
     const gamesForDate = []
 
     if (data.events && data.events.length > 0) {
@@ -54,11 +59,13 @@ function fetchGamesForDate(date) {
       const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
       console.log(`[${now}] Loaded ${dateString}: ${gamesForDate.length} games`)
     }
-  }).fail(function(jqXHR, textStatus, errorThrown) {
-    console.error('Failed to fetch data for', dateString, ':', textStatus, errorThrown)
-    const dateObj = dates.find(d => d.dateString === dateString)
-    if (dateObj) {
-      dateObj.loading = false
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.error('Failed to fetch data for', dateString, ':', textStatus, errorThrown)
+      const dateObj = dates.find(d => d.dateString === dateString)
+      if (dateObj) {
+        dateObj.loading = false
+      }
     }
   })
 }
@@ -68,12 +75,14 @@ function fetchAll() {
     const date = DateTime.fromISO(dateObj.dateString, {zone: 'America/Los_Angeles'})
     fetchGamesForDate(date)
   })
+  // Trigger refresh in all game-row components
+  refreshTrigger.value++
 }
 
 fetchAll()
 
 // Smart polling: only update dates with live games or today's date
-function pollForUpdates() {
+function pollForUpdates(includeSelectedDate = false) {
   const todayNow = DateTime.now().setZone('America/Los_Angeles').toISODate()
 
   // Update todayString if date has changed
@@ -101,11 +110,37 @@ function pollForUpdates() {
     }
   })
 
+  // Also check selectedDateData if requested
+  if (includeSelectedDate) {
+    selectedDateData.forEach(dateObj => {
+      // Skip if we're already updating this date in the main dates array
+      if (datesToUpdate.has(dateObj.dateString)) {
+        return
+      }
+
+      const shouldPoll = dateObj.games.some(game => {
+        if (game.state === 'in') return true
+        if (game.state === 'pre' && game.dateTime && game.dateTime < now) return true
+        return false
+      })
+
+      if (shouldPoll) {
+        const date = DateTime.fromISO(dateObj.dateString, {zone: 'America/Los_Angeles'})
+        fetchGamesForDateIntoArray(date, selectedDateData)
+      }
+    })
+  }
+
   // Fetch updates for these dates
   datesToUpdate.forEach(dateString => {
     const date = DateTime.fromISO(dateString, {zone: 'America/Los_Angeles'})
     fetchGamesForDate(date)
   })
+
+  // Trigger refresh in game-row components if we updated anything
+  if (datesToUpdate.size > 0 || includeSelectedDate) {
+    refreshTrigger.value++
+  }
 }
 
 setInterval(pollForUpdates, 15000) // Poll every 15 seconds
@@ -209,7 +244,11 @@ function fetchGamesForDateIntoArray(date, targetArray) {
   const endpointDate = date.toISODate({format: 'basic'})
   const url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
 
-  jQuery.getJSON(url, function (data) {
+  jQuery.ajax({
+    url: url,
+    dataType: 'json',
+    cache: false,
+    success: function (data) {
     const gamesForDate = []
 
     if (data.events && data.events.length > 0) {
@@ -226,11 +265,13 @@ function fetchGamesForDateIntoArray(date, targetArray) {
       const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
       console.log(`[${now}] Loaded ${dateString}: ${gamesForDate.length} games`)
     }
-  }).fail(function(jqXHR, textStatus, errorThrown) {
-    console.error('Failed to fetch data for', dateString, ':', textStatus, errorThrown)
-    const dateObj = targetArray.find(d => d.dateString === dateString)
-    if (dateObj) {
-      dateObj.loading = false
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.error('Failed to fetch data for', dateString, ':', textStatus, errorThrown)
+      const dateObj = targetArray.find(d => d.dateString === dateString)
+      if (dateObj) {
+        dateObj.loading = false
+      }
     }
   })
 }

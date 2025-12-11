@@ -114,6 +114,12 @@ const app = createApp({
       }
     })
 
+    const forceRefresh = () => {
+      // Use the same logic as automatic polling - only refresh active games
+      // includeSelectedDate=true ensures selected date games are also refreshed
+      pollForUpdates(true)
+    }
+
     return {
       dates: displayedDates,
       todayString: todayString,
@@ -133,7 +139,9 @@ const app = createApp({
       loadPrevious: loadPrevious,
       loadMore: loadMore,
       clearDateSelection: clearDateSelection,
-      clearTeamSelection: clearTeamSelection
+      clearTeamSelection: clearTeamSelection,
+      forceRefresh: forceRefresh,
+      refreshTrigger: refreshTrigger
     }
   },
   components: {

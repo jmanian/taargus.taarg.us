@@ -50,6 +50,38 @@ body {
   gap: 12px;
 }
 
+.refresh-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  min-height: 35px;
+  width: 35px;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+
+.refresh-button:hover {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.refresh-button:active {
+  transform: scale(0.95);
+}
+
+.refresh-button svg {
+  transition: transform 0.3s ease;
+}
+
+.refresh-button:active svg {
+  transform: rotate(180deg);
+}
+
 .filter-group {
   position: relative;
   display: flex;

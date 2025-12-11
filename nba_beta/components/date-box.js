@@ -12,7 +12,8 @@ const dateBoxTemplate = `
       <game-row
         v-for="game in sortedGames"
         :key="game.id"
-        :game="game">
+        :game="game"
+        :refresh-trigger="refreshTrigger">
       </game-row>
       <div v-if="dateData.loading" class="no-games">
         Loading...
@@ -27,7 +28,7 @@ const dateBoxTemplate = `
 
 const DateBox = {
   template: dateBoxTemplate,
-  props: ['dateData', 'isToday', 'isPast'],
+  props: ['dateData', 'isToday', 'isPast', 'refreshTrigger'],
   components: {
     'game-row': GameRow
   },

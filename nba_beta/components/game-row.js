@@ -210,7 +210,7 @@ const gameRowTemplate = `
 
 const GameRow = {
   template: gameRowTemplate,
-  props: ['game'],
+  props: ['game', 'refreshTrigger'],
   data() {
     return {
       isMobile: window.innerWidth <= 768,
@@ -239,6 +239,21 @@ const GameRow = {
           console.log('Watch triggered, canvas ref:', this.$refs.gameFlowCanvas)
           this.drawGameFlow()
         })
+      }
+    },
+    'game.statusDetail'(newVal, oldVal) {
+      // When game status changes (score updates, quarter changes, etc.)
+      // and we have already loaded game flow data, refresh it
+      // Only refresh if card is currently expanded
+      if (newVal !== oldVal && this.isExpanded && this.gameFlowData && !this.gameFlowLoading && this.started) {
+        this.fetchGameFlow()
+      }
+    },
+    refreshTrigger(newVal, oldVal) {
+      // When refresh is triggered and we have already loaded game flow data, refresh it
+      // Only refresh if card is currently expanded
+      if (newVal !== oldVal && this.isExpanded && this.gameFlowData && !this.gameFlowLoading && this.started) {
+        this.fetchGameFlow()
       }
     }
   },
