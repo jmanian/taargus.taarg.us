@@ -1,5 +1,5 @@
 const gameRowTemplate = `
-<div class="game-row" :class="{'expanded': isExpanded, 'expandable': hasExpandableContent}" @click="hasExpandableContent && toggleExpand()">
+<div class="game-row" :class="{'expanded': isExpanded, 'expandable': hasExpandableContent}" :style="teamColorStyles" @click="hasExpandableContent && toggleExpand()">
   <div class="team-side away-side">
     <img v-if="awayImageURL" class="team-logo" :src="awayImageURL">
     <div v-else class="team-logo-placeholder"></div>
@@ -228,6 +228,7 @@ const GameRow = {
   },
   mounted() {
     window.addEventListener('resize', this.handleResize)
+    this.initializeTeamColors()
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize)
@@ -240,6 +241,12 @@ const GameRow = {
           this.drawGameFlow()
         })
       }
+    },
+    game: {
+      handler() {
+        this.initializeTeamColors()
+      },
+      deep: true
     },
     'game.statusDetail'(newVal, oldVal) {
       // When game status changes (score updates, quarter changes, etc.)
@@ -286,6 +293,53 @@ const GameRow = {
           this.drawGameFlow()
         }, 200)
       }
+    },
+    initializeTeamColors() {
+      // Set team colors from game data if available
+      let awayColor = this.game.awayTeamColor || '1e40af'  // default blue
+      let homeColor = this.game.homeTeamColor || 'dc2626'  // default red
+
+      if (this.game.awayTeamColor && this.game.homeTeamColor) {
+        // Prefer non-white colors - if primary is white/near-white, use alternate
+        if (this.isWhitish(awayColor) && this.game.awayTeamAltColor && !this.isWhitish(this.game.awayTeamAltColor)) {
+          awayColor = this.game.awayTeamAltColor
+        }
+        if (this.isWhitish(homeColor) && this.game.homeTeamAltColor && !this.isWhitish(this.game.homeTeamAltColor)) {
+          homeColor = this.game.homeTeamAltColor
+        }
+      }
+
+      // For card borders, we always use the selected colors even if similar
+      this.teamColors = {
+        away: awayColor,
+        home: homeColor
+      }
+    },
+    getChartColors() {
+      // For charts, we need colors to be distinguishable
+      if (!this.teamColors) return { away: '1e40af', home: 'dc2626' }
+
+      let awayColor = this.teamColors.away
+      let homeColor = this.teamColors.home
+
+      // If colors are too similar for chart visibility, use alternate for away team
+      if (this.game.awayTeamAltColor && !this.isWhitish(this.game.awayTeamAltColor) && this.areColorsSimilar(awayColor, homeColor)) {
+        awayColor = this.game.awayTeamAltColor
+      }
+
+      return {
+        away: awayColor,
+        home: homeColor
+      }
+    },
+    isWhitish(hexColor) {
+      // Check if color is white or very light (near white)
+      if (!hexColor) return true
+      const r = parseInt(hexColor.substring(0, 2), 16)
+      const g = parseInt(hexColor.substring(2, 4), 16)
+      const b = parseInt(hexColor.substring(4, 6), 16)
+      // Consider it whitish if all RGB values are above 240
+      return r > 240 && g > 240 && b > 240
     },
     toggleExpand() {
       this.isExpanded = !this.isExpanded
@@ -437,25 +491,8 @@ const GameRow = {
         console.log(`[${now}] Loaded event ${this.game.id}: ${data.plays?.length || 0} plays`)
         console.log('Game flow data received:', data.plays?.length, 'plays')
 
-        // Extract team colors from boxscore
-        if (data.boxscore?.teams) {
-          const teams = data.boxscore.teams
-          const awayTeam = teams.find(t => t.homeAway === 'away')?.team
-          const homeTeam = teams.find(t => t.homeAway === 'home')?.team
-
-          let awayColor = awayTeam?.color || '1e40af'
-          let homeColor = homeTeam?.color || 'dc2626'
-
-          // If colors are too similar, use alternate color for away team
-          if (awayTeam?.alternateColor && homeTeam?.color && this.areColorsSimilar(awayColor, homeColor)) {
-            awayColor = awayTeam.alternateColor
-          }
-
-          this.teamColors = {
-            away: awayColor,
-            home: homeColor
-          }
-        }
+        // Team colors are already set from scoreboard data via initializeTeamColors()
+        // No need to extract them again from the event API
 
         // Extract player box scores
         if (data.boxscore?.players && data.boxscore?.teams) {
@@ -722,7 +759,8 @@ const GameRow = {
       ctx.setLineDash([])
 
       // Draw away team line (as steps) with rounded corners
-      const awayColor = this.teamColors ? `#${this.teamColors.away}` : '#1e40af'
+      const chartColors = this.getChartColors()
+      const awayColor = `#${chartColors.away}`
       ctx.strokeStyle = awayColor
       ctx.lineWidth = this.isMobile ? 1.5 : 2
       ctx.lineJoin = 'round'
@@ -744,7 +782,7 @@ const GameRow = {
       ctx.stroke()
 
       // Draw home team line (as steps) with rounded corners
-      const homeColor = this.teamColors ? `#${this.teamColors.home}` : '#dc2626'
+      const homeColor = `#${chartColors.home}`
       ctx.strokeStyle = homeColor
       ctx.lineWidth = this.isMobile ? 1.5 : 2
       ctx.lineJoin = 'round'
@@ -931,8 +969,9 @@ const GameRow = {
       ctx.closePath()
 
       // Fill with gradient (capped at 30-point lead = 100% opacity)
-      const awayColor = this.teamColors ? `#${this.teamColors.away}` : '#1e40af'
-      const homeColor = this.teamColors ? `#${this.teamColors.home}` : '#dc2626'
+      const chartColors = this.getChartColors()
+      const awayColor = `#${chartColors.away}`
+      const homeColor = `#${chartColors.home}`
 
       // Create gradient based on 30-point scale
       const gradient = ctx.createLinearGradient(0, yScaleGradient(30), 0, yScaleGradient(-30))
@@ -1163,6 +1202,17 @@ const GameRow = {
     },
     showGameFlow: function () {
       return this.started
+    },
+    teamColorStyles: function () {
+      if (this.teamColors && this.teamColors.away && this.teamColors.home) {
+        return {
+          '--away-team-color': `#${this.teamColors.away}`,
+          '--home-team-color': `#${this.teamColors.home}`,
+          '--away-team-alt-color': this.game.awayTeamAltColor ? `#${this.game.awayTeamAltColor}` : `#${this.teamColors.away}`,
+          '--home-team-alt-color': this.game.homeTeamAltColor ? `#${this.game.homeTeamAltColor}` : `#${this.teamColors.home}`
+        }
+      }
+      return {}
     }
   }
 }
