@@ -291,6 +291,18 @@ const GameRow = {
       localStorage.setItem('gameFlowChartMode', mode)
       this.redrawChart()
     },
+    getMaxTime() {
+      if (!this.gameFlowData || this.gameFlowData.length === 0) return 0
+
+      const lastDataTime = this.gameFlowData[this.gameFlowData.length - 1].time
+      const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
+      const endOf4thQuarter = 4 * 12 * 60 // 2880 seconds
+
+      // If game is ongoing and hasn't reached end of 4th quarter, extend x-axis to end of 4th
+      return this.playing && maxPeriod <= 4 && lastDataTime < endOf4thQuarter
+        ? endOf4thQuarter
+        : lastDataTime
+    },
     handleCanvasHover(event) {
       if (this.isMobile) return
       const canvas = this.$refs.gameFlowCanvas
@@ -312,7 +324,7 @@ const GameRow = {
       }
 
       // Calculate x-positions for all plays based on game time
-      const maxTime = this.gameFlowData[this.gameFlowData.length - 1].time
+      const maxTime = this.getMaxTime()
       const xScale = (time) => (time / maxTime) * chartWidth
 
       // Create zones for each play based on midpoints between adjacent plays
@@ -635,7 +647,8 @@ const GameRow = {
       )
       // Round up to nearest 25
       const maxScore = Math.ceil(actualMaxScore / 25) * 25
-      const maxTime = this.gameFlowData[this.gameFlowData.length - 1].time
+      const maxTime = this.getMaxTime()
+      const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
 
       console.log('Drawing chart:', {
         dataPoints: this.gameFlowData.length,
@@ -674,7 +687,6 @@ const GameRow = {
       }
 
       // Draw OT lines if game went to overtime
-      const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
       if (maxPeriod > 4) {
         // Draw line at start of each OT period
         for (let otNum = 1; otNum <= maxPeriod - 4; otNum++) {
@@ -818,7 +830,8 @@ const GameRow = {
       // Find max lead (in either direction) for determining y-axis range
       const maxLead = Math.max(...leadData.map(d => Math.abs(d.lead)))
       const maxLeadRounded = Math.ceil(maxLead / 5) * 5 // Round up to nearest 5
-      const maxTime = leadData[leadData.length - 1].time
+      const maxTime = this.getMaxTime()
+      const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
 
       // Scales
       const xScale = (time) => padding.left + (time / maxTime) * chartWidth
@@ -865,7 +878,6 @@ const GameRow = {
       }
 
       // Draw OT lines if game went to overtime
-      const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
       if (maxPeriod > 4) {
         for (let otNum = 1; otNum <= maxPeriod - 4; otNum++) {
           const x = xScale(4 * 12 * 60 + (otNum - 1) * 5 * 60)
