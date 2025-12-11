@@ -66,6 +66,96 @@ const gameRowTemplate = `
       <div v-if="game.recap" class="recap-section">
         {{ game.recap }}
       </div>
+      <div v-if="boxScoreData && boxScoreData.away && boxScoreData.home && started" class="box-score-section">
+        <div class="box-score-header">BOX SCORE</div>
+        <div class="box-score-tabs">
+          <button
+            class="box-score-tab"
+            :class="{'active': boxScoreActiveTeam === 'away'}"
+            @click.stop="boxScoreActiveTeam = 'away'">
+            {{ boxScoreData.away.teamName }}
+          </button>
+          <button
+            class="box-score-tab"
+            :class="{'active': boxScoreActiveTeam === 'home'}"
+            @click.stop="boxScoreActiveTeam = 'home'">
+            {{ boxScoreData.home.teamName }}
+          </button>
+        </div>
+        <div class="box-score-table-wrapper">
+          <div class="box-score-table-scroll">
+            <table class="box-score-table">
+            <thead>
+              <tr>
+                <th class="sticky-col">Player</th>
+                <th>MIN</th>
+                <th>PTS</th>
+                <th class="stat-group-left">FG</th>
+                <th class="stat-group-right">FG%</th>
+                <th class="stat-group-left">3PT</th>
+                <th class="stat-group-right">3PT%</th>
+                <th class="stat-group-left">FT</th>
+                <th class="stat-group-right">FT%</th>
+                <th>OREB</th>
+                <th>DREB</th>
+                <th>REB</th>
+                <th>AST</th>
+                <th>STL</th>
+                <th>BLK</th>
+                <th>TO</th>
+                <th>PF</th>
+                <th>+/-</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="player in boxScoreData[boxScoreActiveTeam].players" :key="player.name">
+                <td class="sticky-col player-name">
+                  {{ player.name }}
+                  <span v-if="player.starter" class="player-position">{{ player.position }}</span>
+                </td>
+                <td>{{ player.stats.min }}</td>
+                <td>{{ player.stats.pts }}</td>
+                <td class="stat-group-left">{{ player.stats.fgMade }}</td>
+                <td class="stat-group-right">{{ player.stats.fgPct }}</td>
+                <td class="stat-group-left">{{ player.stats.threePtMade }}</td>
+                <td class="stat-group-right">{{ player.stats.threePtPct }}</td>
+                <td class="stat-group-left">{{ player.stats.ftMade }}</td>
+                <td class="stat-group-right">{{ player.stats.ftPct }}</td>
+                <td>{{ player.stats.oreb }}</td>
+                <td>{{ player.stats.dreb }}</td>
+                <td>{{ player.stats.reb }}</td>
+                <td>{{ player.stats.ast }}</td>
+                <td>{{ player.stats.stl }}</td>
+                <td>{{ player.stats.blk }}</td>
+                <td>{{ player.stats.to }}</td>
+                <td>{{ player.stats.pf }}</td>
+                <td>{{ player.stats.plusMinus }}</td>
+              </tr>
+              <tr v-if="boxScoreData[boxScoreActiveTeam].totals" class="totals-row">
+                <td class="sticky-col">TEAM</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.min }}</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.pts }}</td>
+                <td class="stat-group-left">{{ boxScoreData[boxScoreActiveTeam].totals.fgMade }}</td>
+                <td class="stat-group-right">{{ boxScoreData[boxScoreActiveTeam].totals.fgPct }}</td>
+                <td class="stat-group-left">{{ boxScoreData[boxScoreActiveTeam].totals.threePtMade }}</td>
+                <td class="stat-group-right">{{ boxScoreData[boxScoreActiveTeam].totals.threePtPct }}</td>
+                <td class="stat-group-left">{{ boxScoreData[boxScoreActiveTeam].totals.ftMade }}</td>
+                <td class="stat-group-right">{{ boxScoreData[boxScoreActiveTeam].totals.ftPct }}</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.oreb }}</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.dreb }}</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.reb }}</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.ast }}</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.stl }}</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.blk }}</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.to }}</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.pf }}</td>
+                <td>{{ boxScoreData[boxScoreActiveTeam].totals.plusMinus }}</td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
       <div v-if="hasStats" class="stats-section">
         <div class="stats-header">TEAM STATS</div>
         <table class="stats-table">
@@ -127,6 +217,8 @@ const GameRow = {
       isExpanded: false,
       gameFlowData: null,
       gameFlowLoading: false,
+      boxScoreData: null,
+      boxScoreActiveTeam: 'away', // 'away' or 'home'
       teamColors: null,
       chartMode: localStorage.getItem('gameFlowChartMode') || 'lead', // 'score' or 'lead'
       hoveredPlay: null,
@@ -331,6 +423,12 @@ const GameRow = {
           }
         }
 
+        // Extract player box scores
+        if (data.boxscore?.players && data.boxscore?.teams) {
+          this.boxScoreData = this.processBoxScoreData(data.boxscore.players, data.boxscore.teams)
+          console.log('Box score data processed:', this.boxScoreData)
+        }
+
         if (data.plays && data.plays.length > 0) {
           this.gameFlowData = this.processGameFlowData(data.plays)
           console.log('Processed game flow data:', this.gameFlowData.length, 'points')
@@ -391,6 +489,117 @@ const GameRow = {
       })
 
       return dataPoints
+    },
+    parseStat(stat) {
+      if (!stat) return { made: stat, pct: '' }
+      if (stat === '0-0') return { made: '0-0', pct: '0.0' }
+
+      const parts = stat.split('-')
+      if (parts.length !== 2) return { made: stat, pct: '' }
+
+      const made = parseInt(parts[0])
+      const attempted = parseInt(parts[1])
+
+      if (attempted === 0) return { made: stat, pct: '0.0' }
+
+      const percentage = Math.round((made / attempted) * 1000) / 10
+      return { made: stat, pct: percentage.toFixed(1) }
+    },
+    processBoxScoreData(playersData, teamsData) {
+      const result = { away: null, home: null }
+
+      // Create a map of team ID to homeAway from teamsData
+      const teamHomeAwayMap = {}
+      teamsData.forEach(teamData => {
+        teamHomeAwayMap[teamData.team.id] = teamData.homeAway
+      })
+
+      playersData.forEach(teamData => {
+        const teamId = teamData.team.id
+        const homeAway = teamHomeAwayMap[teamId]
+        const statistics = teamData.statistics[0]
+
+        // Parse players
+        const players = statistics.athletes.map(playerData => {
+          const athlete = playerData.athlete
+          const stats = playerData.stats
+
+          const fg = this.parseStat(stats[2])
+          const threePt = this.parseStat(stats[3])
+          const ft = this.parseStat(stats[4])
+
+          return {
+            name: athlete.shortName || athlete.displayName,
+            position: athlete.position?.abbreviation || '',
+            jersey: athlete.jersey || '',
+            starter: playerData.starter || false,
+            stats: {
+              min: stats[0],
+              pts: stats[1],
+              fgMade: fg.made,
+              fgPct: fg.pct,
+              threePtMade: threePt.made,
+              threePtPct: threePt.pct,
+              ftMade: ft.made,
+              ftPct: ft.pct,
+              reb: stats[5],
+              ast: stats[6],
+              to: stats[7],
+              stl: stats[8],
+              blk: stats[9],
+              oreb: stats[10],
+              dreb: stats[11],
+              pf: stats[12],
+              plusMinus: stats[13]
+            }
+          }
+        })
+
+        // Sort so starters are first
+        players.sort((a, b) => {
+          if (a.starter && !b.starter) return -1
+          if (!a.starter && b.starter) return 1
+          return 0
+        })
+
+        // Get team totals (last row in labels)
+        const totals = statistics.totals || null
+
+        let totalsParsed = null
+        if (totals) {
+          const fgTotal = this.parseStat(totals[2])
+          const threePtTotal = this.parseStat(totals[3])
+          const ftTotal = this.parseStat(totals[4])
+
+          totalsParsed = {
+            min: totals[0],
+            pts: totals[1],
+            fgMade: fgTotal.made,
+            fgPct: fgTotal.pct,
+            threePtMade: threePtTotal.made,
+            threePtPct: threePtTotal.pct,
+            ftMade: ftTotal.made,
+            ftPct: ftTotal.pct,
+            reb: totals[5],
+            ast: totals[6],
+            to: totals[7],
+            stl: totals[8],
+            blk: totals[9],
+            oreb: totals[10],
+            dreb: totals[11],
+            pf: totals[12],
+            plusMinus: totals[13]
+          }
+        }
+
+        result[homeAway] = {
+          teamName: teamData.team.name,
+          players: players,
+          totals: totalsParsed
+        }
+      })
+
+      return result
     },
     drawGameFlow() {
       if (this.chartMode === 'lead') {
