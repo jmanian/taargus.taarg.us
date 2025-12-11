@@ -146,8 +146,8 @@ body {
 }
 
 .dropdown-close {
-  background: none;
-  border: none;
+  background: #f8f9fa;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   color: #6c757d;
   cursor: pointer;
   padding: 0;
@@ -157,12 +157,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
 }
 
 .dropdown-close:hover {
   background-color: #e9ecef;
   color: #495057;
+  border-color: rgba(0, 0, 0, 0.12);
+  transform: scale(1.1);
 }
 
 .team-search-container {
@@ -225,8 +228,8 @@ body {
 }
 
 .filter-clear {
-  background-color: #dee2e6;
-  border: none;
+  background-color: #e9ecef;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   color: #6c757d;
   cursor: pointer;
   padding: 0;
@@ -236,12 +239,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 3px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .filter-clear:hover {
-  background-color: #ced4da;
+  background-color: #dee2e6;
   color: #495057;
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transform: scale(1.05);
 }
 
 .filter-chip-single {
@@ -280,8 +288,8 @@ body {
 }
 
 .chip-clear {
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   cursor: pointer;
   padding: 0;
@@ -291,14 +299,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 2px;
-  opacity: 0.8;
+  border-radius: 3px;
   flex-shrink: 0;
+  transition: all 0.15s ease;
 }
 
 .chip-clear:hover {
-  opacity: 1;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
 }
 
 .date-input {
@@ -1054,25 +1063,31 @@ body {
 }
 
 .box-score-tab {
-  background: none;
-  border: none;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.12);
   padding: 6px 14px;
   font-size: 12px;
   font-weight: 600;
-  color: #6c757d;
+  color: #495057;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .box-score-tab:hover {
-  background-color: #e9ecef;
-  color: #495057;
+  background-color: #ffffff;
+  color: #212529;
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 .box-score-tab.active {
   background-color: #0d6efd;
   color: white;
+  border-color: #0d6efd;
+  box-shadow: 0 3px 10px rgba(13, 110, 253, 0.3);
 }
 
 .box-score-table-wrapper {
