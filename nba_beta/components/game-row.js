@@ -156,7 +156,7 @@ const gameRowTemplate = `
           </div>
         </div>
       </div>
-      <div v-if="hasStats" class="stats-section">
+      <div v-if="hasStats && !started" class="stats-section">
         <div class="stats-header">TEAM STATS</div>
         <table class="stats-table">
           <thead>
