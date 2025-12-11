@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.espn.com)",
+      "Bash(curl -s \"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=401809834\")",
+      "Bash(sips:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
