@@ -114,13 +114,8 @@ function getBroadcastInfo(broadcasts) {
     return national.names[0];
   }
 
-  // Otherwise, look for League Pass
-  const allNetworks = broadcasts
-    .filter(bc => bc.names && bc.names.length > 0)
-    .flatMap(bc => bc.names);
-
-  const leaguePass = allNetworks.find(name => name.includes('League Pass'));
-  return leaguePass ? 'League Pass' : '';
+  // Otherwise, default to League Pass
+  return 'League Pass';
 }
 
 function findRecap(headlines) {
