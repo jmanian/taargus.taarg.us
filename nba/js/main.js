@@ -211,6 +211,34 @@ const app = createApp({
         isNavigating = false
       }, 0)
     })
+
+    // Sticky header scroll behavior
+    let lastScrollY = window.scrollY
+    let ticking = false
+
+    const filterBar = document.querySelector('.filter-bar')
+
+    const updateHeaderVisibility = () => {
+      const currentScrollY = window.scrollY
+
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down & past threshold
+        filterBar.classList.add('hidden')
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up
+        filterBar.classList.remove('hidden')
+      }
+
+      lastScrollY = currentScrollY
+      ticking = false
+    }
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateHeaderVisibility)
+        ticking = true
+      }
+    })
   }
 })
 
