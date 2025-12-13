@@ -221,6 +221,16 @@ const app = createApp({
     const updateHeaderVisibility = () => {
       const currentScrollY = window.scrollY
 
+      // Add "stuck" class when header is actually stuck to top
+      // Check if the header's top position is at the viewport top
+      const rect = filterBar.getBoundingClientRect()
+      if (rect.top <= 0) {
+        filterBar.classList.add('stuck')
+      } else {
+        filterBar.classList.remove('stuck')
+      }
+
+      // Hide/show based on scroll direction
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         // Scrolling down & past threshold
         filterBar.classList.add('hidden')
