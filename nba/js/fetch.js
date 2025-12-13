@@ -55,7 +55,26 @@ function fetchGamesForDate(date) {
 
     const dateObj = dates.find(d => d.dateString === dateString)
     if (dateObj) {
-      dateObj.games = gamesForDate
+      // Update games in-place to prevent visual flashing
+      // Match existing games by ID and update their properties
+      gamesForDate.forEach(newGame => {
+        const existingGame = dateObj.games.find(g => g.id === newGame.id)
+        if (existingGame) {
+          // Update existing game object properties
+          Object.assign(existingGame, newGame)
+        } else {
+          // Add new game
+          dateObj.games.push(newGame)
+        }
+      })
+
+      // Remove games that no longer exist
+      for (let i = dateObj.games.length - 1; i >= 0; i--) {
+        if (!gamesForDate.find(g => g.id === dateObj.games[i].id)) {
+          dateObj.games.splice(i, 1)
+        }
+      }
+
       dateObj.loading = false
       const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
       console.log(`[${now}] Loaded ${dateString}: ${gamesForDate.length} games`)
@@ -261,7 +280,26 @@ function fetchGamesForDateIntoArray(date, targetArray) {
 
     const dateObj = targetArray.find(d => d.dateString === dateString)
     if (dateObj) {
-      dateObj.games = gamesForDate
+      // Update games in-place to prevent visual flashing
+      // Match existing games by ID and update their properties
+      gamesForDate.forEach(newGame => {
+        const existingGame = dateObj.games.find(g => g.id === newGame.id)
+        if (existingGame) {
+          // Update existing game object properties
+          Object.assign(existingGame, newGame)
+        } else {
+          // Add new game
+          dateObj.games.push(newGame)
+        }
+      })
+
+      // Remove games that no longer exist
+      for (let i = dateObj.games.length - 1; i >= 0; i--) {
+        if (!gamesForDate.find(g => g.id === dateObj.games[i].id)) {
+          dateObj.games.splice(i, 1)
+        }
+      }
+
       dateObj.loading = false
       const now = DateTime.now().setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
       console.log(`[${now}] Loaded ${dateString}: ${gamesForDate.length} games`)

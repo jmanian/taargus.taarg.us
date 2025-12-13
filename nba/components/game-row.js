@@ -43,8 +43,8 @@ const gameRowTemplate = `
             </button>
           </div>
         </div>
-        <div v-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
-        <div v-else-if="gameFlowData" class="game-flow-chart-container">
+        <div v-if="gameFlowLoading && !gameFlowData" class="game-flow-loading">Loading...</div>
+        <div v-if="gameFlowData" class="game-flow-chart-container">
           <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousemove="handleCanvasHover" @mouseleave="handleCanvasLeave"></canvas>
           <div v-if="hoveredPlay && !isMobile" class="game-flow-tooltip">
             <div class="tooltip-time">{{ hoveredPlay.time }} - {{ hoveredPlay.quarter }}</div>
