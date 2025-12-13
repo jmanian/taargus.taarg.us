@@ -83,12 +83,14 @@ body {
   flex-shrink: 0;
 }
 
-.refresh-button:hover {
-  background-color: #f8f9fa;
-  border-color: rgba(0, 0, 0, 0.12);
-  color: #495057;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .refresh-button:hover {
+    background-color: #f8f9fa;
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #495057;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
 }
 
 .refresh-button:active {
@@ -130,11 +132,13 @@ body {
   flex-shrink: 0;
 }
 
-.filter-group:hover {
-  background-color: #f8f9fa;
-  border-color: rgba(0, 0, 0, 0.12);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .filter-group:hover {
+    background-color: #f8f9fa;
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
 }
 
 
@@ -202,11 +206,13 @@ body {
   transition: all 0.15s ease;
 }
 
-.dropdown-close:hover {
-  background-color: #e9ecef;
-  color: #495057;
-  border-color: rgba(0, 0, 0, 0.12);
-  transform: scale(1.1);
+@media (hover: hover) {
+  .dropdown-close:hover {
+    background-color: #e9ecef;
+    color: #495057;
+    border-color: rgba(0, 0, 0, 0.12);
+    transform: scale(1.1);
+  }
 }
 
 .team-search-container {
@@ -254,8 +260,10 @@ body {
   transition: background 0.2s ease;
 }
 
-.team-dropdown-list::-webkit-scrollbar-thumb:hover {
-  background: #ced4da;
+@media (hover: hover) {
+  .team-dropdown-list::-webkit-scrollbar-thumb:hover {
+    background: #ced4da;
+  }
 }
 
 .team-option {
@@ -270,10 +278,12 @@ body {
   border: 1px solid transparent;
 }
 
-.team-option:hover {
-  background-color: #f8f9fa;
-  border-color: rgba(0, 0, 0, 0.08);
-  transform: translateX(2px);
+@media (hover: hover) {
+  .team-option:hover {
+    background-color: #f8f9fa;
+    border-color: rgba(0, 0, 0, 0.08);
+    transform: translateX(2px);
+  }
 }
 
 .team-option input[type="checkbox"] {
@@ -319,12 +329,14 @@ body {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.filter-clear:hover {
-  background-color: #dee2e6;
-  color: #495057;
-  border-color: rgba(0, 0, 0, 0.12);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  transform: scale(1.05);
+@media (hover: hover) {
+  .filter-clear:hover {
+    background-color: #dee2e6;
+    color: #495057;
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    transform: scale(1.05);
+  }
 }
 
 .filter-chip-single {
@@ -393,8 +405,10 @@ body {
   transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
-.date-box:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.08);
+@media (hover: hover) {
+  .date-box:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
 }
 
 .date-box-today {
@@ -428,8 +442,10 @@ body {
   color: #6c757d;
 }
 
-.date-header:hover {
-  background-color: rgba(0, 0, 0, 0.03);
+@media (hover: hover) {
+  .date-header:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
 }
 
 .toggle-icon {
@@ -443,8 +459,10 @@ body {
   font-weight: 700;
 }
 
-.date-box-today .date-header:hover {
-  background-color: rgba(13, 110, 253, 0.08);
+@media (hover: hover) {
+  .date-box-today .date-header:hover {
+    background-color: rgba(13, 110, 253, 0.08);
+  }
 }
 
 .date-box-today .toggle-icon {
@@ -551,11 +569,13 @@ body {
   }
 }
 
-.game-row:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
-  border-top-color: rgba(0, 0, 0, 0.1);
-  border-bottom-color: rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .game-row:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
+    border-top-color: rgba(0, 0, 0, 0.1);
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
 }
 
 .team-side {
@@ -716,9 +736,11 @@ body {
   }
 }
 
-.load-link:hover {
-  text-decoration: underline;
-  color: #0b5ed7;
+@media (hover: hover) {
+  .load-link:hover {
+    text-decoration: underline;
+    color: #0b5ed7;
+  }
 }
 
 .headline {
@@ -989,12 +1011,14 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.game-flow-tab:hover {
-  background-color: #ffffff;
-  color: #212529;
-  border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .game-flow-tab:hover {
+    background-color: #ffffff;
+    color: #212529;
+    border-color: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
 }
 
 .game-flow-tab.active {
@@ -1120,12 +1144,14 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.box-score-tab:hover {
-  background-color: #ffffff;
-  color: #212529;
-  border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .box-score-tab:hover {
+    background-color: #ffffff;
+    color: #212529;
+    border-color: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
 }
 
 .box-score-tab.active {
