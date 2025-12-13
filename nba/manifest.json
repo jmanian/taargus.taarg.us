@@ -2,7 +2,7 @@
   "name": "NBA Games",
   "short_name": "NBA Games",
   "description": "NBA Game schedules and scores",
-  "start_url": "/nba_beta/",
+  "start_url": "/nba/",
   "display": "standalone",
   "background_color": "#f5f5f5",
   "theme_color": "#f5f5f5",
