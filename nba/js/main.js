@@ -114,7 +114,16 @@ const app = createApp({
       }
     })
 
-    const forceRefresh = () => {
+    const forceRefresh = (event) => {
+      // Trigger spin animation
+      const button = event.currentTarget
+      button.classList.add('spinning')
+
+      // Remove class after animation completes
+      setTimeout(() => {
+        button.classList.remove('spinning')
+      }, 300)
+
       // Use the same logic as automatic polling - only refresh active games
       // includeSelectedDate=true ensures selected date games are also refreshed
       pollForUpdates(true)

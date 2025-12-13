@@ -94,12 +94,21 @@ body {
   transform: scale(0.95);
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(180deg);
+  }
+}
+
 .refresh-button svg {
   transition: transform 0.3s ease;
 }
 
-.refresh-button:active svg {
-  transform: rotate(180deg);
+.refresh-button.spinning svg {
+  animation: spin 0.3s ease-in-out;
 }
 
 .filter-group {
