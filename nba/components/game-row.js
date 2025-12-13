@@ -1,27 +1,29 @@
 const gameRowTemplate = `
-<div class="game-row" :class="{'expanded': isExpanded, 'expandable': hasExpandableContent}" :style="teamColorStyles" @click="hasExpandableContent && toggleExpand()">
-  <div class="team-side away-side">
-    <img v-if="awayImageURL" class="team-logo" :src="awayImageURL">
-    <div v-else class="team-logo-placeholder"></div>
-    <span class="team-name">{{ game.awayTeamName }}</span>
-    <span class="team-record">{{ game.awayRecord }}</span>
-  </div>
+<div class="game-row" :class="{'expanded': isExpanded, 'expandable': hasExpandableContent}" :style="teamColorStyles">
+  <div class="game-summary" @click="hasExpandableContent && toggleExpand()">
+    <div class="team-side away-side">
+      <img v-if="awayImageURL" class="team-logo" :src="awayImageURL">
+      <div v-else class="team-logo-placeholder"></div>
+      <span class="team-name">{{ game.awayTeamName }}</span>
+      <span class="team-record">{{ game.awayRecord }}</span>
+    </div>
 
-  <div class="score away-score" :class="{'losing-score': isAwayLosing}">{{ started ? game.awayScore : '' }}</div>
+    <div class="score away-score" :class="{'losing-score': isAwayLosing}">{{ started ? game.awayScore : '' }}</div>
 
-  <div class="game-center">
-    <span class="game-time" :class="{'live-time': playing, 'pre-game': !started}">{{ timeLabel }}</span>
-    <span class="network">{{ game.network || '&nbsp;' }}</span>
-    <span v-if="game.headline" class="headline">{{ game.headline }}</span>
-  </div>
+    <div class="game-center">
+      <span class="game-time" :class="{'live-time': playing, 'pre-game': !started}">{{ timeLabel }}</span>
+      <span class="network">{{ game.network || '&nbsp;' }}</span>
+      <span v-if="game.headline" class="headline">{{ game.headline }}</span>
+    </div>
 
-  <div class="score home-score" :class="{'losing-score': isHomeLosing}">{{ started ? game.homeScore : '' }}</div>
+    <div class="score home-score" :class="{'losing-score': isHomeLosing}">{{ started ? game.homeScore : '' }}</div>
 
-  <div class="team-side home-side">
-    <img v-if="homeImageURL" class="team-logo" :src="homeImageURL">
-    <div v-else class="team-logo-placeholder"></div>
-    <span class="team-name">{{ game.homeTeamName }}</span>
-    <span class="team-record">{{ game.homeRecord }}</span>
+    <div class="team-side home-side">
+      <img v-if="homeImageURL" class="team-logo" :src="homeImageURL">
+      <div v-else class="team-logo-placeholder"></div>
+      <span class="team-name">{{ game.homeTeamName }}</span>
+      <span class="team-record">{{ game.homeRecord }}</span>
+    </div>
   </div>
 
   <transition name="expand">

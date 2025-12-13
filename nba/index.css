@@ -141,6 +141,11 @@ body {
   }
 }
 
+.filter-group:active {
+  transform: scale(0.98);
+  background-color: #e9ecef;
+}
+
 
 .filter-label {
   font-size: 13px;
@@ -215,6 +220,11 @@ body {
   }
 }
 
+.dropdown-close:active {
+  transform: scale(0.95);
+  background-color: #dee2e6;
+}
+
 .team-search-container {
   padding: 12px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
@@ -286,6 +296,11 @@ body {
   }
 }
 
+.team-option:active {
+  background-color: #e9ecef;
+  transform: scale(0.98);
+}
+
 .team-option input[type="checkbox"] {
   margin: 0;
   cursor: pointer;
@@ -337,6 +352,11 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     transform: scale(1.05);
   }
+}
+
+.filter-clear:active {
+  transform: scale(0.95);
+  background-color: #ced4da;
 }
 
 .filter-chip-single {
@@ -448,6 +468,10 @@ body {
   }
 }
 
+.date-header:active {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
 .toggle-icon {
   font-size: 12px;
   color: #6c757d;
@@ -463,6 +487,10 @@ body {
   .date-box-today .date-header:hover {
     background-color: rgba(13, 110, 253, 0.08);
   }
+}
+
+.date-box-today .date-header:active {
+  background-color: rgba(13, 110, 253, 0.15);
 }
 
 .date-box-today .toggle-icon {
@@ -519,6 +547,15 @@ body {
 }
 
 .game-row {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s cubic-bezier(0, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.game-summary {
   padding: 14px 16px;
   display: grid;
   grid-template-columns: 1fr 50px 120px 50px 1fr;
@@ -526,55 +563,34 @@ body {
   align-items: center;
   min-height: 68px;
   position: relative;
-  background-color: #ffffff;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-  transition: all 0.25s cubic-bezier(0, 0, 0.2, 1);
+  transition: background-color 0.2s ease;
 }
 
-.game-row.expandable {
+.game-row.expandable .game-summary {
   cursor: pointer;
 }
 
-.expand-indicator {
-  position: absolute;
-  bottom: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 3px;
-}
-
-.expand-indicator .dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: #dee2e6;
+.game-summary:active {
+  background-color: #f8f9fa;
 }
 
 @media (max-width: 768px) {
   .game-row {
+    border-radius: 10px;
+  }
+
+  .game-summary {
     padding: 14px 8px;
     padding-left: 5px;
     padding-right: 5px;
     gap: 4px;
     grid-template-columns: minmax(60px, 1fr) 35px 80px 35px minmax(60px, 1fr);
-    border-radius: 10px;
-  }
-
-  .expand-indicator .dot {
-    width: 3px;
-    height: 3px;
   }
 }
 
 @media (hover: hover) {
-  .game-row:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
-    border-top-color: rgba(0, 0, 0, 0.1);
-    border-bottom-color: rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+  .game-row.expandable .game-summary:hover {
+    background-color: rgba(0, 0, 0, 0.02);
   }
 }
 
@@ -743,6 +759,11 @@ body {
   }
 }
 
+.load-link:active {
+  color: #084298;
+  opacity: 0.8;
+}
+
 .headline {
   text-align: center;
   font-size: 13px;
@@ -758,10 +779,14 @@ body {
 }
 
 .game-details {
-  grid-column: 1 / -1;
-  padding: 16px 0 4px 0;
+  padding: 16px 16px 16px 16px;
   border-top: 1px solid #e9ecef;
-  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .game-details {
+    padding: 12px 8px 12px 8px;
+  }
 }
 
 .odds-section {
@@ -1021,6 +1046,10 @@ body {
   }
 }
 
+.game-flow-tab:active {
+  transform: scale(0.96);
+}
+
 .game-flow-tab.active {
   background-color: #0d6efd;
   color: white;
@@ -1152,6 +1181,10 @@ body {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     transform: translateY(-1px);
   }
+}
+
+.box-score-tab:active {
+  transform: scale(0.96);
 }
 
 .box-score-tab.active {
