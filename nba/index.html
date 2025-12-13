@@ -47,7 +47,7 @@
                     <img v-for="teamAbbr in selectedTeams" :key="teamAbbr" :src="getTeamLogoURL(teamAbbr)" class="team-logo-small" :alt="teamAbbr" />
                   </div>
                   <span class="team-count">{{ selectedTeams.length }} team{{ selectedTeams.length > 1 ? 's' : '' }}</span>
-                  <button @click.stop="clearTeamSelection" class="chip-clear">✕</button>
+                  <button @click.stop="clearTeamSelection" class="filter-clear">✕</button>
                 </div>
                 <div v-if="teamDropdownOpen" class="team-dropdown" @click.stop>
                   <div class="team-dropdown-header">
