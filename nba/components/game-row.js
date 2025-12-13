@@ -344,12 +344,12 @@ const GameRow = {
     toggleExpand() {
       this.isExpanded = !this.isExpanded
 
-      // Fetch game flow data when expanding if we haven't already
-      if (this.isExpanded && !this.gameFlowData && !this.gameFlowLoading && this.started) {
+      // Fetch fresh game flow data when expanding a started game
+      if (this.isExpanded && !this.gameFlowLoading && this.started) {
         this.fetchGameFlow()
       }
 
-      // Redraw chart if we already have data
+      // Redraw chart if we already have data (for immediate visual feedback while fetching)
       if (this.isExpanded && this.gameFlowData) {
         this.$nextTick(() => {
           this.drawGameFlow()
