@@ -55,6 +55,8 @@ function parseEvent(event) {
     spread: odds?.details,
     spreadFormatted: spreadFormatted,
     total: odds?.overUnder,
+    homeMoneyline: odds?.moneyline?.home?.close?.odds,
+    awayMoneyline: odds?.moneyline?.away?.close?.odds,
     recap: findRecap(competition.headlines),
     homeStats: getTeamStats(homeTeam, gameStarted),
     awayStats: getTeamStats(awayTeam, gameStarted),

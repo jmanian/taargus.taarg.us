@@ -55,7 +55,7 @@ const gameRowTemplate = `
           </div>
         </div>
       </div>
-      <div v-if="game.spreadFormatted || game.total" class="odds-section">
+      <div v-if="game.spreadFormatted || game.total || (game.homeMoneyline && game.awayMoneyline)" class="odds-section">
         <div v-if="game.spreadFormatted" class="odds-item">
           <span class="odds-label">Spread</span>
           <span class="odds-value">{{ game.spreadFormatted }}</span>
@@ -63,6 +63,10 @@ const gameRowTemplate = `
         <div v-if="game.total" class="odds-item">
           <span class="odds-label">Total</span>
           <span class="odds-value">{{ game.total }}</span>
+        </div>
+        <div v-if="game.homeMoneyline && game.awayMoneyline" class="odds-item">
+          <span class="odds-label">Moneyline</span>
+          <span class="odds-value">{{ game.homeMoneyline }}/{{ game.awayMoneyline }}</span>
         </div>
       </div>
       <div v-if="game.recap" class="recap-section">
