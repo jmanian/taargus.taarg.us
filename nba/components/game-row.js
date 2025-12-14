@@ -66,7 +66,7 @@ const gameRowTemplate = `
         </div>
         <div v-if="game.homeMoneyline && game.awayMoneyline" class="odds-item">
           <span class="odds-label">Moneyline</span>
-          <span class="odds-value">{{ game.homeMoneyline }}/{{ game.awayMoneyline }}</span>
+          <span class="odds-value">{{ game.awayMoneyline }}/{{ game.homeMoneyline }}</span>
         </div>
       </div>
       <div v-if="game.recap" class="recap-section">
