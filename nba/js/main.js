@@ -186,6 +186,11 @@ const app = createApp({
       if (teamDropdownOpen.value && e.target && e.target.closest && !e.target.closest('.filter-group')) {
         teamDropdownOpen.value = false
       }
+
+      // Close all local network tooltips when clicking anywhere except the indicator itself
+      if (e.target && e.target.closest && !e.target.closest('.local-indicator')) {
+        document.dispatchEvent(new CustomEvent('close-local-tooltips'))
+      }
     })
 
     // Close dropdown when pressing Esc

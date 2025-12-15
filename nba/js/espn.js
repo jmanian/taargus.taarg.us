@@ -112,12 +112,20 @@ function findNationalBroadcast(broadcasts) {
 function getBroadcastInfo(broadcasts) {
   // First check for national broadcast
   const national = broadcasts.find(bc => bc.market.toLowerCase() === 'national')
-  if (national) {
-    return national.names[0];
-  }
 
-  // Otherwise, default to League Pass
-  return 'League Pass';
+  // Collect local networks (home and away markets), excluding League Pass
+  const localNetworks = broadcasts
+    .filter(bc => bc.market.toLowerCase() === 'home' || bc.market.toLowerCase() === 'away')
+    .flatMap(bc => bc.names)
+    .filter(name => !name.includes('League Pass'))
+
+  const primaryNetwork = national ? national.names[0] : 'League Pass';
+
+  return {
+    primary: primaryNetwork,
+    hasLocal: localNetworks.length > 0,
+    localNetworks: localNetworks
+  };
 }
 
 function findRecap(headlines) {

@@ -12,7 +12,18 @@ const gameRowTemplate = `
 
     <div class="game-center">
       <span class="game-time" :class="{'live-time': playing, 'pre-game': !started}">{{ timeLabel }}</span>
-      <span class="network">{{ game.network || '&nbsp;' }}</span>
+      <div class="network">
+        <span class="network-primary">
+          <span v-if="game.network">{{ game.network.primary }}</span>
+          <span v-else>&nbsp;</span>
+        </span>
+        <span v-if="game.network && game.network.hasLocal" class="local-indicator" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave" @click.stop="toggleLocalTooltip">
+          <span v-html="game.network.primary === 'League Pass' ? 'or&nbsp;local' : 'and&nbsp;local'"></span>
+          <span v-if="showLocalTooltip" class="local-tooltip">
+            <span v-for="(network, index) in game.network.localNetworks" :key="index" class="tooltip-network">{{ network }}</span>
+          </span>
+        </span>
+      </div>
       <span v-if="game.headline" class="headline">{{ game.headline }}</span>
     </div>
 
@@ -229,15 +240,18 @@ const GameRow = {
       teamColors: null,
       hoveredPlay: null,
       hoveredPlayIndex: null,
-      resizeTimeout: null
+      resizeTimeout: null,
+      showLocalTooltip: false
     }
   },
   mounted() {
     window.addEventListener('resize', this.handleResize)
+    document.addEventListener('close-local-tooltips', this.handleCloseTooltip)
     this.initializeTeamColors()
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize)
+    document.removeEventListener('close-local-tooltips', this.handleCloseTooltip)
   },
   watch: {
     gameFlowData(newVal) {
@@ -274,15 +288,42 @@ const GameRow = {
       if (newVal !== oldVal && this.isExpanded && this.gameFlowData) {
         this.redrawChart()
       }
-    }
+    },
   },
   methods: {
+    handleMouseEnter() {
+      if (!this.isMobile) {
+        this.showLocalTooltip = true
+      }
+    },
+    handleMouseLeave() {
+      if (!this.isMobile) {
+        this.showLocalTooltip = false
+      }
+    },
+    toggleLocalTooltip(event) {
+      const wasOpen = this.showLocalTooltip
+
+      // Close all other tooltips
+      document.dispatchEvent(new CustomEvent('close-local-tooltips'))
+
+      // Toggle this one (if it was closed, open it)
+      this.showLocalTooltip = !wasOpen
+    },
+    handleCloseTooltip() {
+      this.showLocalTooltip = false
+    },
     handleResize() {
       this.isMobile = window.innerWidth <= 768
 
       // Debounce resize events
       if (this.resizeTimeout) {
         clearTimeout(this.resizeTimeout)
+      }
+
+      // Update tooltip position if visible
+      if (this.showLocalTooltip) {
+        this.updateTooltipPosition()
       }
 
       // Redraw chart if it's currently visible

@@ -419,7 +419,7 @@ body {
 .date-box {
   background-color: #ffffff;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
@@ -552,7 +552,7 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
   transition: all 0.25s cubic-bezier(0, 0, 0.2, 1);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .game-summary {
@@ -714,7 +714,74 @@ body {
   color: #868e96;
   text-align: center;
   min-height: 13px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25em;
 }
+
+@media (max-width: 768px) {
+  .network {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+.network-primary {
+  white-space: nowrap;
+}
+
+.local-indicator {
+  position: relative;
+  cursor: help;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .local-indicator {
+    cursor: pointer;
+  }
+}
+
+.local-indicator:hover {
+  opacity: 1;
+}
+
+.local-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  text-align: center;
+  z-index: 10000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tooltip-network {
+  display: block;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .local-tooltip {
+    left: 50%;
+    right: auto;
+  }
+}
+
 
 .no-games {
   padding: 20px;
