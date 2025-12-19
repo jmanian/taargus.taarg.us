@@ -5,10 +5,13 @@ const app = createApp({
     // Dark mode state: 'auto', 'light', or 'dark'
     const darkModePreference = Vue.ref(localStorage.getItem('darkModePreference') || 'auto')
 
+    // Reactive system preference
+    const systemPrefersDark = Vue.ref(window.matchMedia('(prefers-color-scheme: dark)').matches)
+
     // Computed: actual dark mode state based on preference and OS setting
     const isDarkMode = Vue.computed(() => {
       if (darkModePreference.value === 'auto') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches
+        return systemPrefersDark.value
       }
       return darkModePreference.value === 'dark'
     })
@@ -27,12 +30,15 @@ const app = createApp({
     // Apply on load
     applyDarkMode()
 
-    // Listen for OS dark mode changes when in auto mode
+    // Listen for OS dark mode changes and update reactive ref
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    mediaQuery.addEventListener('change', () => {
-      if (darkModePreference.value === 'auto') {
-        applyDarkMode()
-      }
+    mediaQuery.addEventListener('change', (e) => {
+      systemPrefersDark.value = e.matches
+    })
+
+    // Watch isDarkMode computed property and apply changes
+    Vue.watch(isDarkMode, () => {
+      applyDarkMode()
     })
 
     const toggleDarkMode = () => {
