@@ -3,6 +3,530 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   touch-action: pan-x pan-y;
   min-height: 100vh;
+  transition: background 0.3s ease;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background: linear-gradient(to bottom, #1a1a1a 0%, #0d0d0d 100%);
+  color: #e9ecef;
+}
+
+body.dark-mode .filter-bar {
+  background: rgba(42, 42, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .filter-bar.stuck {
+  background: rgba(42, 42, 42, 0.95);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .refresh-button,
+body.dark-mode .dark-mode-button {
+  background-color: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #adb5bd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) {
+  body.dark-mode .refresh-button:hover,
+  body.dark-mode .dark-mode-button:hover {
+    background-color: #333333;
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #dee2e6;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+body.dark-mode .filter-group {
+  background-color: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) {
+  body.dark-mode .filter-group:hover {
+    background-color: #333333;
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+body.dark-mode .filter-group:active {
+  background-color: #3a3a3a;
+}
+
+body.dark-mode .filter-label {
+  color: #adb5bd;
+}
+
+body.dark-mode .team-dropdown {
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .team-dropdown-header {
+  background: linear-gradient(to bottom, #2a2a2a 0%, #252525 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e9ecef;
+}
+
+body.dark-mode .dropdown-close {
+  background: #333333;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #adb5bd;
+}
+
+@media (hover: hover) {
+  body.dark-mode .dropdown-close:hover {
+    background-color: #3a3a3a;
+    color: #dee2e6;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+body.dark-mode .dropdown-close:active {
+  background-color: #404040;
+}
+
+body.dark-mode .team-search-container {
+  background-color: #252525;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .team-search-input {
+  background-color: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e9ecef;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .team-search-input:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25), 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .team-dropdown-list::-webkit-scrollbar-track {
+  background: #252525;
+}
+
+body.dark-mode .team-dropdown-list::-webkit-scrollbar-thumb {
+  background: #404040;
+}
+
+@media (hover: hover) {
+  body.dark-mode .team-dropdown-list::-webkit-scrollbar-thumb:hover {
+    background: #4a4a4a;
+  }
+}
+
+body.dark-mode .team-option {
+  color: #e9ecef;
+}
+
+@media (hover: hover) {
+  body.dark-mode .team-option:hover {
+    background-color: #333333;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+body.dark-mode .team-option:active {
+  background-color: #3a3a3a;
+}
+
+body.dark-mode .team-option-logo {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .filter-value {
+  color: #e9ecef;
+}
+
+body.dark-mode .filter-clear {
+  background-color: #333333;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #adb5bd;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) {
+  body.dark-mode .filter-clear:hover {
+    background-color: #3a3a3a;
+    color: #dee2e6;
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+}
+
+body.dark-mode .filter-clear:active {
+  background-color: #404040;
+}
+
+body.dark-mode .team-logo-small {
+  background-color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .team-count {
+  color: #e9ecef;
+}
+
+body.dark-mode .date-box {
+  background-color: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+@media (hover: hover) {
+  body.dark-mode .date-box:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+
+body.dark-mode .date-box-today {
+  border: 2px solid #0d6efd;
+  background: linear-gradient(to bottom, #2a2a2a 0%, #1a2a3a 100%);
+  box-shadow: 0 4px 20px rgba(13, 110, 253, 0.3), 0 2px 8px rgba(13, 110, 253, 0.2);
+}
+
+@media (hover: hover) {
+  body.dark-mode .date-header:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+body.dark-mode .date-header:active {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .game-count {
+  color: #adb5bd;
+}
+
+body.dark-mode .toggle-icon {
+  color: #adb5bd;
+}
+
+body.dark-mode .date-box-today .date-header {
+  color: #4da3ff;
+}
+
+@media (hover: hover) {
+  body.dark-mode .date-box-today .date-header:hover {
+    background-color: rgba(13, 110, 253, 0.15);
+  }
+}
+
+body.dark-mode .date-box-today .date-header:active {
+  background-color: rgba(13, 110, 253, 0.25);
+}
+
+body.dark-mode .date-box-today .toggle-icon {
+  color: #4da3ff;
+}
+
+body.dark-mode .date-box-today .game-count {
+  color: #4da3ff;
+}
+
+body.dark-mode .game-row {
+  background-color: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .game-summary:active {
+  background-color: #333333;
+}
+
+@media (hover: hover) {
+  body.dark-mode .game-row.expandable .game-summary:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+}
+
+body.dark-mode .team-name {
+  color: #e9ecef;
+}
+
+body.dark-mode .team-record {
+  color: #adb5bd;
+}
+
+body.dark-mode .team-logo-placeholder {
+  border: 2px solid #404040;
+  background-color: #2a2a2a;
+}
+
+body.dark-mode .losing-score {
+  color: #6c757d;
+}
+
+body.dark-mode .game-time {
+  color: #adb5bd;
+}
+
+body.dark-mode .game-time.pre-game {
+  color: #e9ecef;
+}
+
+body.dark-mode .live-time {
+  color: #ff4d5a;
+}
+
+body.dark-mode .network {
+  color: #868e96;
+}
+
+body.dark-mode .local-tooltip {
+  background-color: rgba(42, 42, 42, 0.95);
+  color: #e9ecef;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .no-games {
+  background-color: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #adb5bd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .load-link {
+  color: #4da3ff;
+}
+
+@media (hover: hover) {
+  body.dark-mode .load-link:hover {
+    color: #6cb5ff;
+  }
+}
+
+body.dark-mode .load-link:active {
+  color: #3a92e6;
+}
+
+body.dark-mode .headline {
+  color: #adb5bd;
+}
+
+body.dark-mode .game-details {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .odds-section {
+  background: linear-gradient(135deg, #252525 0%, #2a2a2a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .odds-label {
+  color: #adb5bd;
+}
+
+body.dark-mode .odds-value {
+  color: #e9ecef;
+}
+
+body.dark-mode .recap-section {
+  background: linear-gradient(135deg, #252525 0%, #2a2a2a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ced4da;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .stats-section {
+  background: linear-gradient(135deg, #252525 0%, #2a2a2a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .stats-header {
+  color: #adb5bd;
+}
+
+body.dark-mode .stats-table th {
+  color: #adb5bd;
+}
+
+body.dark-mode .stats-table td {
+  color: #e9ecef;
+}
+
+body.dark-mode .stats-table td.team-abbr {
+  color: #ced4da;
+}
+
+body.dark-mode .stats-table tbody tr:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+body.dark-mode .leaders-section {
+  background: linear-gradient(135deg, #252525 0%, #2a2a2a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .leaders-header {
+  color: #adb5bd;
+}
+
+body.dark-mode .leader-team-name {
+  color: #ced4da;
+}
+
+body.dark-mode .leader-line {
+  color: #e9ecef;
+}
+
+body.dark-mode .game-flow-section {
+  background: linear-gradient(135deg, #1f1f1f 0%, #1a1a1a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .game-flow-tab {
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ced4da;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) {
+  body.dark-mode .game-flow-tab:hover {
+    background-color: #333333;
+    color: #e9ecef;
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+body.dark-mode .game-flow-tab.active {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+  box-shadow: 0 3px 10px rgba(13, 110, 253, 0.4);
+}
+
+body.dark-mode .game-flow-header {
+  color: #adb5bd;
+}
+
+body.dark-mode .game-flow-loading {
+  color: #adb5bd;
+}
+
+body.dark-mode .game-flow-tooltip {
+  background-color: rgba(42, 42, 42, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .tooltip-time {
+  color: #adb5bd;
+}
+
+body.dark-mode .tooltip-score {
+  color: #e9ecef;
+}
+
+body.dark-mode .tooltip-description {
+  color: #ced4da;
+}
+
+body.dark-mode .game-flow-canvas {
+  background-color: #2a2a2a;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .box-score-section {
+  background-color: #252525;
+}
+
+body.dark-mode .box-score-header {
+  color: #adb5bd;
+}
+
+body.dark-mode .box-score-tab {
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ced4da;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) {
+  body.dark-mode .box-score-tab:hover {
+    background-color: #333333;
+    color: #e9ecef;
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+body.dark-mode .box-score-tab.active {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+  box-shadow: 0 3px 10px rgba(13, 110, 253, 0.4);
+}
+
+body.dark-mode .box-score-table th {
+  color: #adb5bd;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .box-score-table th.stat-group-left {
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .box-score-table th.stat-group-right {
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .box-score-table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #e9ecef;
+}
+
+body.dark-mode .box-score-table td.stat-group-left {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .box-score-table td.stat-group-right {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .box-score-table th.sticky-col,
+body.dark-mode .box-score-table td.sticky-col {
+  background-color: #252525;
+  box-shadow: 2px 0 3px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .box-score-table th.sticky-col {
+  background-color: #252525;
+}
+
+body.dark-mode .box-score-table td.player-name {
+  color: #e9ecef;
+  background-color: #252525;
+}
+
+body.dark-mode .box-score-table .totals-row td.sticky-col {
+  background-color: #1f1f1f;
+}
+
+body.dark-mode .player-position {
+  color: #868e96;
+}
+
+body.dark-mode .box-score-table .totals-row {
+  background-color: #1f1f1f;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .custom-padding {
@@ -112,6 +636,37 @@ body {
 
 .refresh-button.spinning svg {
   animation: spin 0.3s ease-in-out;
+}
+
+.dark-mode-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  height: 38px;
+  width: 38px;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+@media (hover: hover) {
+  .dark-mode-button:hover {
+    background-color: #f8f9fa;
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #495057;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+}
+
+.dark-mode-button:active {
+  transform: scale(0.95);
 }
 
 .filter-group {

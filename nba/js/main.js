@@ -2,6 +2,25 @@ const { createApp } = Vue
 
 const app = createApp({
   setup() {
+    // Dark mode state
+    const darkMode = Vue.ref(localStorage.getItem('darkMode') === 'true')
+
+    // Apply dark mode class on load
+    if (darkMode.value) {
+      document.body.classList.add('dark-mode')
+    }
+
+    const toggleDarkMode = () => {
+      darkMode.value = !darkMode.value
+      if (darkMode.value) {
+        document.body.classList.add('dark-mode')
+        localStorage.setItem('darkMode', 'true')
+      } else {
+        document.body.classList.remove('dark-mode')
+        localStorage.setItem('darkMode', 'false')
+      }
+    }
+
     // Get sorted team list for dropdown
     const teamList = Object.values(teamData).sort((a, b) =>
       a.simpleName.localeCompare(b.simpleName)
@@ -135,6 +154,8 @@ const app = createApp({
     }
 
     return {
+      darkMode: darkMode,
+      toggleDarkMode: toggleDarkMode,
       dates: displayedDates,
       todayString: todayString,
       selectedDate: selectedDate,
