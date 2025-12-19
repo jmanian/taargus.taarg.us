@@ -19,6 +19,9 @@ const app = createApp({
         document.body.classList.remove('dark-mode')
         localStorage.setItem('darkMode', 'false')
       }
+
+      // Dispatch event to trigger chart color updates in game-row components
+      document.dispatchEvent(new CustomEvent('dark-mode-changed'))
     }
 
     // Get sorted team list for dropdown

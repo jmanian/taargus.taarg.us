@@ -247,11 +247,13 @@ const GameRow = {
   mounted() {
     window.addEventListener('resize', this.handleResize)
     document.addEventListener('close-local-tooltips', this.handleCloseTooltip)
+    document.addEventListener('dark-mode-changed', this.handleDarkModeChange)
     this.initializeTeamColors()
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize)
     document.removeEventListener('close-local-tooltips', this.handleCloseTooltip)
+    document.removeEventListener('dark-mode-changed', this.handleDarkModeChange)
   },
   watch: {
     gameFlowData(newVal) {
@@ -341,17 +343,27 @@ const GameRow = {
         }, 200)
       }
     },
+    handleDarkModeChange() {
+      // Re-initialize team colors when dark mode changes
+      this.initializeTeamColors()
+      // Redraw chart if currently expanded and has data
+      if (this.isExpanded && this.gameFlowData) {
+        this.$nextTick(() => {
+          this.drawGameFlow()
+        })
+      }
+    },
     initializeTeamColors() {
       // Set team colors from game data if available
       let awayColor = this.game.awayTeamColor || '1e40af'  // default blue
       let homeColor = this.game.homeTeamColor || 'dc2626'  // default red
 
       if (this.game.awayTeamColor && this.game.homeTeamColor) {
-        // Prefer non-white colors - if primary is white/near-white, use alternate
-        if (this.isWhitish(awayColor) && this.game.awayTeamAltColor && !this.isWhitish(this.game.awayTeamAltColor)) {
+        // Prefer readable colors - if primary is unreadable (white in light mode, black in dark mode), use alternate
+        if (this.isUnreadableColor(awayColor) && this.game.awayTeamAltColor && !this.isUnreadableColor(this.game.awayTeamAltColor)) {
           awayColor = this.game.awayTeamAltColor
         }
-        if (this.isWhitish(homeColor) && this.game.homeTeamAltColor && !this.isWhitish(this.game.homeTeamAltColor)) {
+        if (this.isUnreadableColor(homeColor) && this.game.homeTeamAltColor && !this.isUnreadableColor(this.game.homeTeamAltColor)) {
           homeColor = this.game.homeTeamAltColor
         }
       }
@@ -370,7 +382,7 @@ const GameRow = {
       let homeColor = this.teamColors.home
 
       // If colors are too similar for chart visibility, use alternate for away team
-      if (this.game.awayTeamAltColor && !this.isWhitish(this.game.awayTeamAltColor) && this.areColorsSimilar(awayColor, homeColor)) {
+      if (this.game.awayTeamAltColor && !this.isUnreadableColor(this.game.awayTeamAltColor) && this.areColorsSimilar(awayColor, homeColor)) {
         awayColor = this.game.awayTeamAltColor
       }
 
@@ -387,6 +399,22 @@ const GameRow = {
       const b = parseInt(hexColor.substring(4, 6), 16)
       // Consider it whitish if all RGB values are above 240
       return r > 240 && g > 240 && b > 240
+    },
+    isBlackish(hexColor) {
+      // Check if color is black or very dark (near black)
+      if (!hexColor) return true
+      const r = parseInt(hexColor.substring(0, 2), 16)
+      const g = parseInt(hexColor.substring(2, 4), 16)
+      const b = parseInt(hexColor.substring(4, 6), 16)
+      // Consider it blackish if all RGB values are below 40
+      return r < 40 && g < 40 && b < 40
+    },
+    isDarkMode() {
+      return document.body.classList.contains('dark-mode')
+    },
+    isUnreadableColor(hexColor) {
+      // In light mode, avoid white colors; in dark mode, avoid black colors
+      return this.isDarkMode() ? this.isBlackish(hexColor) : this.isWhitish(hexColor)
     },
     toggleExpand() {
       this.isExpanded = !this.isExpanded
