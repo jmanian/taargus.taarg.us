@@ -2,26 +2,51 @@ const { createApp } = Vue
 
 const app = createApp({
   setup() {
-    // Dark mode state
-    const darkMode = Vue.ref(localStorage.getItem('darkMode') === 'true')
+    // Dark mode state: 'auto', 'light', or 'dark'
+    const darkModePreference = Vue.ref(localStorage.getItem('darkModePreference') || 'auto')
 
-    // Apply dark mode class on load
-    if (darkMode.value) {
-      document.body.classList.add('dark-mode')
-    }
+    // Computed: actual dark mode state based on preference and OS setting
+    const isDarkMode = Vue.computed(() => {
+      if (darkModePreference.value === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches
+      }
+      return darkModePreference.value === 'dark'
+    })
 
-    const toggleDarkMode = () => {
-      darkMode.value = !darkMode.value
-      if (darkMode.value) {
+    // Apply dark mode class based on current state
+    const applyDarkMode = () => {
+      if (isDarkMode.value) {
         document.body.classList.add('dark-mode')
-        localStorage.setItem('darkMode', 'true')
       } else {
         document.body.classList.remove('dark-mode')
-        localStorage.setItem('darkMode', 'false')
       }
-
       // Dispatch event to trigger chart color updates in game-row components
       document.dispatchEvent(new CustomEvent('dark-mode-changed'))
+    }
+
+    // Apply on load
+    applyDarkMode()
+
+    // Listen for OS dark mode changes when in auto mode
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    mediaQuery.addEventListener('change', () => {
+      if (darkModePreference.value === 'auto') {
+        applyDarkMode()
+      }
+    })
+
+    const toggleDarkMode = () => {
+      // Cycle through: auto -> light -> dark -> auto
+      if (darkModePreference.value === 'auto') {
+        darkModePreference.value = 'light'
+      } else if (darkModePreference.value === 'light') {
+        darkModePreference.value = 'dark'
+      } else {
+        darkModePreference.value = 'auto'
+      }
+
+      localStorage.setItem('darkModePreference', darkModePreference.value)
+      applyDarkMode()
     }
 
     // Get sorted team list for dropdown
@@ -157,7 +182,7 @@ const app = createApp({
     }
 
     return {
-      darkMode: darkMode,
+      darkModePreference: darkModePreference,
       toggleDarkMode: toggleDarkMode,
       dates: displayedDates,
       todayString: todayString,
