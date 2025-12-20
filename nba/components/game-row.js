@@ -379,7 +379,17 @@ const GameRow = {
       // Helper to score a combination (higher is better)
       const scoreCombination = (away, home) => {
         // Calculate similarity penalty (gradient, not binary)
-        const similarityPenalty = this.getColorSimilarityPenalty(away, home)
+        let similarityPenalty = this.getColorSimilarityPenalty(away, home)
+
+        // Additional penalty if both colors are in the same luminance zone
+        // (both very dark or both very light), even if they're different hues
+        const awayLum = this.getColorLuminance(away)
+        const homeLum = this.getColorLuminance(home)
+
+        if ((awayLum < 60 && homeLum < 60) || (awayLum > 200 && homeLum > 200)) {
+          // Both colors are in the same extreme zone - add penalty
+          similarityPenalty += 400
+        }
 
         // Sum individual color scores minus similarity penalty
         return scoreColor(away) + scoreColor(home) - similarityPenalty
