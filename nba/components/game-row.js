@@ -355,59 +355,97 @@ const GameRow = {
     },
     initializeTeamColors() {
       // Set team colors from game data if available
-      let awayColor = this.game.awayTeamColor || '1e40af'  // default blue
-      let homeColor = this.game.homeTeamColor || 'dc2626'  // default red
+      const awayPrimary = this.game.awayTeamColor || '1e40af'  // default blue
+      const homePrimary = this.game.homeTeamColor || 'dc2626'  // default red
+      const awayAlt = this.game.awayTeamAltColor
+      const homeAlt = this.game.homeTeamAltColor
 
-      if (this.game.awayTeamColor && this.game.homeTeamColor) {
-        // Prefer readable colors - if primary is unreadable (white in light mode, black in dark mode), use alternate
-        if (this.isUnreadableColor(awayColor) && this.game.awayTeamAltColor && !this.isUnreadableColor(this.game.awayTeamAltColor)) {
-          awayColor = this.game.awayTeamAltColor
-        }
-        if (this.isUnreadableColor(homeColor) && this.game.homeTeamAltColor && !this.isUnreadableColor(this.game.homeTeamAltColor)) {
-          homeColor = this.game.homeTeamAltColor
+      // Build all possible color combinations
+      const combinations = []
+      const isDark = this.isDarkMode()
+
+      // Helper to score a color (higher is better)
+      const scoreColor = (color) => {
+        const luminance = this.getColorLuminance(color)
+        if (isDark) {
+          // In dark mode: prefer lighter colors, heavily penalize very dark ones
+          return luminance < 80 ? luminance - 300 : luminance
+        } else {
+          // In light mode: prefer darker colors, heavily penalize very light ones
+          return luminance > 220 ? (255 - luminance) - 300 : (255 - luminance)
         }
       }
 
-      // For card borders, we always use the selected colors even if similar
+      // Helper to score a combination (higher is better)
+      const scoreCombination = (away, home) => {
+        // Calculate similarity penalty (gradient, not binary)
+        const similarityPenalty = this.getColorSimilarityPenalty(away, home)
+
+        // Sum individual color scores minus similarity penalty
+        return scoreColor(away) + scoreColor(home) - similarityPenalty
+      }
+
+      // Try all combinations
+      combinations.push({
+        away: awayPrimary,
+        home: homePrimary,
+        score: scoreCombination(awayPrimary, homePrimary)
+      })
+
+      if (awayAlt) {
+        combinations.push({
+          away: awayAlt,
+          home: homePrimary,
+          score: scoreCombination(awayAlt, homePrimary)
+        })
+      }
+
+      if (homeAlt) {
+        combinations.push({
+          away: awayPrimary,
+          home: homeAlt,
+          score: scoreCombination(awayPrimary, homeAlt)
+        })
+      }
+
+      if (awayAlt && homeAlt) {
+        combinations.push({
+          away: awayAlt,
+          home: homeAlt,
+          score: scoreCombination(awayAlt, homeAlt)
+        })
+      }
+
+      // Pick the best combination
+      const best = combinations.sort((a, b) => b.score - a.score)[0]
+
       this.teamColors = {
-        away: awayColor,
-        home: homeColor
+        away: best.away,
+        home: best.home
       }
     },
     getChartColors() {
-      // For charts, we need colors to be distinguishable
-      if (!this.teamColors) return { away: '1e40af', home: 'dc2626' }
-
-      let awayColor = this.teamColors.away
-      let homeColor = this.teamColors.home
-
-      // If colors are too similar for chart visibility, use alternate for away team
-      if (this.game.awayTeamAltColor && !this.isUnreadableColor(this.game.awayTeamAltColor) && this.areColorsSimilar(awayColor, homeColor)) {
-        awayColor = this.game.awayTeamAltColor
-      }
-
-      return {
-        away: awayColor,
-        home: homeColor
-      }
+      // Chart colors are now determined in initializeTeamColors
+      return this.teamColors || { away: '1e40af', home: 'dc2626' }
+    },
+    getColorLuminance(hexColor) {
+      // Calculate relative luminance of a color
+      if (!hexColor) return 0
+      const r = parseInt(hexColor.substring(0, 2), 16)
+      const g = parseInt(hexColor.substring(2, 4), 16)
+      const b = parseInt(hexColor.substring(4, 6), 16)
+      // Weighted luminance formula
+      return (0.299 * r) + (0.587 * g) + (0.114 * b)
     },
     isWhitish(hexColor) {
       // Check if color is white or very light (near white)
-      if (!hexColor) return true
-      const r = parseInt(hexColor.substring(0, 2), 16)
-      const g = parseInt(hexColor.substring(2, 4), 16)
-      const b = parseInt(hexColor.substring(4, 6), 16)
-      // Consider it whitish if all RGB values are above 240
-      return r > 240 && g > 240 && b > 240
+      // Luminance > 220 is considered too light for light backgrounds
+      return this.getColorLuminance(hexColor) > 220
     },
     isBlackish(hexColor) {
       // Check if color is black or very dark (near black)
-      if (!hexColor) return true
-      const r = parseInt(hexColor.substring(0, 2), 16)
-      const g = parseInt(hexColor.substring(2, 4), 16)
-      const b = parseInt(hexColor.substring(4, 6), 16)
-      // Consider it blackish if all RGB values are below 40
-      return r < 40 && g < 40 && b < 40
+      // Luminance < 80 is considered too dark for dark backgrounds
+      return this.getColorLuminance(hexColor) < 80
     },
     isDarkMode() {
       return document.body.classList.contains('dark-mode')
@@ -530,7 +568,7 @@ const GameRow = {
       this.hoveredPlayIndex = null
       this.redrawChart()
     },
-    areColorsSimilar(hex1, hex2) {
+    getColorDistance(hex1, hex2) {
       // Convert hex to RGB
       const hexToRgb = (hex) => {
         const clean = hex.replace('#', '')
@@ -545,15 +583,39 @@ const GameRow = {
       const color2 = hexToRgb(hex2)
 
       // Calculate Euclidean distance in RGB space
-      const distance = Math.sqrt(
+      return Math.sqrt(
         Math.pow(color1.r - color2.r, 2) +
         Math.pow(color1.g - color2.g, 2) +
         Math.pow(color1.b - color2.b, 2)
       )
+    },
+    getColorSimilarityPenalty(hex1, hex2) {
+      const distance = this.getColorDistance(hex1, hex2)
 
-      // Colors are similar if distance is less than 130 (out of max ~441)
-      // This threshold can be adjusted based on testing
-      return distance < 130
+      // Gradient penalty based on distance
+      // Different enough (>= 80): No penalty (orange vs gold is ~82)
+      // Somewhat similar (50-80): Moderate penalty
+      // Very similar (< 50): Heavy penalty (e.g. two blues)
+      if (distance >= 80) {
+        // Different enough - no penalty
+        return 0
+      } else if (distance >= 50) {
+        // Somewhat similar - moderate penalty that increases as colors get closer
+        // At distance 50: penalty = 0
+        // At distance 80: penalty = 0
+        // Linear gradient: 0 to 300
+        return (80 - distance) * 10
+      } else {
+        // Very similar colors - steep penalty
+        // At distance 0: penalty = 800
+        // At distance 50: penalty = 300
+        return 300 + (50 - distance) * 10
+      }
+    },
+    areColorsSimilar(hex1, hex2) {
+      // Legacy method - still used for reference
+      // Colors are similar if distance is less than 80
+      return this.getColorDistance(hex1, hex2) < 80
     },
     async fetchGameFlow() {
       this.gameFlowLoading = true
