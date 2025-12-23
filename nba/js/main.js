@@ -140,11 +140,7 @@ const app = createApp({
     const getTeamLogoURL = (teamAbbr) => {
       // Depend on isDarkMode so logos update when mode changes
       const mode = isDarkMode.value ? 'D' : 'L'
-      if (!teamAbbr || !teamData[teamAbbr]) {
-        return ''
-      }
-      const id = teamData[teamAbbr].teamId
-      return `https://cdn.nba.com/logos/nba/${id}/primary/${mode}/logo.svg`
+      return teamImageURL(teamAbbr, mode)
     }
 
     const handleDateClick = (e) => {

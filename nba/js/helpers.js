@@ -1,11 +1,9 @@
 const DateTime = luxon.DateTime;
 
-function teamImageURL(tricode) {
+function teamImageURL(tricode, mode = 'L') {
   if (!tricode || !teamData[tricode]) {
     return '';
   }
-  // Use dark mode logos (/D/) when in dark mode, otherwise light mode logos (/L/)
-  const mode = document.body.classList.contains('dark-mode') ? 'D' : 'L';
   return 'https://cdn.nba.com/logos/nba/' + teamId(tricode) + '/primary/' + mode + '/logo.svg';
 }
 

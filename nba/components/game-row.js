@@ -1357,14 +1357,12 @@ const GameRow = {
     awayImageURL: function () {
       // Depend on isDarkMode so this recomputes when dark mode changes
       const mode = this.isDarkMode ? 'D' : 'L'
-      const teamId = this.game.awayTeam && teamData[this.game.awayTeam] ? teamData[this.game.awayTeam].teamId : null
-      return teamId ? `https://cdn.nba.com/logos/nba/${teamId}/primary/${mode}/logo.svg` : ''
+      return teamImageURL(this.game.awayTeam, mode)
     },
     homeImageURL: function () {
       // Depend on isDarkMode so this recomputes when dark mode changes
       const mode = this.isDarkMode ? 'D' : 'L'
-      const teamId = this.game.homeTeam && teamData[this.game.homeTeam] ? teamData[this.game.homeTeam].teamId : null
-      return teamId ? `https://cdn.nba.com/logos/nba/${teamId}/primary/${mode}/logo.svg` : ''
+      return teamImageURL(this.game.homeTeam, mode)
     },
     hasExpandableContent: function () {
       return !!(this.game.spreadFormatted || this.game.total || this.game.recap || this.hasStats || this.hasLeaders)

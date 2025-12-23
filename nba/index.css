@@ -140,7 +140,7 @@ body.dark-mode .team-option:active {
 }
 
 body.dark-mode .team-option-logo {
-  background: white;
+  background: #2a2a2a;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
@@ -169,7 +169,7 @@ body.dark-mode .filter-clear:active {
 }
 
 body.dark-mode .team-logo-small {
-  background-color: white;
+  background-color: #2a2a2a;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
