@@ -67,6 +67,10 @@ body.dark-mode .filter-group:active {
   background-color: #3a3a3a;
 }
 
+body.dark-mode .filter-group svg {
+  color: #adb5bd;
+}
+
 body.dark-mode .filter-label {
   color: #adb5bd;
 }
