@@ -2316,6 +2316,23 @@ body.dark-mode .negative-diff {
   color: #e57373;
 }
 
+/* Playoff cutoff borders */
+.standings-table tbody tr.playoff-cutoff {
+  border-bottom: 2px dotted #6c757d !important;
+}
+
+body.dark-mode .standings-table tbody tr.playoff-cutoff {
+  border-bottom: 2px dotted #adb5bd !important;
+}
+
+.standings-table tbody tr.playin-cutoff {
+  border-bottom: 2px solid #6c757d !important;
+}
+
+body.dark-mode .standings-table tbody tr.playin-cutoff {
+  border-bottom: 2px solid #adb5bd !important;
+}
+
 @media (max-width: 768px) {
   .conference-title {
     font-size: 18px;

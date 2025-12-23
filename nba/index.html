@@ -145,8 +145,8 @@
                         <th class="team-col">{{ conference.name.includes('Eastern') ? 'EAST' : 'WEST' }}</th>
                         <th>W</th>
                         <th>L</th>
-                        <th>PCT</th>
                         <th>GB</th>
+                        <th>PCT</th>
                         <th>HOME</th>
                         <th>AWAY</th>
                         <th>DIV</th>
@@ -159,7 +159,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(entry, index) in getSortedStandings(conference.standings.entries)" :key="entry.team.id">
+                      <tr v-for="(entry, index) in getSortedStandings(conference.standings.entries)" :key="entry.team.id" :class="{'playoff-cutoff': index === 5, 'playin-cutoff': index === 9}">
                         <td class="team-col">
                           <span class="rank-number">{{ index + 1 }}</span>
                           <img :src="getStandingsTeamLogo(entry.team.logos)" class="standings-team-logo" :alt="entry.team.abbreviation" />
@@ -167,8 +167,8 @@
                         </td>
                         <td>{{ getStatValue(entry.stats, 'wins') }}</td>
                         <td>{{ getStatValue(entry.stats, 'losses') }}</td>
-                        <td>{{ getStatValue(entry.stats, 'winPercent') }}</td>
                         <td>{{ getStatValue(entry.stats, 'gamesBehind') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'winPercent') }}</td>
                         <td>{{ getStatValue(entry.stats, 'Home') }}</td>
                         <td>{{ getStatValue(entry.stats, 'Road') }}</td>
                         <td>{{ getStatValue(entry.stats, 'vs. Div.') }}</td>
