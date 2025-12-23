@@ -2020,14 +2020,13 @@ body.dark-mode .standings-button {
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 10px;
   height: 38px;
-  padding: 0 16px;
+  width: 38px;
   cursor: pointer;
   color: #6c757d;
+  padding: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
   flex-shrink: 0;
-  font-size: 14px;
-  font-weight: 500;
 }
 
 @media (hover: hover) {
