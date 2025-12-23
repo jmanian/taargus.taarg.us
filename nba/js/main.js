@@ -189,6 +189,29 @@ const app = createApp({
       localStorage.setItem('gameFlowChartMode', mode)
     }
 
+    const getStatValue = (stats, statName) => {
+      const stat = stats.find(s => s.name === statName)
+      return stat ? stat.displayValue : '-'
+    }
+
+    const getStandingsTeamLogo = (logos) => {
+      if (!logos || logos.length === 0) return ''
+      // Prefer dark mode logo if available and in dark mode
+      const mode = isDarkMode.value ? 'dark' : 'default'
+      const preferredLogo = logos.find(logo => logo.rel && logo.rel.includes(mode))
+      return preferredLogo ? preferredLogo.href : logos[0].href
+    }
+
+    const getSortedStandings = (entries) => {
+      if (!entries) return []
+      // Sort by games behind (GB) ascending
+      return [...entries].sort((a, b) => {
+        const gbA = parseFloat(getStatValue(a.stats, 'gamesBehind')) || 0
+        const gbB = parseFloat(getStatValue(b.stats, 'gamesBehind')) || 0
+        return gbA - gbB
+      })
+    }
+
     // Provide dark mode state to all child components
     Vue.provide('isDarkMode', isDarkMode)
 
@@ -218,7 +241,15 @@ const app = createApp({
       forceRefresh: forceRefresh,
       refreshTrigger: refreshTrigger,
       chartMode: chartMode,
-      handleChartModeChange: handleChartModeChange
+      handleChartModeChange: handleChartModeChange,
+      viewMode: viewMode,
+      standingsData: standingsData,
+      standingsLoading: standingsLoading,
+      showStandings: showStandings,
+      showGames: showGames,
+      getStatValue: getStatValue,
+      getStandingsTeamLogo: getStandingsTeamLogo,
+      getSortedStandings: getSortedStandings
     }
   },
   components: {

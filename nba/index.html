@@ -33,7 +33,7 @@
     <!-- root element -->
     <div id="app">
       <div class="container-fluid custom-padding">
-        <div class="dates-container">
+        <div class="dates-container" :class="{'standings-view': viewMode === 'standings'}">
           <div class="filter-bar">
             <button class="refresh-button" @click.stop="forceRefresh" title="Refresh data" type="button">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -79,7 +79,20 @@
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
               </svg>
             </button>
-            <div class="filter-group" @click="handleTeamFilterClick">
+            <button v-if="viewMode === 'games'" class="standings-button" @click.stop="showStandings" title="View standings" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"/>
+                <line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/>
+                <line x1="3" y1="12" x2="3.01" y2="12"/>
+                <line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+            </button>
+            <button v-if="viewMode === 'standings'" class="games-button" @click.stop="showGames" title="View games" type="button">
+              Games
+            </button>
+            <div v-if="viewMode === 'games'" class="filter-group" @click="handleTeamFilterClick">
                 <label class="filter-label">Teams</label>
                 <div v-if="selectedTeams.length > 0" class="filter-chip-single">
                   <div class="team-logos">
@@ -104,15 +117,69 @@
                   </div>
                 </div>
               </div>
-            <div class="filter-group" @click="handleDateClick">
+            <div v-if="viewMode === 'games'" class="filter-group" @click="handleDateClick">
               <label class="filter-label">Date</label>
               <input type="date" v-model="selectedDate" ref="dateInput" class="date-input-always-hidden" />
               <span v-if="selectedDate" class="filter-value">{{ formatSelectedDate }}</span>
               <button v-if="selectedDate" @click.stop="clearDateSelection" class="filter-clear">✕</button>
             </div>
           </div>
-          <a v-if="!selectedDate" href="#" @click.prevent="loadPrevious" class="load-link">↑ Load previous week</a>
+          <div v-if="viewMode === 'standings'" class="standings-container">
+            <div v-if="standingsLoading" class="standings-loading">Loading standings...</div>
+            <div v-else-if="standingsData">
+              <div v-for="conference in standingsData.children" :key="conference.id" class="conference-section">
+                <h3 class="conference-title">{{ conference.name }}</h3>
+                <div class="standings-table-wrapper">
+                  <table class="standings-table">
+                    <thead>
+                      <tr>
+                        <th class="rank-col">#</th>
+                        <th class="team-col">Team</th>
+                        <th>W</th>
+                        <th>L</th>
+                        <th>PCT</th>
+                        <th>GB</th>
+                        <th>HOME</th>
+                        <th>AWAY</th>
+                        <th>DIV</th>
+                        <th>CONF</th>
+                        <th>PPG</th>
+                        <th>OPP PPG</th>
+                        <th>DIFF</th>
+                        <th>STRK</th>
+                        <th>L10</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(entry, index) in getSortedStandings(conference.standings.entries)" :key="entry.team.id">
+                        <td class="rank-col">{{ index + 1 }}</td>
+                        <td class="team-col">
+                          <img :src="getStandingsTeamLogo(entry.team.logos)" class="standings-team-logo" :alt="entry.team.abbreviation" />
+                          <span class="team-name-text">{{ entry.team.name }}</span>
+                        </td>
+                        <td>{{ getStatValue(entry.stats, 'wins') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'losses') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'winPercent') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'gamesBehind') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'Home') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'Road') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'vs. Div.') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'vs. Conf.') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'avgPointsFor') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'avgPointsAgainst') }}</td>
+                        <td :class="{'positive-diff': parseFloat(getStatValue(entry.stats, 'differential')) > 0, 'negative-diff': parseFloat(getStatValue(entry.stats, 'differential')) < 0}">{{ getStatValue(entry.stats, 'differential') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'streak') }}</td>
+                        <td>{{ getStatValue(entry.stats, 'Last Ten Games') }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <a v-if="viewMode === 'games' && !selectedDate" href="#" @click.prevent="loadPrevious" class="load-link">↑ Load previous week</a>
           <date-box
+            v-if="viewMode === 'games'"
             v-for="dateData in dates"
             :key="dateData.dateString"
             :date-data="dateData"
@@ -122,7 +189,7 @@
             :chart-mode="chartMode"
             @chart-mode-change="handleChartModeChange">
           </date-box>
-          <a v-if="!selectedDate" href="#" @click.prevent="loadMore" class="load-link">Load more ↓</a>
+          <a v-if="viewMode === 'games' && !selectedDate" href="#" @click.prevent="loadMore" class="load-link">Load more ↓</a>
         </div>
       </div>
     </div>

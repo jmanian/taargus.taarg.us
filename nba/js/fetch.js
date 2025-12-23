@@ -15,6 +15,9 @@ const selectedTeams = ref(initialTeams)
 const teamDropdownOpen = ref(false)
 const refreshTrigger = ref(0)
 const chartMode = ref(localStorage.getItem('gameFlowChartMode') || 'lead')
+const viewMode = ref('games')
+const standingsData = ref(null)
+const standingsLoading = ref(false)
 let isNavigating = false
 
 function initializeDates() {
@@ -313,4 +316,35 @@ function fetchGamesForDateIntoArray(date, targetArray) {
       }
     }
   })
+}
+
+function fetchStandings() {
+  standingsLoading.value = true
+  const url = 'https://site.api.espn.com/apis/v2/sports/basketball/nba/standings'
+
+  jQuery.ajax({
+    url: url,
+    dataType: 'json',
+    cache: false,
+    success: function (data) {
+      standingsData.value = data
+      standingsLoading.value = false
+      console.log('Standings loaded successfully')
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.error('Failed to fetch standings:', textStatus, errorThrown)
+      standingsLoading.value = false
+    }
+  })
+}
+
+function showStandings() {
+  viewMode.value = 'standings'
+  if (!standingsData.value) {
+    fetchStandings()
+  }
+}
+
+function showGames() {
+  viewMode.value = 'games'
 }
