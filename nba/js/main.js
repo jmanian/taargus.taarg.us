@@ -182,6 +182,11 @@ const app = createApp({
       // Use the same logic as automatic polling - only refresh active games
       // includeSelectedDate=true ensures selected date games are also refreshed
       pollForUpdates(true)
+
+      // If in standings mode, also refresh standings
+      if (viewMode.value === 'standings') {
+        fetchStandings()
+      }
     }
 
     const handleChartModeChange = (mode) => {

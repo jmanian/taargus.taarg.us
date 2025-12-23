@@ -133,8 +133,8 @@
             </button>
           </div>
           <div v-if="viewMode === 'standings'" class="standings-container">
-            <div v-if="standingsLoading" class="standings-loading">Loading standings...</div>
-            <div v-else-if="standingsData">
+            <div v-if="standingsLoading && !standingsData" class="standings-loading">Loading standings...</div>
+            <div v-if="standingsData">
               <div v-for="conference in standingsData.children" :key="conference.id" class="conference-section">
                 <h3 class="conference-title">{{ conference.name }}</h3>
                 <div class="standings-table-wrapper">

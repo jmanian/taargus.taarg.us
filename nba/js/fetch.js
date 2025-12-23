@@ -340,9 +340,7 @@ function fetchStandings() {
 
 function showStandings() {
   viewMode.value = 'standings'
-  if (!standingsData.value) {
-    fetchStandings()
-  }
+  fetchStandings()
 }
 
 function showGames() {
