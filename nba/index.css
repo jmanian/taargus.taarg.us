@@ -1988,6 +1988,13 @@ body.dark-mode .box-score-table .totals-row {
   min-width: 38px;
   width: auto;
   padding: 8px 12px;
+  color: #6c757d;
+}
+
+.date-filter:not(:has(.filter-value)) {
+  width: 38px;
+  padding: 0;
+  justify-content: center;
 }
 
 .date-clear-overlay {
