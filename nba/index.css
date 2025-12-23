@@ -992,6 +992,12 @@ body.dark-mode .box-score-table .totals-row {
   pointer-events: auto;
   width: 0;
   height: 0;
+  z-index: 0;
+}
+
+.date-filter .filter-clear {
+  position: relative;
+  z-index: 10;
 }
 
 .date-box {
@@ -1977,53 +1983,11 @@ body.dark-mode .box-score-table .totals-row {
   }
 }
 
-/* Date button */
-.date-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 10px;
-  height: 38px;
-  width: 38px;
-  cursor: pointer;
-  color: #6c757d;
-  padding: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  position: relative;
-}
-
-@media (hover: hover) {
-  .date-button:hover {
-    background-color: #f8f9fa;
-    border-color: rgba(0, 0, 0, 0.12);
-    color: #495057;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
-  }
-}
-
-.date-button:active {
-  transform: scale(0.95);
-}
-
-body.dark-mode .date-button {
-  background-color: #2a2a2a;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #adb5bd;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-@media (hover: hover) {
-  body.dark-mode .date-button:hover {
-    background-color: #333333;
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #dee2e6;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  }
+/* Date filter - button-like when empty, filter-like when selected */
+.date-filter {
+  min-width: 38px;
+  width: auto;
+  padding: 8px 12px;
 }
 
 .date-clear-overlay {
