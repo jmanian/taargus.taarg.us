@@ -229,6 +229,11 @@ const GameRow = {
   template: gameRowTemplate,
   props: ['game', 'refreshTrigger', 'chartMode'],
   emits: ['chart-mode-change'],
+  inject: {
+    isDarkMode: {
+      default: () => Vue.ref(false)
+    }
+  },
   data() {
     return {
       isMobile: window.innerWidth <= 768,
@@ -247,13 +252,11 @@ const GameRow = {
   mounted() {
     window.addEventListener('resize', this.handleResize)
     document.addEventListener('close-local-tooltips', this.handleCloseTooltip)
-    document.addEventListener('dark-mode-changed', this.handleDarkModeChange)
     this.initializeTeamColors()
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize)
     document.removeEventListener('close-local-tooltips', this.handleCloseTooltip)
-    document.removeEventListener('dark-mode-changed', this.handleDarkModeChange)
   },
   watch: {
     gameFlowData(newVal) {
@@ -284,6 +287,19 @@ const GameRow = {
       if (newVal !== oldVal && this.isExpanded && this.gameFlowData && !this.gameFlowLoading && this.started) {
         this.fetchGameFlow()
       }
+    },
+    isDarkMode: {
+      handler() {
+        // Re-initialize colors when dark mode changes
+        this.initializeTeamColors()
+        // Redraw chart if currently expanded
+        if (this.isExpanded && this.gameFlowData) {
+          this.$nextTick(() => {
+            this.drawGameFlow()
+          })
+        }
+      },
+      deep: true
     },
     chartMode(newVal, oldVal) {
       // When chart mode changes from outside (other game cards), redraw the chart
@@ -343,16 +359,6 @@ const GameRow = {
         }, 200)
       }
     },
-    handleDarkModeChange() {
-      // Re-initialize team colors when dark mode changes
-      this.initializeTeamColors()
-      // Redraw chart if currently expanded and has data
-      if (this.isExpanded && this.gameFlowData) {
-        this.$nextTick(() => {
-          this.drawGameFlow()
-        })
-      }
-    },
     initializeTeamColors() {
       // Set team colors from game data if available
       const awayPrimary = this.game.awayTeamColor || '1e40af'  // default blue
@@ -362,7 +368,7 @@ const GameRow = {
 
       // Build all possible color combinations
       const combinations = []
-      const isDark = this.isDarkMode()
+      const isDark = this.isDarkMode
 
       // Helper to score a color (higher is better)
       const scoreColor = (color) => {
@@ -478,12 +484,9 @@ const GameRow = {
       // Luminance < 80 is considered too dark for dark backgrounds
       return this.getColorLuminance(hexColor) < 80
     },
-    isDarkMode() {
-      return document.body.classList.contains('dark-mode')
-    },
     isUnreadableColor(hexColor) {
       // In light mode, avoid white colors; in dark mode, avoid black colors
-      return this.isDarkMode() ? this.isBlackish(hexColor) : this.isWhitish(hexColor)
+      return this.isDarkMode ? this.isBlackish(hexColor) : this.isWhitish(hexColor)
     },
     toggleExpand() {
       this.isExpanded = !this.isExpanded
@@ -1352,10 +1355,16 @@ const GameRow = {
       }
     },
     awayImageURL: function () {
-      return teamImageURL(this.game.awayTeam)
+      // Depend on isDarkMode so this recomputes when dark mode changes
+      const mode = this.isDarkMode ? 'D' : 'L'
+      const teamId = this.game.awayTeam && teamData[this.game.awayTeam] ? teamData[this.game.awayTeam].teamId : null
+      return teamId ? `https://cdn.nba.com/logos/nba/${teamId}/primary/${mode}/logo.svg` : ''
     },
     homeImageURL: function () {
-      return teamImageURL(this.game.homeTeam)
+      // Depend on isDarkMode so this recomputes when dark mode changes
+      const mode = this.isDarkMode ? 'D' : 'L'
+      const teamId = this.game.homeTeam && teamData[this.game.homeTeam] ? teamData[this.game.homeTeam].teamId : null
+      return teamId ? `https://cdn.nba.com/logos/nba/${teamId}/primary/${mode}/logo.svg` : ''
     },
     hasExpandableContent: function () {
       return !!(this.game.spreadFormatted || this.game.total || this.game.recap || this.hasStats || this.hasLeaders)

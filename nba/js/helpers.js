@@ -4,7 +4,9 @@ function teamImageURL(tricode) {
   if (!tricode || !teamData[tricode]) {
     return '';
   }
-  return 'https://cdn.nba.com/logos/nba/' + teamId(tricode) + '/primary/L/logo.svg';
+  // Use dark mode logos (/D/) when in dark mode, otherwise light mode logos (/L/)
+  const mode = document.body.classList.contains('dark-mode') ? 'D' : 'L';
+  return 'https://cdn.nba.com/logos/nba/' + teamId(tricode) + '/primary/' + mode + '/logo.svg';
 }
 
 function teamId(tricode) {

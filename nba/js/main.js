@@ -138,7 +138,13 @@ const app = createApp({
     }
 
     const getTeamLogoURL = (teamAbbr) => {
-      return teamImageURL(teamAbbr)
+      // Depend on isDarkMode so logos update when mode changes
+      const mode = isDarkMode.value ? 'D' : 'L'
+      if (!teamAbbr || !teamData[teamAbbr]) {
+        return ''
+      }
+      const id = teamData[teamAbbr].teamId
+      return `https://cdn.nba.com/logos/nba/${id}/primary/${mode}/logo.svg`
     }
 
     const handleDateClick = (e) => {
@@ -187,8 +193,12 @@ const app = createApp({
       localStorage.setItem('gameFlowChartMode', mode)
     }
 
+    // Provide dark mode state to all child components
+    Vue.provide('isDarkMode', isDarkMode)
+
     return {
       darkModePreference: darkModePreference,
+      isDarkMode: isDarkMode,
       toggleDarkMode: toggleDarkMode,
       dates: displayedDates,
       todayString: todayString,
