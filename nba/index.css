@@ -2352,6 +2352,11 @@ body.dark-mode .negative-diff {
     margin: 0 -8px;
     border-radius: 10px;
     max-width: calc(100% + 16px);
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .standings-table-wrapper::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
   }
 
   .standings-table {
