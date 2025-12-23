@@ -5,7 +5,8 @@
       "Bash(curl -s \"https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=401809834\")",
       "Bash(sips:*)",
       "Bash(curl:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "WebFetch(domain:www.sportspals.fun)"
     ],
     "deny": [],
     "ask": []

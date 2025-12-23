@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="index.css?v=1765248431" />
+    <link rel="stylesheet" type="text/css" href="index.css?v=1766503608" />
 
     <!-- Favicon and icons -->
     <link rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png" />
@@ -138,8 +138,7 @@
                   <table class="standings-table">
                     <thead>
                       <tr>
-                        <th class="rank-col">#</th>
-                        <th class="team-col">Team</th>
+                        <th class="team-col">{{ conference.name.includes('Eastern') ? 'EAST' : 'WEST' }}</th>
                         <th>W</th>
                         <th>L</th>
                         <th>PCT</th>
@@ -157,8 +156,8 @@
                     </thead>
                     <tbody>
                       <tr v-for="(entry, index) in getSortedStandings(conference.standings.entries)" :key="entry.team.id">
-                        <td class="rank-col">{{ index + 1 }}</td>
                         <td class="team-col">
+                          <span class="rank-number">{{ index + 1 }}</span>
                           <img :src="getStandingsTeamLogo(entry.team.logos)" class="standings-team-logo" :alt="entry.team.abbreviation" />
                           <span class="team-name-text">{{ entry.team.name }}</span>
                         </td>
@@ -200,10 +199,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-    <script src="playoffs/data/teams.js?v=1765248973"></script>
-    <script src="js/helpers.js?v=1765248973"></script>
-    <script src="js/espn.js?v=1765248973"></script>
-    <script src="js/fetch.js?v=1765248973"></script>
-    <script src="js/main.js?v=1765248973"></script>
+    <script src="playoffs/data/teams.js?v=1766463947"></script>
+    <script src="js/helpers.js?v=1766463947"></script>
+    <script src="js/espn.js?v=1766463947"></script>
+    <script src="js/fetch.js?v=1766463947"></script>
+    <script src="js/main.js?v=1766463947"></script>
   </body>
 </html>

@@ -2094,15 +2094,7 @@ body.dark-mode .standings-loading {
 }
 
 .conference-title {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 16px;
-  margin-top: 0;
-  color: #212529;
-}
-
-body.dark-mode .conference-title {
-  color: #e9ecef;
+  display: none;
 }
 
 .standings-table-wrapper {
@@ -2153,11 +2145,6 @@ body.dark-mode .standings-table th {
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-.standings-table th.rank-col {
-  width: 40px;
-  text-align: center;
-}
-
 .standings-table th.team-col {
   text-align: left;
   min-width: 200px;
@@ -2194,20 +2181,22 @@ body.dark-mode .standings-table td {
   color: #e9ecef;
 }
 
-.standings-table td.rank-col {
-  font-weight: 700;
-  color: #6c757d;
-}
-
-body.dark-mode .standings-table td.rank-col {
-  color: #adb5bd;
-}
-
 .standings-table td.team-col {
   text-align: left;
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.rank-number {
+  font-weight: 700;
+  color: #6c757d;
+  min-width: 24px;
+  text-align: center;
+}
+
+body.dark-mode .rank-number {
+  color: #adb5bd;
 }
 
 .standings-team-logo {
@@ -2257,6 +2246,7 @@ body.dark-mode .negative-diff {
 
   .standings-table-wrapper {
     overflow-x: auto;
+    overflow-y: visible;
     -webkit-overflow-scrolling: touch;
     margin: 0 -8px;
     border-radius: 10px;
@@ -2266,6 +2256,30 @@ body.dark-mode .negative-diff {
   .standings-table {
     font-size: 11px;
     min-width: 700px;
+    border-collapse: collapse;
+  }
+
+  .standings-table thead {
+    position: static;
+  }
+
+  .standings-table thead th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: #f8f9fa;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  body.dark-mode .standings-table thead th {
+    background-color: #1f1f1f;
+  }
+
+  /* Team column header needs highest z-index since it's sticky both ways */
+  .standings-table thead th.team-col {
+    z-index: 20;
   }
 
   .standings-table th,
@@ -2277,63 +2291,62 @@ body.dark-mode .negative-diff {
     font-size: 10px;
   }
 
-  /* Sticky rank column */
-  .standings-table th.rank-col,
-  .standings-table td.rank-col {
-    position: sticky;
-    left: 0;
-    z-index: 21;
-    background-color: #ffffff;
-    min-width: 32px;
-    max-width: 32px;
-    padding-left: 6px;
-    padding-right: 6px;
-  }
-
-  body.dark-mode .standings-table th.rank-col,
-  body.dark-mode .standings-table td.rank-col {
-    background-color: #2a2a2a;
-  }
-
-  body.dark-mode .standings-table thead th.rank-col {
-    background-color: #1f1f1f;
-  }
-
-  /* Sticky team column */
+  /* Team column as leftmost sticky column (like box score player names) */
   .standings-table th.team-col,
   .standings-table td.team-col {
     position: sticky;
-    left: 32px;
-    z-index: 20;
-    background-color: #ffffff;
-    box-shadow: 2px 0 3px rgba(0, 0, 0, 0.08);
-    min-width: 48px;
-    max-width: 48px;
+    left: 0;
+    z-index: 10;
+    min-width: 60px;
+    max-width: 60px;
+    box-shadow: 2px 0 3px rgba(0, 0, 0, 0.05);
     padding-left: 6px;
     padding-right: 6px;
   }
 
-  body.dark-mode .standings-table th.team-col,
+  .standings-table th.team-col {
+    background-color: #f8f9fa;
+    width: 60px;
+    text-align: center;
+  }
+
+  .standings-table td.team-col {
+    background-color: #ffffff;
+    width: 60px;
+  }
+
+  body.dark-mode .standings-table th.team-col {
+    background-color: #1f1f1f;
+    box-shadow: 2px 0 3px rgba(0, 0, 0, 0.4);
+  }
+
   body.dark-mode .standings-table td.team-col {
     background-color: #2a2a2a;
     box-shadow: 2px 0 3px rgba(0, 0, 0, 0.4);
   }
 
-  body.dark-mode .standings-table thead th.team-col {
-    background-color: #1f1f1f;
-  }
-
-  .standings-team-logo {
-    width: 28px;
-    height: 28px;
-  }
-
   .standings-table td.team-col {
-    gap: 0;
-    justify-content: center;
+    display: table-cell;
+    text-align: center;
+    white-space: nowrap;
   }
 
   .team-name-text {
     display: none;
+  }
+
+  .rank-number {
+    display: inline-block;
+    min-width: 16px;
+    font-size: 10px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  .standings-team-logo {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
   }
 }
