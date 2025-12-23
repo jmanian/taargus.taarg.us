@@ -2264,13 +2264,10 @@ body.dark-mode .negative-diff {
   }
 
   .standings-table thead th {
-    position: -webkit-sticky;
     position: sticky;
     top: 0;
     z-index: 3;
     background-color: #f8f9fa;
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
   }
 
   body.dark-mode .standings-table thead th {
@@ -2299,7 +2296,6 @@ body.dark-mode .negative-diff {
     z-index: 10;
     min-width: 60px;
     max-width: 60px;
-    box-shadow: 2px 0 3px rgba(0, 0, 0, 0.05);
     padding-left: 6px;
     padding-right: 6px;
   }
@@ -2308,11 +2304,16 @@ body.dark-mode .negative-diff {
     background-color: #f8f9fa;
     width: 60px;
     text-align: center;
+    box-shadow: 2px 0 3px rgba(0, 0, 0, 0.05);
   }
 
   .standings-table td.team-col {
     background-color: #ffffff;
     width: 60px;
+    display: table-cell;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 2px 0 3px rgba(0, 0, 0, 0.05);
   }
 
   body.dark-mode .standings-table th.team-col {
@@ -2323,12 +2324,6 @@ body.dark-mode .negative-diff {
   body.dark-mode .standings-table td.team-col {
     background-color: #2a2a2a;
     box-shadow: 2px 0 3px rgba(0, 0, 0, 0.4);
-  }
-
-  .standings-table td.team-col {
-    display: table-cell;
-    text-align: center;
-    white-space: nowrap;
   }
 
   .team-name-text {
