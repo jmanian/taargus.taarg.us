@@ -429,6 +429,27 @@ const GameRow = {
       // Pick the best combination
       const best = combinations.sort((a, b) => b.score - a.score)[0]
 
+      // Debug logging (enabled with ?debugColors query param)
+      const urlParams = new URLSearchParams(window.location.search)
+      if (urlParams.has('debugColors')) {
+        console.log(`🎨 Color selection for ${this.game.awayTeam} @ ${this.game.homeTeam}:`)
+        console.log('Available colors:', {
+          awayPrimary,
+          awayAlt,
+          homePrimary,
+          homeAlt
+        })
+        console.log('All combinations evaluated:')
+        combinations.forEach((combo, i) => {
+          const dist = this.getColorDistance(combo.away, combo.home)
+          const awayLum = this.getColorLuminance(combo.away)
+          const homeLum = this.getColorLuminance(combo.home)
+          const zonePenalty = (awayLum < 60 && homeLum < 60) || (awayLum > 200 && homeLum > 200) ? 400 : 0
+          console.log(`  ${i + 1}. Away: ${combo.away} (lum: ${awayLum.toFixed(1)}), Home: ${combo.home} (lum: ${homeLum.toFixed(1)}), Score: ${combo.score.toFixed(1)}, Distance: ${dist.toFixed(1)}, Zone penalty: ${zonePenalty}`)
+        })
+        console.log('✅ Selected:', best)
+      }
+
       this.teamColors = {
         away: best.away,
         home: best.home
