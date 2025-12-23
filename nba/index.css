@@ -716,6 +716,10 @@ body.dark-mode .box-score-table .totals-row {
   background-color: #e9ecef;
 }
 
+.filter-group-active {
+  z-index: 10001 !important;
+}
+
 
 .filter-label {
   font-size: 13px;
