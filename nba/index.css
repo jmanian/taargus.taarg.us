@@ -2348,6 +2348,7 @@ body.dark-mode .negative-diff {
     overflow-x: auto;
     overflow-y: visible;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: none;
     margin: 0 -8px;
     border-radius: 10px;
     max-width: calc(100% + 16px);
