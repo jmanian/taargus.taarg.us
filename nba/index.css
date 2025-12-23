@@ -929,6 +929,14 @@ body.dark-mode .box-score-table .totals-row {
   background-color: #ced4da;
 }
 
+@media (max-width: 768px) {
+  .filter-clear {
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+  }
+}
+
 .filter-chip-single {
   display: flex;
   align-items: center;

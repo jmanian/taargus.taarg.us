@@ -104,7 +104,7 @@
                   </div>
                 </div>
               </div>
-            <button v-if="viewMode === 'games'" class="date-button" @click.stop="handleDateClick" title="Select date" type="button">
+            <button v-if="viewMode === 'games' && !selectedDate" class="date-button" @click.stop="handleDateClick" title="Select date" type="button">
               <input type="date" v-model="selectedDate" ref="dateInput" class="date-input-always-hidden" />
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -112,8 +112,14 @@
                 <line x1="8" y1="2" x2="8" y2="6"/>
                 <line x1="3" y1="10" x2="21" y2="10"/>
               </svg>
-              <button v-if="selectedDate" @click.stop="clearDateSelection" class="date-clear-overlay">✕</button>
             </button>
+            <div v-if="viewMode === 'games' && selectedDate" class="filter-group" @click="handleDateClick">
+              <input type="date" v-model="selectedDate" ref="dateInput" class="date-input-always-hidden" />
+              <div class="filter-chip-single">
+                <span class="filter-value">{{ formatSelectedDate }}</span>
+                <button @click.stop="clearDateSelection" class="filter-clear">✕</button>
+              </div>
+            </div>
             <button v-if="viewMode === 'games'" class="standings-button" @click.stop="showStandings" title="View standings" type="button">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="8" y1="6" x2="21" y2="6"/>

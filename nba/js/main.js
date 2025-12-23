@@ -145,7 +145,7 @@ const app = createApp({
 
     const handleDateClick = (e) => {
       // Don't open picker if clicking the clear button
-      if (e.target.closest('.filter-clear')) return
+      if (e.target.closest('.filter-clear') || e.target.classList.contains('filter-clear')) return
       openDatePicker()
     }
 
