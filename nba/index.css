@@ -2,6 +2,7 @@
    (e.g., when switching between games view and standings view on desktop) */
 html {
   overflow-y: scroll;
+  background-color: #f8f9fa;
 }
 
 body {
@@ -18,6 +19,10 @@ body.dark-mode {
   background: linear-gradient(to bottom, #1a1a1a 0%, #0d0d0d 100%);
   color: #e9ecef;
   color-scheme: dark;
+}
+
+html:has(body.dark-mode) {
+  background-color: #1a1a1a;
 }
 
 body.dark-mode .filter-bar {
