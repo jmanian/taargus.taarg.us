@@ -2433,12 +2433,12 @@ body.dark-mode .standings-table tbody tr.playin-cutoff {
 
   body.dark-mode .standings-table th.team-col {
     background-color: #1f1f1f;
-    box-shadow: 2px 0 3px rgba(0, 0, 0, 0.4);
+    box-shadow: 2px 0 3px rgba(0, 0, 0, 0.15);
   }
 
   body.dark-mode .standings-table td.team-col {
     background-color: #2a2a2a;
-    box-shadow: 2px 0 3px rgba(0, 0, 0, 0.4);
+    box-shadow: 2px 0 3px rgba(0, 0, 0, 0.15);
   }
 
   .team-name-text {
