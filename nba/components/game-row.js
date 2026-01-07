@@ -113,15 +113,15 @@ const gameRowTemplate = `
                 <th class="stat-group-right">3PT%</th>
                 <th class="stat-group-left">FT</th>
                 <th class="stat-group-right">FT%</th>
-                <th>OREB</th>
+                <th class="stat-group-left">OREB</th>
                 <th>DREB</th>
                 <th>REB</th>
-                <th>AST</th>
+                <th class="stat-group-left">AST</th>
                 <th>STL</th>
                 <th>BLK</th>
-                <th>TO</th>
+                <th class="stat-group-left">TO</th>
                 <th>PF</th>
-                <th>+/-</th>
+                <th class="stat-group-left">+/-</th>
               </tr>
             </thead>
             <tbody>
@@ -138,15 +138,15 @@ const gameRowTemplate = `
                 <td class="stat-group-right">{{ player.stats.threePtPct }}</td>
                 <td class="stat-group-left">{{ player.stats.ftMade }}</td>
                 <td class="stat-group-right">{{ player.stats.ftPct }}</td>
-                <td>{{ player.stats.oreb }}</td>
+                <td class="stat-group-left">{{ player.stats.oreb }}</td>
                 <td>{{ player.stats.dreb }}</td>
                 <td>{{ player.stats.reb }}</td>
-                <td>{{ player.stats.ast }}</td>
+                <td class="stat-group-left">{{ player.stats.ast }}</td>
                 <td>{{ player.stats.stl }}</td>
                 <td>{{ player.stats.blk }}</td>
-                <td>{{ player.stats.to }}</td>
+                <td class="stat-group-left">{{ player.stats.to }}</td>
                 <td>{{ player.stats.pf }}</td>
-                <td>{{ player.stats.plusMinus }}</td>
+                <td class="stat-group-left">{{ player.stats.plusMinus }}</td>
               </tr>
               <tr v-if="boxScoreData[boxScoreActiveTeam].totals" class="totals-row">
                 <td class="sticky-col">TEAM</td>
@@ -158,15 +158,15 @@ const gameRowTemplate = `
                 <td class="stat-group-right">{{ boxScoreData[boxScoreActiveTeam].totals.threePtPct }}</td>
                 <td class="stat-group-left">{{ boxScoreData[boxScoreActiveTeam].totals.ftMade }}</td>
                 <td class="stat-group-right">{{ boxScoreData[boxScoreActiveTeam].totals.ftPct }}</td>
-                <td>{{ boxScoreData[boxScoreActiveTeam].totals.oreb }}</td>
+                <td class="stat-group-left">{{ boxScoreData[boxScoreActiveTeam].totals.oreb }}</td>
                 <td>{{ boxScoreData[boxScoreActiveTeam].totals.dreb }}</td>
                 <td>{{ boxScoreData[boxScoreActiveTeam].totals.reb }}</td>
-                <td>{{ boxScoreData[boxScoreActiveTeam].totals.ast }}</td>
+                <td class="stat-group-left">{{ boxScoreData[boxScoreActiveTeam].totals.ast }}</td>
                 <td>{{ boxScoreData[boxScoreActiveTeam].totals.stl }}</td>
                 <td>{{ boxScoreData[boxScoreActiveTeam].totals.blk }}</td>
-                <td>{{ boxScoreData[boxScoreActiveTeam].totals.to }}</td>
+                <td class="stat-group-left">{{ boxScoreData[boxScoreActiveTeam].totals.to }}</td>
                 <td>{{ boxScoreData[boxScoreActiveTeam].totals.pf }}</td>
-                <td>{{ boxScoreData[boxScoreActiveTeam].totals.plusMinus }}</td>
+                <td class="stat-group-left">{{ boxScoreData[boxScoreActiveTeam].totals.plusMinus }}</td>
               </tr>
             </tbody>
           </table>
