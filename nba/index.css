@@ -1836,6 +1836,12 @@ body.dark-mode .box-score-table .totals-row {
   padding: 0;
   padding-left: 0;
   margin-left: 0;
+  overscroll-behavior-x: none;
+  scrollbar-width: none; /* Firefox */
+}
+
+.box-score-table-scroll::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .box-score-table {
