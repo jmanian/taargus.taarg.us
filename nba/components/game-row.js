@@ -866,8 +866,13 @@ const GameRow = {
       canvas.style.height = height + 'px'
       ctx.scale(dpr, dpr)
 
-      // Chart dimensions
-      const padding = { top: 20, right: 40, bottom: 40, left: 40 }
+      // Chart dimensions - no horizontal padding on mobile for maximum chart space
+      const padding = {
+        top: 20,
+        right: this.isMobile ? 0 : 20,
+        bottom: 40,
+        left: this.isMobile ? 0 : 20
+      }
       const chartWidth = width - padding.left - padding.right
       const chartHeight = height - padding.top - padding.bottom
 
@@ -1022,12 +1027,15 @@ const GameRow = {
         }
       }
 
-      // Score labels (y-axis) - show every 25 points
-      ctx.textAlign = 'right'
-      for (let i = 0; i <= numLines; i++) {
+      // Score labels (y-axis) - show every 25 points, skip 0, draw inside chart
+      // Labels should be below the gridline
+      ctx.textAlign = 'left'
+      ctx.font = '11px sans-serif'
+      for (let i = 1; i <= numLines; i++) { // Start at 1 to skip 0
         const score = i * 25
         const y = yScale(score)
-        ctx.fillText(score.toString(), padding.left - 10, y + 4)
+        // Draw label just inside the chart area, below the gridline
+        ctx.fillText(score.toString(), padding.left + 5, y + 12)
       }
     },
     drawLeadTracker() {
@@ -1046,8 +1054,13 @@ const GameRow = {
       canvas.style.height = height + 'px'
       ctx.scale(dpr, dpr)
 
-      // Chart dimensions
-      const padding = { top: 20, right: 40, bottom: 40, left: 40 }
+      // Chart dimensions - no horizontal padding on mobile for maximum chart space
+      const padding = {
+        top: 20,
+        right: this.isMobile ? 0 : 20,
+        bottom: 40,
+        left: this.isMobile ? 0 : 20
+      }
       const chartWidth = width - padding.left - padding.right
       const chartHeight = height - padding.top - padding.bottom
 
@@ -1274,19 +1287,28 @@ const GameRow = {
         }
       }
 
-      // Lead labels (y-axis)
-      ctx.textAlign = 'right'
+      // Lead labels (y-axis) - skip 0, draw inside chart
+      // Top half (positive): labels below gridline
+      // Bottom half (negative): labels above gridline
+      ctx.textAlign = 'left'
+      ctx.font = '11px sans-serif'
       for (let i = -numLines; i <= numLines; i++) {
+        if (i === 0) continue // Skip 0 label
         const lead = i * 5
         const y = yScale(lead)
-        ctx.fillText(Math.abs(lead).toString(), padding.left - 10, y + 4)
+        // For positive values (top half), place label below the line
+        // For negative values (bottom half), place label above the line
+        const yOffset = lead > 0 ? 12 : -3
+        ctx.fillText(Math.abs(lead).toString(), padding.left + 5, y + yOffset)
       }
 
-      // Team labels on y-axis (to the right of the axis numbers)
+      // Team labels on y-axis - moved farther right to avoid collision
+      // Home team label aligned with bottom-most gridline label
       ctx.textAlign = 'left'
       ctx.font = 'bold 11px sans-serif'
-      ctx.fillText(this.game.awayTeam, padding.left + 5, padding.top + 12)
-      ctx.fillText(this.game.homeTeam, padding.left + 5, height - padding.bottom - 8)
+      ctx.fillText(this.game.awayTeam, padding.left + 30, padding.top + 12)
+      const bottomGridlineY = yScale(-maxLeadRounded)
+      ctx.fillText(this.game.homeTeam, padding.left + 30, bottomGridlineY - 3)
     },
     formatLeaders(leaders) {
       if (!leaders) return []
