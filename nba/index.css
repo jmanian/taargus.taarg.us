@@ -194,62 +194,52 @@ body.dark-mode .team-count {
   color: #e9ecef;
 }
 
-body.dark-mode .date-box {
-  background-color: #2a2a2a;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-@media (hover: hover) {
-  body.dark-mode .date-box:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-}
-
-body.dark-mode .date-box-today {
-  border: 2px solid #0d6efd;
-  background: linear-gradient(to bottom, #2a2a2a 0%, #1a2a3a 100%);
-  box-shadow: 0 4px 20px rgba(13, 110, 253, 0.3), 0 2px 8px rgba(13, 110, 253, 0.2);
+body.dark-mode .date-header {
+  color: #adb5bd;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 @media (hover: hover) {
   body.dark-mode .date-header:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    color: #ced4da;
+    border-bottom-color: rgba(255, 255, 255, 0.15);
   }
 }
 
 body.dark-mode .date-header:active {
-  background-color: rgba(255, 255, 255, 0.08);
+  color: #e9ecef;
 }
 
 body.dark-mode .game-count {
-  color: #adb5bd;
+  color: inherit;
 }
 
 body.dark-mode .toggle-icon {
-  color: #adb5bd;
+  color: inherit;
 }
 
 body.dark-mode .date-box-today .date-header {
   color: #4da3ff;
+  border-bottom-color: #4da3ff;
 }
 
 @media (hover: hover) {
   body.dark-mode .date-box-today .date-header:hover {
-    background-color: rgba(13, 110, 253, 0.15);
+    color: #6cb5ff;
+    border-bottom-color: #6cb5ff;
   }
 }
 
 body.dark-mode .date-box-today .date-header:active {
-  background-color: rgba(13, 110, 253, 0.25);
+  color: #3a92e6;
 }
 
 body.dark-mode .date-box-today .toggle-icon {
-  color: #4da3ff;
+  color: inherit;
 }
 
 body.dark-mode .date-box-today .game-count {
-  color: #4da3ff;
+  color: inherit;
 }
 
 body.dark-mode .game-row {
@@ -1014,29 +1004,17 @@ body.dark-mode .box-score-table .totals-row {
 }
 
 .date-box {
-  background-color: #ffffff;
-  border-radius: 16px;
+  /* No background, border, or shadow - just a logical grouping */
   overflow: visible;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-@media (hover: hover) {
-  .date-box:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.08);
-  }
 }
 
 .date-box-today {
-  border: 2px solid #0d6efd;
-  background: linear-gradient(to bottom, #ffffff 0%, #f0f7ff 100%);
-  box-shadow: 0 4px 20px rgba(13, 110, 253, 0.2), 0 2px 8px rgba(13, 110, 253, 0.15);
+  /* No special styling for today - handled in header */
 }
 
 .date-header {
   background-color: transparent;
-  padding: 16px 20px;
+  padding: 12px 0;
   font-weight: 700;
   font-size: 17px;
   letter-spacing: -0.3px;
@@ -1045,6 +1023,10 @@ body.dark-mode .box-score-table .totals-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #6c757d;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
 .header-right {
@@ -1056,50 +1038,53 @@ body.dark-mode .box-score-table .totals-row {
 .game-count {
   font-size: 13px;
   font-weight: 400;
-  color: #6c757d;
+  color: inherit;
+  opacity: 0.7;
 }
 
 @media (hover: hover) {
   .date-header:hover {
-    background-color: rgba(0, 0, 0, 0.03);
+    color: #495057;
+    border-color: rgba(0, 0, 0, 0.15);
   }
 }
 
 .date-header:active {
-  background-color: rgba(0, 0, 0, 0.06);
+  color: #212529;
 }
 
 .toggle-icon {
   font-size: 12px;
-  color: #6c757d;
+  color: inherit;
 }
 
 .date-box-today .date-header {
-  background-color: transparent;
   color: #0d6efd;
-  font-weight: 700;
+  border-bottom-color: #0d6efd;
+  border-bottom-width: 2px;
 }
 
 @media (hover: hover) {
   .date-box-today .date-header:hover {
-    background-color: rgba(13, 110, 253, 0.08);
+    color: #0b5ed7;
+    border-bottom-color: #0b5ed7;
   }
 }
 
 .date-box-today .date-header:active {
-  background-color: rgba(13, 110, 253, 0.15);
+  color: #084298;
 }
 
 .date-box-today .toggle-icon {
-  color: #0d6efd;
+  color: inherit;
 }
 
 .date-box-today .game-count {
-  color: #0d6efd;
+  color: inherit;
 }
 
 .games-list {
-  padding: 16px 20px 20px;
+  padding: 0 0 20px 0;
   min-height: 20px;
   display: flex;
   flex-direction: column;
@@ -1107,18 +1092,19 @@ body.dark-mode .box-score-table .totals-row {
 }
 
 @media (max-width: 768px) {
-  .date-box {
-    border-radius: 12px;
-  }
-
   .date-header {
-    padding: 12px 14px;
+    padding: 8px 0;
     font-size: 16px;
     font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .date-box-collapsed .date-header {
+    margin-bottom: 0;
   }
 
   .games-list {
-    padding: 12px 8px;
+    padding: 0 0 16px 0;
     gap: 12px;
   }
 }
