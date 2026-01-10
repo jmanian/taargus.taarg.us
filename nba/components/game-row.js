@@ -1194,7 +1194,17 @@ const GameRow = {
         } else if (currentLead < 0) {
           segmentColor = homeColor
         } else {
-          segmentColor = this.isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.3)'
+          // currentLead === 0 (tie)
+          // Use the color of the team that had the lead previously
+          // This ensures vertical lines are always team-colored, not gray
+          if (prevLead > 0) {
+            segmentColor = awayColor
+          } else if (prevLead < 0) {
+            segmentColor = homeColor
+          } else {
+            // Both current and previous are 0 (horizontal line at 0)
+            segmentColor = this.isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.3)'
+          }
         }
 
         // If color changed, draw accumulated path and start new one
