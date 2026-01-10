@@ -1891,7 +1891,6 @@ body.dark-mode .box-score-table .totals-row {
   left: 0;
   background-color: #ffffff;
   z-index: 2;
-  min-width: 140px;
   max-width: 140px;
   padding-left: 16px;
   padding-right: 12px;
@@ -1955,7 +1954,6 @@ body.dark-mode .box-score-table .totals-row {
 
   .box-score-table th.sticky-col,
   .box-score-table td.sticky-col {
-    min-width: 110px;
     max-width: 110px;
     padding-left: 12px;
   }
