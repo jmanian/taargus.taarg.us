@@ -605,12 +605,13 @@ const GameRow = {
       this.redrawChart()
     },
     handleTouchStart(event) {
-      // Prevent default to avoid text selection highlight on mobile
-      event.preventDefault()
+      // Don't prevent default - allow scrolling
+      // Just update hover state
+      this.handleCanvasHover(event)
     },
     handleCanvasTouchMove(event) {
-      // Prevent default to avoid text selection highlight on mobile
-      event.preventDefault()
+      // Don't prevent default - allow scrolling to work
+      // Just update hover state as touch moves
       this.handleCanvasHover(event)
     },
     getColorDistance(hex1, hex2) {
