@@ -981,28 +981,24 @@ const GameRow = {
       })
       ctx.stroke()
 
-      // Highlight hovered segment
+      // Highlight hovered segment with dots at endpoints
       if (this.hoveredPlayIndex !== null && this.hoveredPlayIndex > 0) {
         const i = this.hoveredPlayIndex
         const point = this.gameFlowData[i]
-        const prevPoint = this.gameFlowData[i - 1]
         const x = xScale(point.time)
+        const dotRadius = this.isMobile ? 4 : 5
 
-        // Highlight away team vertical segment
-        ctx.strokeStyle = awayColor
-        ctx.lineWidth = this.isMobile ? 3 : 4
+        // Draw dot for away team score
+        ctx.fillStyle = awayColor
         ctx.beginPath()
-        ctx.moveTo(x, yScale(prevPoint.awayScore))
-        ctx.lineTo(x, yScale(point.awayScore))
-        ctx.stroke()
+        ctx.arc(x, yScale(point.awayScore), dotRadius, 0, 2 * Math.PI)
+        ctx.fill()
 
-        // Highlight home team vertical segment
-        ctx.strokeStyle = homeColor
-        ctx.lineWidth = this.isMobile ? 3 : 4
+        // Draw dot for home team score
+        ctx.fillStyle = homeColor
         ctx.beginPath()
-        ctx.moveTo(x, yScale(prevPoint.homeScore))
-        ctx.lineTo(x, yScale(point.homeScore))
-        ctx.stroke()
+        ctx.arc(x, yScale(point.homeScore), dotRadius, 0, 2 * Math.PI)
+        ctx.fill()
       }
 
       // Draw axis labels
@@ -1250,12 +1246,12 @@ const GameRow = {
         ctx.stroke()
       }
 
-      // Highlight hovered segment on lead tracker
+      // Highlight hovered segment on lead tracker with dot at endpoint
       if (this.hoveredPlayIndex !== null && this.hoveredPlayIndex > 0) {
         const i = this.hoveredPlayIndex
         const point = leadData[i]
-        const prevPoint = leadData[i - 1]
         const x = xScale(point.time)
+        const dotRadius = this.isMobile ? 4 : 5
 
         // Determine color based on the lead
         let highlightColor
@@ -1267,12 +1263,11 @@ const GameRow = {
           highlightColor = this.isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.3)'
         }
 
-        ctx.strokeStyle = highlightColor
-        ctx.lineWidth = this.isMobile ? 2 : 3
+        // Draw dot at endpoint
+        ctx.fillStyle = highlightColor
         ctx.beginPath()
-        ctx.moveTo(x, yScale(prevPoint.lead))
-        ctx.lineTo(x, yScale(point.lead))
-        ctx.stroke()
+        ctx.arc(x, yScale(point.lead), dotRadius, 0, 2 * Math.PI)
+        ctx.fill()
       }
 
       // Draw axis labels
