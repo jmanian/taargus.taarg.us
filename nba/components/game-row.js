@@ -531,7 +531,7 @@ const GameRow = {
 
       const rect = canvas.getBoundingClientRect()
       const mouseX = event.clientX - rect.left
-      const padding = { left: 40, right: 40 }
+      const padding = { left: this.isMobile ? 0 : 20, right: this.isMobile ? 0 : 20 }
       const chartWidth = canvas.offsetWidth - padding.left - padding.right
 
       const relativeX = mouseX - padding.left
