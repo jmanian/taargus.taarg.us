@@ -531,6 +531,8 @@ const GameRow = {
 
       const rect = canvas.getBoundingClientRect()
       const mouseX = event.clientX - rect.left
+      // IMPORTANT: These padding values must match the padding used in drawScoreFlow() and drawLeadTracker()
+      // to ensure accurate mouse position mapping to game events
       const padding = { left: this.isMobile ? 0 : 20, right: this.isMobile ? 0 : 20 }
       const chartWidth = canvas.offsetWidth - padding.left - padding.right
 
