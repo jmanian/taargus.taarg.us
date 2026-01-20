@@ -58,8 +58,8 @@ const gameRowTemplate = `
         </div>
         <div v-if="gameFlowLoading && !gameFlowData" class="game-flow-loading">Loading...</div>
         <div v-if="gameFlowData" class="game-flow-chart-container">
-          <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousemove="handleCanvasHover" @mouseleave="handleCanvasLeave"></canvas>
-          <div v-if="hoveredPlay && !isMobile" class="game-flow-tooltip">
+          <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousemove="handleCanvasHover" @mouseleave="handleCanvasLeave" @touchmove="handleCanvasHover" @touchend="handleCanvasLeave"></canvas>
+          <div v-if="hoveredPlay" class="game-flow-tooltip">
             <div class="tooltip-time">{{ hoveredPlay.time }} - {{ hoveredPlay.quarter }}</div>
             <div class="tooltip-score">{{ hoveredPlay.awayTeam }} {{ hoveredPlay.awayScore }} - {{ hoveredPlay.homeTeam }} {{ hoveredPlay.homeScore }}</div>
             <div class="tooltip-description">{{ hoveredPlay.description }}</div>
@@ -525,12 +525,13 @@ const GameRow = {
         : lastDataTime
     },
     handleCanvasHover(event) {
-      if (this.isMobile) return
       const canvas = this.$refs.gameFlowCanvas
       if (!canvas || !this.gameFlowData) return
 
       const rect = canvas.getBoundingClientRect()
-      const mouseX = event.clientX - rect.left
+      // Handle both mouse and touch events
+      const clientX = event.touches ? event.touches[0].clientX : event.clientX
+      const mouseX = clientX - rect.left
       // IMPORTANT: These padding values must match the padding used in drawScoreFlow() and drawLeadTracker()
       // to ensure accurate mouse position mapping to game events
       const padding = { left: this.isMobile ? 0 : 20, right: this.isMobile ? 0 : 20 }
@@ -599,7 +600,6 @@ const GameRow = {
       this.redrawChart()
     },
     handleCanvasLeave() {
-      if (this.isMobile) return
       this.hoveredPlay = null
       this.hoveredPlayIndex = null
       this.redrawChart()
