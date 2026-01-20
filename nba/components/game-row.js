@@ -58,7 +58,7 @@ const gameRowTemplate = `
         </div>
         <div v-if="gameFlowLoading && !gameFlowData" class="game-flow-loading">Loading...</div>
         <div v-if="gameFlowData" class="game-flow-chart-container">
-          <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousemove="handleCanvasHover" @mouseleave="handleCanvasLeave" @touchmove="handleCanvasHover" @touchend="handleCanvasLeave"></canvas>
+          <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousemove="handleCanvasHover" @mouseleave="handleCanvasLeave" @touchstart="handleTouchStart" @touchmove="handleCanvasTouchMove" @touchend="handleCanvasLeave"></canvas>
           <div v-if="hoveredPlay" class="game-flow-tooltip">
             <div class="tooltip-time">{{ hoveredPlay.time }} - {{ hoveredPlay.quarter }}</div>
             <div class="tooltip-score">{{ hoveredPlay.awayTeam }} {{ hoveredPlay.awayScore }} - {{ hoveredPlay.homeTeam }} {{ hoveredPlay.homeScore }}</div>
@@ -603,6 +603,15 @@ const GameRow = {
       this.hoveredPlay = null
       this.hoveredPlayIndex = null
       this.redrawChart()
+    },
+    handleTouchStart(event) {
+      // Prevent default to avoid text selection highlight on mobile
+      event.preventDefault()
+    },
+    handleCanvasTouchMove(event) {
+      // Prevent default to avoid text selection highlight on mobile
+      event.preventDefault()
+      this.handleCanvasHover(event)
     },
     getColorDistance(hex1, hex2) {
       // Convert hex to RGB
