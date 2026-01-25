@@ -29,7 +29,8 @@ function parseEvent(event) {
   }
 
   const gameState = event.status.type.state;
-  const gameStarted = gameState !== 'pre';
+  const isPostponed = event.status.type.name === 'STATUS_POSTPONED';
+  const gameStarted = gameState !== 'pre' && !isPostponed;
 
   return {
     id: event.id,
@@ -49,7 +50,7 @@ function parseEvent(event) {
     homeScore: Number(homeTeam.score),
     awayScore: Number(awayTeam.score),
     network: getBroadcastInfo(competition.broadcasts),
-    state: gameState,
+    state: isPostponed ? 'postponed' : gameState,
     statusDetail: event.status.type.shortDetail.replace('-', '–'),
     clock: event.status.displayClock,
     spread: odds?.details,

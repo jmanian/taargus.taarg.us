@@ -6,7 +6,8 @@
       "Bash(sips:*)",
       "Bash(curl:*)",
       "Bash(python3:*)",
-      "WebFetch(domain:www.sportspals.fun)"
+      "WebFetch(domain:www.sportspals.fun)",
+      "Read(//private/tmp/**)"
     ],
     "deny": [],
     "ask": []

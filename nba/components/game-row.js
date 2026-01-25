@@ -1366,7 +1366,7 @@ const GameRow = {
   },
   computed: {
     started: function () {
-      return this.game.state !== 'pre'
+      return this.game.state !== 'pre' && this.game.state !== 'postponed'
     },
     playing: function () {
       return this.game.state === 'in'
@@ -1388,6 +1388,8 @@ const GameRow = {
       switch (this.game.state) {
         case 'pre':
           return this.startTimeShort
+        case 'postponed':
+          return 'Postponed'
         case 'in':
         case 'post':
           return this.game.statusDetail
@@ -1404,7 +1406,7 @@ const GameRow = {
       return teamImageURL(this.game.homeTeam, mode)
     },
     hasExpandableContent: function () {
-      return !!(this.game.spreadFormatted || this.game.total || this.game.recap || this.hasStats || this.hasLeaders)
+      return this.game.state !== 'postponed' && !!(this.game.spreadFormatted || this.game.total || this.game.recap || this.hasStats || this.hasLeaders)
     },
     hasStats: function () {
       return !!(this.game.homeStats && this.game.awayStats)
