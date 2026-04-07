@@ -199,6 +199,17 @@ const app = createApp({
       return stat ? stat.displayValue : '-'
     }
 
+    const getClincher = (stats) => {
+      return stats.find(s => s.name === 'clincher') || null
+    }
+
+    const clinchCodeMap = { z: 'c', y: 'd', x: 'p', pb: 'pi', e: 'e' }
+    const getClinchCode = (stats) => {
+      const clincher = getClincher(stats)
+      if (!clincher) return null
+      return clinchCodeMap[clincher.displayValue] || clincher.displayValue
+    }
+
     const getStandingsTeamLogo = (logos) => {
       if (!logos || logos.length === 0) return ''
       // Prefer dark mode logo if available and in dark mode
@@ -254,7 +265,9 @@ const app = createApp({
       showGames: showGames,
       getStatValue: getStatValue,
       getStandingsTeamLogo: getStandingsTeamLogo,
-      getSortedStandings: getSortedStandings
+      getSortedStandings: getSortedStandings,
+      getClincher: getClincher,
+      getClinchCode: getClinchCode
     }
   },
   components: {

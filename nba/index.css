@@ -2258,6 +2258,43 @@ body.dark-mode .rank-number {
   color: #adb5bd;
 }
 
+.clincher-indicator {
+  position: relative;
+  font-size: 11px;
+  color: #999;
+  margin-left: -6px;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+body.dark-mode .clincher-indicator {
+  color: #777;
+}
+
+.clincher-indicator:hover::after,
+.clincher-indicator:focus::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+body.dark-mode .clincher-indicator:hover::after,
+body.dark-mode .clincher-indicator:focus::after {
+  background-color: rgba(42, 42, 42, 0.95);
+  color: #e9ecef;
+}
+
 .standings-team-logo {
   width: 32px;
   height: 32px;
@@ -2432,5 +2469,18 @@ body.dark-mode .standings-table tbody tr.playin-cutoff td {
     width: 24px;
     height: 24px;
     vertical-align: middle;
+  }
+
+  .clincher-indicator {
+    margin-left: 2px;
+    font-size: 10px;
+  }
+
+  .clincher-indicator:hover::after,
+  .clincher-indicator:focus::after {
+    bottom: auto;
+    left: calc(100% + 6px);
+    top: 50%;
+    transform: translateY(-50%);
   }
 }

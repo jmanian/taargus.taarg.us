@@ -164,6 +164,7 @@
                           <span class="rank-number">{{ index + 1 }}</span>
                           <img :src="getStandingsTeamLogo(entry.team.logos)" class="standings-team-logo" :alt="entry.team.abbreviation" />
                           <span class="team-name-text">{{ entry.team.name }}</span>
+                          <span v-if="getClincher(entry.stats)" class="clincher-indicator" :data-tooltip="getClincher(entry.stats).description" tabindex="0">{{ getClinchCode(entry.stats) }}</span>
                         </td>
                         <td>{{ getStatValue(entry.stats, 'wins') }}</td>
                         <td>{{ getStatValue(entry.stats, 'losses') }}</td>
