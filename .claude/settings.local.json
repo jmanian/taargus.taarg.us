@@ -7,7 +7,9 @@
       "Bash(curl:*)",
       "Bash(python3:*)",
       "WebFetch(domain:www.sportspals.fun)",
-      "Read(//private/tmp/**)"
+      "Read(//private/tmp/**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
