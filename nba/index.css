@@ -2268,6 +2268,15 @@ body.dark-mode .rank-number {
   outline: none;
 }
 
+.clincher-indicator::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  bottom: -8px;
+  left: -8px;
+  right: -8px;
+}
+
 body.dark-mode .clincher-indicator {
   color: #777;
 }
