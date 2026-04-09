@@ -2293,6 +2293,8 @@ body.dark-mode .clincher-indicator:hover::after,
 body.dark-mode .clincher-indicator:focus::after {
   background-color: rgba(42, 42, 42, 0.95);
   color: #e9ecef;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .standings-team-logo {
