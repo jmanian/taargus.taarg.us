@@ -2281,8 +2281,7 @@ body.dark-mode .clincher-indicator {
   color: #777;
 }
 
-.clincher-indicator:hover::after,
-.clincher-indicator:focus::after {
+.clincher-indicator:hover::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: calc(100% + 8px);
@@ -2298,8 +2297,7 @@ body.dark-mode .clincher-indicator {
   pointer-events: none;
 }
 
-body.dark-mode .clincher-indicator:hover::after,
-body.dark-mode .clincher-indicator:focus::after {
+body.dark-mode .clincher-indicator:hover::after {
   background-color: rgba(42, 42, 42, 0.95);
   color: #e9ecef;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -2487,11 +2485,27 @@ body.dark-mode .standings-table tbody tr.playin-cutoff td {
     font-size: 10px;
   }
 
-  .clincher-indicator:hover::after,
   .clincher-indicator:focus::after {
+    content: attr(data-tooltip);
+    position: absolute;
     bottom: auto;
     left: calc(100% + 6px);
     top: 50%;
     transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    z-index: 10000;
+    pointer-events: none;
+  }
+
+  body.dark-mode .clincher-indicator:focus::after {
+    background-color: rgba(42, 42, 42, 0.95);
+    color: #e9ecef;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   }
 }
