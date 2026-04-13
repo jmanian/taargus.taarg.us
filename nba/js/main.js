@@ -203,7 +203,7 @@ const app = createApp({
       return stats.find(s => s.name === 'clincher') || null
     }
 
-    const clinchCodeMap = { z: 'c', y: 'd', x: 'p', pb: 'pi', e: 'e' }
+    const clinchCodeMap = { z: 'c', y: 'd', x: 'p', pb: 'pi', e: 'e', '*': 'c*' }
     const getClinchCode = (stats) => {
       const clincher = getClincher(stats)
       if (!clincher) return null
