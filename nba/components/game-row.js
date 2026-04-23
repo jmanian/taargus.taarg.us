@@ -24,7 +24,6 @@ const gameRowTemplate = `
           </span>
         </span>
       </div>
-      <span v-if="game.headline" class="headline">{{ game.headline }}</span>
     </div>
 
     <div class="score home-score" :class="{'losing-score': isHomeLosing}">{{ started ? game.homeScore : '' }}</div>
@@ -34,6 +33,10 @@ const gameRowTemplate = `
       <div v-else class="team-logo-placeholder"></div>
       <span class="team-name">{{ game.homeTeamName }}</span>
       <span class="team-record">{{ game.homeRecord }}</span>
+    </div>
+
+    <div v-if="game.headline" class="headline" :class="{'multiline': headlineLines.length > 1}">
+      <span v-for="(line, i) in headlineLines" :key="i" class="headline-line">{{ line }}</span>
     </div>
   </div>
 
@@ -1418,6 +1421,28 @@ const GameRow = {
     },
     showGameFlow: function () {
       return this.started
+    },
+    headlineLines: function () {
+      const h = this.game.headline
+      if (!h) return []
+      if (h.length <= 30 || !h.includes(' – ')) return [h]
+
+      const sep = ' – '
+      const mid = h.length / 2
+      let bestDashIdx = -1
+      let bestDist = Infinity
+      let searchFrom = 0
+      while (true) {
+        const idx = h.indexOf(sep, searchFrom)
+        if (idx === -1) break
+        const dist = Math.abs(idx - mid)
+        if (dist < bestDist) {
+          bestDist = dist
+          bestDashIdx = idx
+        }
+        searchFrom = idx + sep.length
+      }
+      return [h.slice(0, bestDashIdx), h.slice(bestDashIdx + sep.length)]
     },
     teamColorStyles: function () {
       if (this.teamColors && this.teamColors.away && this.teamColors.home) {

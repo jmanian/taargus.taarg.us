@@ -1137,6 +1137,10 @@ body.dark-mode .box-score-table .totals-row {
   transition: background-color 0.2s ease;
 }
 
+.game-summary:has(.headline) {
+  row-gap: 0;
+}
+
 .game-row.expandable .game-summary {
   cursor: pointer;
 }
@@ -1204,7 +1208,7 @@ body.dark-mode .box-score-table .totals-row {
 
 .game-center {
   display: grid;
-  grid-template-rows: 1fr auto auto auto 1fr;
+  grid-template-rows: 1fr auto auto 1fr;
   justify-items: center;
   justify-self: center;
   align-self: stretch;
@@ -1216,11 +1220,6 @@ body.dark-mode .box-score-table .totals-row {
 
 .network {
   grid-row: 3;
-  align-self: start;
-}
-
-.headline {
-  grid-row: 4;
   align-self: start;
 }
 
@@ -1403,11 +1402,23 @@ body.dark-mode .box-score-table .totals-row {
 }
 
 .headline {
+  grid-column: 1 / -1;
   text-align: center;
   font-size: 13px;
+  line-height: 1.25;
   color: #6c757d;
   font-style: italic;
-  white-space: nowrap;
+  margin-top: -32px;
+  margin-bottom: -4px;
+}
+
+.headline.multiline {
+  align-self: start;
+  margin-top: -24px;
+}
+
+.headline-line {
+  display: block;
 }
 
 @media (max-width: 768px) {
