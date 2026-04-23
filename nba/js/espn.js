@@ -6,7 +6,10 @@ function parseEvent(event) {
   const awayTeam = findTeam(competition.competitors, 'away');
   const dateTime = DateTime.fromISO(event.date).setZone('America/Los_Angeles')
   const date = dateTime.toISODate()
-  const headline = competition.notes?.find(note => note.type === 'event')?.headline;
+  const rawHeadline = competition.notes?.find(note => note.type === 'event')?.headline;
+  const headline = competition.series?.type === 'playoff'
+    ? competition.series.summary
+    : rawHeadline?.replaceAll(' - ', ' – ');
   const odds = competition.odds?.[0];
 
   // Build spread string with full team name
@@ -44,7 +47,7 @@ function parseEvent(event) {
     awayTeamColor: awayTeam.team.color,
     homeTeamAltColor: homeTeam.team.alternateColor,
     awayTeamAltColor: awayTeam.team.alternateColor,
-    headline: headline?.replaceAll(' - ', ' – '),
+    headline: headline,
     dateTime: competition.timeValid ? dateTime : null,
     date: date,
     homeScore: Number(homeTeam.score),
