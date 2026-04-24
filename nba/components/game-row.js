@@ -1,6 +1,6 @@
 const gameRowTemplate = `
 <div class="game-row" :class="{'expanded': isExpanded, 'expandable': hasExpandableContent}" :style="teamColorStyles">
-  <div class="game-summary" @click="hasExpandableContent && toggleExpand()">
+  <div class="game-summary" :class="{'pre-game-summary': !started}" @click="hasExpandableContent && toggleExpand()">
     <div class="team-side away-side">
       <img v-if="awayImageURL" class="team-logo" :src="awayImageURL">
       <div v-else class="team-logo-placeholder"></div>
@@ -8,7 +8,7 @@ const gameRowTemplate = `
       <span class="team-record">{{ game.awayRecord }}</span>
     </div>
 
-    <div class="score away-score" :class="{'losing-score': isAwayLosing}">{{ started ? game.awayScore : '' }}</div>
+    <div v-if="started" class="score away-score" :class="{'losing-score': isAwayLosing}">{{ game.awayScore }}</div>
 
     <div class="game-center">
       <span class="game-time" :class="{'live-time': playing, 'pre-game': !started}">{{ timeLabel }}</span>
@@ -24,9 +24,12 @@ const gameRowTemplate = `
           </span>
         </span>
       </div>
+      <div v-if="!started && game.headline" class="headline">
+        <span v-for="(line, i) in headlineLines" :key="i" class="headline-line">{{ line }}</span>
+      </div>
     </div>
 
-    <div class="score home-score" :class="{'losing-score': isHomeLosing}">{{ started ? game.homeScore : '' }}</div>
+    <div v-if="started" class="score home-score" :class="{'losing-score': isHomeLosing}">{{ game.homeScore }}</div>
 
     <div class="team-side home-side">
       <img v-if="homeImageURL" class="team-logo" :src="homeImageURL">
@@ -35,7 +38,7 @@ const gameRowTemplate = `
       <span class="team-record">{{ game.homeRecord }}</span>
     </div>
 
-    <div v-if="game.headline" class="headline" :class="{'multiline': headlineLines.length > 1}">
+    <div v-if="started && game.headline" class="headline">
       <span v-for="(line, i) in headlineLines" :key="i" class="headline-line">{{ line }}</span>
     </div>
   </div>
