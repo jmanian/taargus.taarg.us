@@ -2,6 +2,15 @@ body {
   font-family: Helvetica Neue, Arial, sans-serif;
 }
 
+.nba-link-row {
+  margin-bottom: 0.5rem;
+}
+
+.nba-link {
+  font-weight: 600;
+  text-decoration: none;
+}
+
 /* today card styles */
 
 .today-scores {

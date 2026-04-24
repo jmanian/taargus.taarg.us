@@ -1,6 +1,9 @@
 const pageTemplate = `
 <div class='container'>
   <h1><span class="badge text-bg-primary shadow-sm">{{ year }} NBA Playoffs</span></h1>
+  <div class="nba-link-row">
+    <a href="../" class="btn btn-outline-primary btn-sm nba-link" role="button">All Games &rarr;</a>
+  </div>
   <n-today :games='todayGames'></n-today>
   <n-round v-for='round in rounds' :round='round' :nowLocal='nowLocal' :key='round.id' :year=year></n-round>
   <br>
