@@ -1850,7 +1850,7 @@ body.dark-mode .box-score-table .totals-row {
 .box-score-table {
   width: 100%;
   min-width: 800px;
-  font-size: 11px;
+  font-size: 12px;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -1862,7 +1862,7 @@ body.dark-mode .box-score-table .totals-row {
   color: #6c757d;
   border-bottom: 1px solid #dee2e6;
   white-space: nowrap;
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -1953,7 +1953,7 @@ body.dark-mode .box-score-table .totals-row {
   }
 
   .box-score-table {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .box-score-table th,
