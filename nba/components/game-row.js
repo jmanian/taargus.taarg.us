@@ -1175,14 +1175,20 @@ const GameRow = {
       const awayColor = `#${chartColors.away}`
       const homeColor = `#${chartColors.home}`
 
-      // Gradient anchored at the y-positions for ±30-point leads, so opacity maps
-      // absolutely to lead value (full team color at ±30, transparent at 0)
-      // regardless of axis bounds. Canvas clamps colors past the gradient endpoints,
-      // so leads beyond ±30 stay at full color.
-      const gradient = ctx.createLinearGradient(0, yScale(30), 0, yScale(-30))
-      gradient.addColorStop(0, awayColor + 'CC') // 80% opacity at +30
-      gradient.addColorStop(0.5, '#ffffff00') // transparent at 0
-      gradient.addColorStop(1, homeColor + 'CC') // 80% opacity at -30
+      // Opacity tapers exponentially toward an 80% asymptote: opacity(L) = 0.8 * (1 - exp(-|L|/k)).
+      // k=8 gives noticeable jumps at small leads and effectively maxes out by ~+20.
+      // Sampled at multiple stops since Canvas only interpolates linearly between them.
+      const opacityK = 20
+      const opacityMax = 0.8
+      const gradLMax = 80
+      const gradient = ctx.createLinearGradient(0, yScale(gradLMax), 0, yScale(-gradLMax))
+      gradient.addColorStop(0.5, '#ffffff00')
+      for (let lead = 1; lead <= gradLMax; lead++) {
+        const alpha = opacityMax * (1 - Math.exp(-lead / opacityK))
+        const alphaHex = Math.round(alpha * 255).toString(16).padStart(2, '0')
+        gradient.addColorStop(0.5 - (lead / gradLMax) * 0.5, awayColor + alphaHex)
+        gradient.addColorStop(0.5 + (lead / gradLMax) * 0.5, homeColor + alphaHex)
+      }
       ctx.fillStyle = gradient
       ctx.fill()
 
