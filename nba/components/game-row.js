@@ -1085,27 +1085,31 @@ const GameRow = {
         period: point.period
       }))
 
-      // Find max lead (in either direction) for determining y-axis range
-      const maxLead = Math.max(...leadData.map(d => Math.abs(d.lead)))
-      const maxLeadRounded = Math.ceil(maxLead / 5) * 5 // Round up to nearest 5
+      // Determine each side's y-axis bound independently from each team's biggest lead.
+      // Round up to the nearest 5, with a floor of 5 even if a team never led.
+      const awayMaxLead = Math.max(0, ...leadData.map(d => d.lead))
+      const homeMaxLead = Math.max(0, ...leadData.map(d => -d.lead))
+      const maxAwayLeadRounded = Math.max(5, Math.ceil(awayMaxLead / 5) * 5)
+      const maxHomeLeadRounded = Math.max(5, Math.ceil(homeMaxLead / 5) * 5)
+      const totalLeadRange = maxAwayLeadRounded + maxHomeLeadRounded
       const maxTime = this.getMaxTime()
       const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
 
       // Scales
       const xScale = (time) => padding.left + (time / maxTime) * chartWidth
-      const yScale = (lead) => padding.top + chartHeight / 2 - (lead / maxLeadRounded) * (chartHeight / 2)
-
-      // Scale for gradient (capped at 30)
-      const yScaleGradient = (lead) => {
-        const clampedLead = Math.max(-30, Math.min(30, lead))
-        return padding.top + chartHeight / 2 - (clampedLead / 30) * (chartHeight / 2)
-      }
+      const awayHeight = (maxAwayLeadRounded / totalLeadRange) * chartHeight
+      const homeHeight = chartHeight - awayHeight
+      const zeroY = padding.top + awayHeight
+      const yScale = (lead) => lead >= 0
+        ? zeroY - (lead / maxAwayLeadRounded) * awayHeight
+        : zeroY + (-lead / maxHomeLeadRounded) * homeHeight
 
       // Draw grid lines at 5-point intervals
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'
       ctx.lineWidth = 1
-      const numLines = maxLeadRounded / 5
-      for (let i = -numLines; i <= numLines; i++) {
+      const numAwayLines = maxAwayLeadRounded / 5
+      const numHomeLines = maxHomeLeadRounded / 5
+      for (let i = -numHomeLines; i <= numAwayLines; i++) {
         const lead = i * 5
         const y = yScale(lead)
         ctx.beginPath()
@@ -1171,10 +1175,13 @@ const GameRow = {
       const awayColor = `#${chartColors.away}`
       const homeColor = `#${chartColors.home}`
 
-      // Create gradient based on 30-point scale
-      const gradient = ctx.createLinearGradient(0, yScaleGradient(30), 0, yScaleGradient(-30))
+      // Gradient anchored at the y-positions for ±30-point leads, so opacity maps
+      // absolutely to lead value (full team color at ±30, transparent at 0)
+      // regardless of axis bounds. Canvas clamps colors past the gradient endpoints,
+      // so leads beyond ±30 stay at full color.
+      const gradient = ctx.createLinearGradient(0, yScale(30), 0, yScale(-30))
       gradient.addColorStop(0, awayColor + 'CC') // 80% opacity at +30
-      gradient.addColorStop(0.5, '#ffffff00') // transparent at center (0)
+      gradient.addColorStop(0.5, '#ffffff00') // transparent at 0
       gradient.addColorStop(1, homeColor + 'CC') // 80% opacity at -30
       ctx.fillStyle = gradient
       ctx.fill()
@@ -1315,7 +1322,7 @@ const GameRow = {
       // Bottom half (negative): labels above gridline
       ctx.textAlign = 'left'
       ctx.font = '11px sans-serif'
-      for (let i = -numLines; i <= numLines; i++) {
+      for (let i = -numHomeLines; i <= numAwayLines; i++) {
         if (i === 0) continue // Skip 0 label
         const lead = i * 5
         const y = yScale(lead)
@@ -1330,7 +1337,7 @@ const GameRow = {
       ctx.textAlign = 'left'
       ctx.font = 'bold 11px sans-serif'
       ctx.fillText(this.game.awayTeam, padding.left + 30, padding.top + 12)
-      const bottomGridlineY = yScale(-maxLeadRounded)
+      const bottomGridlineY = yScale(-maxHomeLeadRounded)
       ctx.fillText(this.game.homeTeam, padding.left + 30, bottomGridlineY - 3)
     },
     formatLeaders(leaders) {
