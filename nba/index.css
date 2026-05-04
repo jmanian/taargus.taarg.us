@@ -262,7 +262,8 @@ body.dark-mode .team-name {
   color: #e9ecef;
 }
 
-body.dark-mode .team-record {
+body.dark-mode .team-record,
+body.dark-mode .team-seed {
   color: #adb5bd;
 }
 
@@ -1204,6 +1205,11 @@ body.dark-mode .box-score-table .totals-row {
   font-size: 11px;
   color: #6c757d;
   margin-top: -2px;
+}
+
+.team-seed {
+  color: #6c757d;
+  margin-right: 3px;
 }
 
 .game-center {

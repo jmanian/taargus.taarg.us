@@ -1,5 +1,8 @@
 // Parse data from espn api
 
+// Tricode -> playoff seed, populated from the standings endpoint.
+const playoffSeeds = {};
+
 function parseEvent(event) {
   const competition = event.competitions[0];
   const homeTeam = findTeam(competition.competitors, 'home');
@@ -7,9 +10,14 @@ function parseEvent(event) {
   const dateTime = DateTime.fromISO(event.date).setZone('America/Los_Angeles')
   const date = dateTime.toISODate()
   const rawHeadline = competition.notes?.find(note => note.type === 'event')?.headline;
-  const headline = competition.series?.type === 'playoff'
+  const isPlayoff = competition.series?.type === 'playoff';
+  const headline = isPlayoff
     ? competition.series.summary
     : rawHeadline?.replaceAll(' - ', ' – ');
+  const homeTricode = teamTricode(homeTeam);
+  const awayTricode = teamTricode(awayTeam);
+  const homeSeed = isPlayoff ? playoffSeeds[homeTricode] || null : null;
+  const awaySeed = isPlayoff ? playoffSeeds[awayTricode] || null : null;
   const odds = competition.odds?.[0];
 
   // Build spread string with full team name
@@ -37,12 +45,15 @@ function parseEvent(event) {
 
   return {
     id: event.id,
-    homeTeam: teamTricode(homeTeam),
-    awayTeam: teamTricode(awayTeam),
+    homeTeam: homeTricode,
+    awayTeam: awayTricode,
     homeTeamName: homeTeam.team.name,
     awayTeamName: awayTeam.team.name,
     homeRecord: getOverallRecord(homeTeam),
     awayRecord: getOverallRecord(awayTeam),
+    homeSeed: homeSeed,
+    awaySeed: awaySeed,
+    isPlayoff: isPlayoff,
     homeTeamColor: homeTeam.team.color,
     awayTeamColor: awayTeam.team.color,
     homeTeamAltColor: homeTeam.team.alternateColor,

@@ -103,6 +103,7 @@ function fetchAll() {
 }
 
 fetchAll()
+fetchStandings()
 
 // Smart polling: only update dates with live games or today's date
 function pollForUpdates(includeSelectedDate = false) {
@@ -329,6 +330,8 @@ function fetchStandings() {
     success: function (data) {
       standingsData.value = data
       standingsLoading.value = false
+      populatePlayoffSeeds(data)
+      applySeedsToLoadedGames()
       console.log('Standings loaded successfully')
     },
     error: function(jqXHR, textStatus, errorThrown) {
@@ -336,6 +339,29 @@ function fetchStandings() {
       standingsLoading.value = false
     }
   })
+}
+
+function populatePlayoffSeeds(data) {
+  for (const k of Object.keys(playoffSeeds)) delete playoffSeeds[k]
+  data.children?.forEach(conference => {
+    conference.standings?.entries?.forEach(entry => {
+      const tricode = translateEspnTeamCode(entry.team.abbreviation)
+      const seedStat = entry.stats?.find(s => s.name === 'playoffSeed')
+      if (tricode && seedStat?.value != null) {
+        playoffSeeds[tricode] = seedStat.value
+      }
+    })
+  })
+}
+
+function applySeedsToLoadedGames() {
+  const update = game => {
+    if (!game.isPlayoff) return
+    game.homeSeed = playoffSeeds[game.homeTeam] || null
+    game.awaySeed = playoffSeeds[game.awayTeam] || null
+  }
+  dates.forEach(d => d.games.forEach(update))
+  selectedDateData.forEach(d => d.games.forEach(update))
 }
 
 function showStandings() {

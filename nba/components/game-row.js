@@ -4,8 +4,11 @@ const gameRowTemplate = `
     <div class="team-side away-side">
       <img v-if="awayImageURL" class="team-logo" :src="awayImageURL">
       <div v-else class="team-logo-placeholder"></div>
-      <span class="team-name">{{ game.awayTeamName }}</span>
-      <span class="team-record">{{ game.awayRecord }}</span>
+      <span class="team-name">
+        <span v-if="game.awaySeed" class="team-seed">{{ game.awaySeed }}</span>
+        {{ game.awayTeamName }}
+      </span>
+      <span class="team-record">{{ game.awaySeed ? '\xa0' : game.awayRecord }}</span>
     </div>
 
     <div v-if="started" class="score away-score" :class="{'losing-score': isAwayLosing}">{{ game.awayScore }}</div>
@@ -34,8 +37,11 @@ const gameRowTemplate = `
     <div class="team-side home-side">
       <img v-if="homeImageURL" class="team-logo" :src="homeImageURL">
       <div v-else class="team-logo-placeholder"></div>
-      <span class="team-name">{{ game.homeTeamName }}</span>
-      <span class="team-record">{{ game.homeRecord }}</span>
+      <span class="team-name">
+        <span v-if="game.homeSeed" class="team-seed">{{ game.homeSeed }}</span>
+        {{ game.homeTeamName }}
+      </span>
+      <span class="team-record">{{ game.homeSeed ? '\xa0' : game.homeRecord }}</span>
     </div>
 
     <div v-if="started && game.headline" class="headline">
