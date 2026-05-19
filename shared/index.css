@@ -2546,7 +2546,7 @@ body.dark-mode .standings-table tbody tr.playin-cutoff td {
     width: 24px;
     height: 24px;
     vertical-align: middle;
-    transform: scale(1.2);
+    transform: scale(1.05);
   }
 
   .clincher-indicator {
