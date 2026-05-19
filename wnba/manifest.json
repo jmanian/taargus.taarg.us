@@ -1,0 +1,17 @@
+{
+  "name": "WNBA Games",
+  "short_name": "WNBA Games",
+  "description": "WNBA Game schedules and scores",
+  "start_url": "/wnba/",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#f5f5f5",
+  "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

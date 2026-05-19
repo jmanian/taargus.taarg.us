@@ -97,24 +97,7 @@ function teamTricode(competitor) {
 }
 
 function translateEspnTeamCode(code) {
-  switch(code) {
-    case 'GS':
-      return 'GSW';
-    case 'NY':
-      return 'NYK';
-    case 'SA':
-      return 'SAS';
-    case 'NO':
-      return 'NOP';
-    case 'UTAH':
-      return 'UTA';
-    case 'WSH':
-      return 'WAS';
-    case 'TBD':
-      return null;
-    default:
-      return code;
-  }
+  return LEAGUE.translateTeamCode(code);
 }
 
 function findNationalBroadcast(broadcasts) {

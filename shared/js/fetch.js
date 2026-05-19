@@ -40,7 +40,7 @@ initializeDates()
 function fetchGamesForDate(date) {
   const dateString = date.toISODate()
   const endpointDate = date.toISODate({format: 'basic'})
-  const url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
+  const url = LEAGUE.scoreboardURL(endpointDate)
 
   jQuery.ajax({
     url: url,
@@ -266,7 +266,7 @@ function fetchSelectedDate(dateString) {
 function fetchGamesForDateIntoArray(date, targetArray) {
   const dateString = date.toISODate()
   const endpointDate = date.toISODate({format: 'basic'})
-  const url = 'https://site.web.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&includeModules=videos&dates=' + endpointDate + '&tz=America%2FNew_York&buyWindow=1m&showAirings=live&showZipLookup=true'
+  const url = LEAGUE.scoreboardURL(endpointDate)
 
   jQuery.ajax({
     url: url,
@@ -321,7 +321,7 @@ function fetchGamesForDateIntoArray(date, targetArray) {
 
 function fetchStandings() {
   standingsLoading.value = true
-  const url = 'https://site.api.espn.com/apis/v2/sports/basketball/nba/standings'
+  const url = LEAGUE.standingsURL()
 
   jQuery.ajax({
     url: url,

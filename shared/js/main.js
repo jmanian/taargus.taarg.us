@@ -56,7 +56,7 @@ const app = createApp({
     }
 
     // Get sorted team list for dropdown
-    const teamList = Object.values(teamData).sort((a, b) =>
+    const teamList = Object.values(LEAGUE.teams).sort((a, b) =>
       a.simpleName.localeCompare(b.simpleName)
     )
 
@@ -200,6 +200,7 @@ const app = createApp({
     }
 
     const getClincher = (stats) => {
+      if (!LEAGUE.standings.clincher) return null
       return stats.find(s => s.name === 'clincher') || null
     }
 
@@ -210,12 +211,17 @@ const app = createApp({
       return clinchCodeMap[clincher.displayValue] || clincher.displayValue
     }
 
-    const getStandingsTeamLogo = (logos) => {
-      if (!logos || logos.length === 0) return ''
-      // Prefer dark mode logo if available and in dark mode
-      const mode = isDarkMode.value ? 'dark' : 'default'
-      const preferredLogo = logos.find(logo => logo.rel && logo.rel.includes(mode))
-      return preferredLogo ? preferredLogo.href : logos[0].href
+    const getCutoffClass = (index) => {
+      const classes = {}
+      for (const cutoff of LEAGUE.standings.cutoffs) {
+        if (index === cutoff.index) classes[cutoff.class] = true
+      }
+      return classes
+    }
+
+    const getStandingsTeamLogo = (team) => {
+      const mode = isDarkMode.value ? 'D' : 'L'
+      return teamImageURL(LEAGUE.translateTeamCode(team.abbreviation), mode)
     }
 
     const getSortedStandings = (entries) => {
@@ -267,7 +273,8 @@ const app = createApp({
       getStandingsTeamLogo: getStandingsTeamLogo,
       getSortedStandings: getSortedStandings,
       getClincher: getClincher,
-      getClinchCode: getClinchCode
+      getClinchCode: getClinchCode,
+      getCutoffClass: getCutoffClass
     }
   },
   components: {

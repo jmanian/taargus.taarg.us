@@ -523,11 +523,11 @@ const GameRow = {
 
       const lastDataTime = this.gameFlowData[this.gameFlowData.length - 1].time
       const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
-      const endOf4thQuarter = 4 * 12 * 60 // 2880 seconds
+      const endOfRegulation = LEAGUE.regulationPeriods * LEAGUE.periodSeconds
 
-      // If game is ongoing and hasn't reached end of 4th quarter, extend x-axis to end of 4th
-      return this.playing && maxPeriod <= 4 && lastDataTime < endOf4thQuarter
-        ? endOf4thQuarter
+      // If game is ongoing and hasn't reached end of regulation, extend x-axis to end of regulation
+      return this.playing && maxPeriod <= LEAGUE.regulationPeriods && lastDataTime < endOfRegulation
+        ? endOfRegulation
         : lastDataTime
     },
     handleCanvasHover(event) {
@@ -672,7 +672,7 @@ const GameRow = {
     async fetchGameFlow() {
       this.gameFlowLoading = true
       try {
-        const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary?event=${this.game.id}`
+        const url = LEAGUE.summaryURL(this.game.id)
         const response = await fetch(url)
         const data = await response.json()
 
@@ -726,14 +726,14 @@ const GameRow = {
           }
 
           let totalSeconds
-          if (period <= 4) {
-            // Regular quarters (12 minutes each)
-            const secondsIntoQuarter = (12 * 60) - (minutes * 60 + seconds)
-            totalSeconds = ((period - 1) * 12 * 60) + secondsIntoQuarter
+          if (period <= LEAGUE.regulationPeriods) {
+            // Regular quarters
+            const secondsIntoQuarter = LEAGUE.periodSeconds - (minutes * 60 + seconds)
+            totalSeconds = ((period - 1) * LEAGUE.periodSeconds) + secondsIntoQuarter
           } else {
-            // Overtime periods (5 minutes each)
-            const secondsIntoOT = (5 * 60) - (minutes * 60 + seconds)
-            totalSeconds = (4 * 12 * 60) + ((period - 5) * 5 * 60) + secondsIntoOT
+            // Overtime periods
+            const secondsIntoOT = LEAGUE.otSeconds - (minutes * 60 + seconds)
+            totalSeconds = (LEAGUE.regulationPeriods * LEAGUE.periodSeconds) + ((period - LEAGUE.regulationPeriods - 1) * LEAGUE.otSeconds) + secondsIntoOT
           }
 
           dataPoints.push({
@@ -931,8 +931,8 @@ const GameRow = {
       // Draw quarter lines
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)'
       ctx.setLineDash([3, 3])
-      for (let quarter = 1; quarter <= 3; quarter++) {
-        const x = xScale(quarter * 12 * 60)
+      for (let quarter = 1; quarter < LEAGUE.regulationPeriods; quarter++) {
+        const x = xScale(quarter * LEAGUE.periodSeconds)
         ctx.beginPath()
         ctx.moveTo(x, padding.top)
         ctx.lineTo(x, height - padding.bottom)
@@ -940,10 +940,10 @@ const GameRow = {
       }
 
       // Draw OT lines if game went to overtime
-      if (maxPeriod > 4) {
+      if (maxPeriod > LEAGUE.regulationPeriods) {
         // Draw line at start of each OT period
-        for (let otNum = 1; otNum <= maxPeriod - 4; otNum++) {
-          const x = xScale(4 * 12 * 60 + (otNum - 1) * 5 * 60)
+        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
+          const x = xScale(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
           ctx.beginPath()
           ctx.moveTo(x, padding.top)
           ctx.lineTo(x, height - padding.bottom)
@@ -1025,16 +1025,16 @@ const GameRow = {
       // Quarter labels
       const quarterLabels = ['1st', '2nd', '3rd', '4th']
       quarterLabels.forEach((label, i) => {
-        const x = xScale((i + 0.5) * 12 * 60)
+        const x = xScale((i + 0.5) * LEAGUE.periodSeconds)
         ctx.fillText(label, x, height - 10)
       })
 
       // OT labels if game went to overtime
-      if (maxPeriod > 4) {
-        const numOvertimes = maxPeriod - 4
+      if (maxPeriod > LEAGUE.regulationPeriods) {
+        const numOvertimes = maxPeriod - LEAGUE.regulationPeriods
         for (let otNum = 1; otNum <= numOvertimes; otNum++) {
-          const otStart = 4 * 12 * 60 + (otNum - 1) * 5 * 60
-          const otEnd = otNum === numOvertimes ? maxTime : (4 * 12 * 60 + otNum * 5 * 60)
+          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
+          const otEnd = otNum === numOvertimes ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
           const x = xScale((otStart + otEnd) / 2)
           const label = otNum === 1 ? 'OT' : `OT${otNum}`
           ctx.fillText(label, x, height - 10)
@@ -1131,8 +1131,8 @@ const GameRow = {
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)'
       ctx.lineWidth = 1
       ctx.setLineDash([3, 3])
-      for (let quarter = 1; quarter <= 3; quarter++) {
-        const x = xScale(quarter * 12 * 60)
+      for (let quarter = 1; quarter < LEAGUE.regulationPeriods; quarter++) {
+        const x = xScale(quarter * LEAGUE.periodSeconds)
         ctx.beginPath()
         ctx.moveTo(x, padding.top)
         ctx.lineTo(x, height - padding.bottom)
@@ -1140,9 +1140,9 @@ const GameRow = {
       }
 
       // Draw OT lines if game went to overtime
-      if (maxPeriod > 4) {
-        for (let otNum = 1; otNum <= maxPeriod - 4; otNum++) {
-          const x = xScale(4 * 12 * 60 + (otNum - 1) * 5 * 60)
+      if (maxPeriod > LEAGUE.regulationPeriods) {
+        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
+          const x = xScale(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
           ctx.beginPath()
           ctx.moveTo(x, padding.top)
           ctx.lineTo(x, height - padding.bottom)
@@ -1307,16 +1307,16 @@ const GameRow = {
       // Quarter labels
       const quarterLabels = ['1st', '2nd', '3rd', '4th']
       quarterLabels.forEach((label, i) => {
-        const x = xScale((i + 0.5) * 12 * 60)
+        const x = xScale((i + 0.5) * LEAGUE.periodSeconds)
         ctx.fillText(label, x, height - 10)
       })
 
       // OT labels if game went to overtime
-      if (maxPeriod > 4) {
-        const numOvertimes = maxPeriod - 4
+      if (maxPeriod > LEAGUE.regulationPeriods) {
+        const numOvertimes = maxPeriod - LEAGUE.regulationPeriods
         for (let otNum = 1; otNum <= numOvertimes; otNum++) {
-          const otStart = 4 * 12 * 60 + (otNum - 1) * 5 * 60
-          const otEnd = otNum === numOvertimes ? maxTime : (4 * 12 * 60 + otNum * 5 * 60)
+          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
+          const otEnd = otNum === numOvertimes ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
           const x = xScale((otStart + otEnd) / 2)
           const label = otNum === 1 ? 'OT' : `OT${otNum}`
           ctx.fillText(label, x, height - 10)
