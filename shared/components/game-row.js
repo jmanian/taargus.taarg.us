@@ -263,6 +263,7 @@ const GameRow = {
       touchStartX: null,
       touchStartY: null,
       touchMoved: false,
+      touchMode: null,
       resizeTimeout: null,
       showLocalTooltip: false
     }
@@ -699,14 +700,48 @@ const GameRow = {
       this.hoveredPlayIndex = null
       this.redrawChart()
     },
+    distanceToAnchorPx(event) {
+      const canvas = this.$refs.gameFlowCanvas
+      if (!canvas || this.rangeStartIndex == null) return Infinity
+      const rect = canvas.getBoundingClientRect()
+      const touch = event.touches && event.touches[0]
+      if (!touch) return Infinity
+      const touchX = touch.clientX - rect.left
+      const padding = { left: this.isMobile ? 0 : 20, right: this.isMobile ? 0 : 20 }
+      const chartWidth = canvas.offsetWidth - padding.left - padding.right
+      const maxTime = this.getMaxTime()
+      const xScale = (time) => (time / maxTime) * chartWidth
+      const anchorX = padding.left + xScale(this.gameFlowData[this.rangeStartIndex].time)
+      return Math.abs(touchX - anchorX)
+    },
     handleTouchStart(event) {
-      if (event.touches && event.touches[0]) {
-        this.touchStartX = event.touches[0].clientX
-        this.touchStartY = event.touches[0].clientY
-        this.touchMoved = false
+      if (!event.touches || !event.touches[0]) return
+      this.touchStartX = event.touches[0].clientX
+      this.touchStartY = event.touches[0].clientY
+      this.touchMoved = false
+
+      // Determine gesture mode from current state and touch position
+      if (this.rangeStartIndex != null && this.rangeEndIndex != null) {
+        // State C: any touch clears
+        this.touchMode = 'clear-on-release'
+        return
       }
-      // Show preview unless fully-locked range exists (next tap will clear it)
-      if (this.rangeStartIndex != null && this.rangeEndIndex != null) return
+      if (this.rangeStartIndex != null) {
+        // State B: near anchor → extend; far → replace anchor
+        if (this.distanceToAnchorPx(event) <= 30) {
+          this.touchMode = 'extend'
+          const idx = this.getPlayIndexAtEvent(event)
+          this.rangeEndIndex = idx
+          this.hoveredPlay = null
+          this.hoveredPlayIndex = null
+          this.redrawChart()
+          return
+        }
+        this.touchMode = 'replace-anchor'
+      } else {
+        this.touchMode = 'set-anchor'
+      }
+      // Preview the hovered point while finger is down
       this.handleCanvasHover(event)
     },
     handleCanvasTouchMove(event) {
@@ -715,48 +750,56 @@ const GameRow = {
         const dy = Math.abs(event.touches[0].clientY - (this.touchStartY || 0))
         if (dx > 8 || dy > 8) this.touchMoved = true
       }
-      if (this.rangeStartIndex != null && this.rangeEndIndex != null) return
-      this.handleCanvasHover(event)
-    },
-    handleTouchEnd(event) {
-      const wasTap = !this.touchMoved
-      this.touchMoved = false
-      this.touchStartX = null
-      this.touchStartY = null
-
-      if (!wasTap) {
-        // Drag/scroll - clear preview if no anchor locked yet
-        if (this.rangeStartIndex == null) {
-          this.hoveredPlay = null
-          this.hoveredPlayIndex = null
+      if (this.touchMode === 'clear-on-release') return
+      if (this.touchMode === 'extend') {
+        // Live-update the second endpoint as finger moves
+        const idx = this.getPlayIndexAtEvent(event)
+        if (idx != null) {
+          this.rangeEndIndex = idx
           this.redrawChart()
         }
         return
       }
+      this.handleCanvasHover(event)
+    },
+    handleTouchEnd(event) {
+      const mode = this.touchMode
+      const moved = this.touchMoved
+      this.touchMode = null
+      this.touchMoved = false
+      this.touchStartX = null
+      this.touchStartY = null
 
-      const idx = this.getPlayIndexAtEvent(event)
-      if (idx == null) return
-
-      if (this.rangeStartIndex != null && this.rangeEndIndex != null) {
-        // Third tap - clear
+      if (mode === 'clear-on-release') {
         this.clearRange()
         this.hoveredPlay = null
         this.hoveredPlayIndex = null
-      } else if (this.rangeStartIndex == null) {
-        // First tap - lock anchor
-        this.rangeStartIndex = idx
-        this.hoveredPlay = null
-        this.hoveredPlayIndex = null
-      } else {
-        // Second tap - lock end
-        if (idx === this.rangeStartIndex) {
+        this.redrawChart()
+        return
+      }
+
+      if (mode === 'extend') {
+        if (!moved || this.rangeStartIndex === this.rangeEndIndex) {
+          // Tap on the anchor dot, or drag that ended on the anchor → clear it
           this.clearRange()
-        } else {
-          this.rangeEndIndex = idx
         }
         this.hoveredPlay = null
         this.hoveredPlayIndex = null
+        this.redrawChart()
+        return
       }
+
+      // 'set-anchor' or 'replace-anchor' — lock anchor at release position
+      const idx = this.getPlayIndexAtEvent(event)
+      this.hoveredPlay = null
+      this.hoveredPlayIndex = null
+      if (idx == null) {
+        // Released off-chart — bail without changing state
+        this.redrawChart()
+        return
+      }
+      this.rangeStartIndex = idx
+      this.rangeEndIndex = null
       this.redrawChart()
     },
     getColorDistance(hex1, hex2) {
