@@ -64,8 +64,12 @@ const gameRowTemplate = `
         </div>
         <div v-if="gameFlowLoading && !gameFlowData" class="game-flow-loading">Loading...</div>
         <div v-if="gameFlowData" class="game-flow-chart-container">
-          <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousemove="handleCanvasHover" @mouseleave="handleCanvasLeave" @touchstart="handleTouchStart" @touchmove="handleCanvasTouchMove" @touchend="handleCanvasLeave"></canvas>
-          <div v-if="hoveredPlay" class="game-flow-tooltip">
+          <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousedown="handleCanvasMouseDown" @mousemove="handleCanvasHover" @mouseup="handleCanvasMouseUp" @mouseleave="handleCanvasLeave" @touchstart="handleTouchStart" @touchmove="handleCanvasTouchMove" @touchend="handleTouchEnd"></canvas>
+          <div v-if="rangeTooltip" class="game-flow-tooltip">
+            <div class="tooltip-time">{{ rangeTooltip.timeRange }}</div>
+            <div class="tooltip-score">{{ rangeTooltip.scoreLine }}</div>
+          </div>
+          <div v-else-if="hoveredPlay" class="game-flow-tooltip">
             <div class="tooltip-time">{{ hoveredPlay.time }} - {{ hoveredPlay.quarter }} · {{ formatLead(hoveredPlay) }}</div>
             <div class="tooltip-score">{{ hoveredPlay.awayTeam }} {{ hoveredPlay.awayScore }} - {{ hoveredPlay.homeTeam }} {{ hoveredPlay.homeScore }}</div>
             <div class="tooltip-description">{{ hoveredPlay.description }}</div>
@@ -251,6 +255,14 @@ const GameRow = {
       teamColors: null,
       hoveredPlay: null,
       hoveredPlayIndex: null,
+      rangeStartIndex: null,
+      rangeEndIndex: null,
+      mouseDownX: null,
+      mouseDownIndex: null,
+      isDraggingRange: false,
+      touchStartX: null,
+      touchStartY: null,
+      touchMoved: false,
       resizeTimeout: null,
       showLocalTooltip: false
     }
@@ -537,70 +549,58 @@ const GameRow = {
       }
       return lastDataTime
     },
-    handleCanvasHover(event) {
+    getPlayIndexAtEvent(event) {
       const canvas = this.$refs.gameFlowCanvas
-      if (!canvas || !this.gameFlowData) return
+      if (!canvas || !this.gameFlowData) return null
 
       const rect = canvas.getBoundingClientRect()
-      // Handle both mouse and touch events
-      const clientX = event.touches ? event.touches[0].clientX : event.clientX
+      const clientX = event.touches && event.touches[0]
+        ? event.touches[0].clientX
+        : (event.changedTouches && event.changedTouches[0]
+          ? event.changedTouches[0].clientX
+          : event.clientX)
       const mouseX = clientX - rect.left
       // IMPORTANT: These padding values must match the padding used in drawScoreFlow() and drawLeadTracker()
-      // to ensure accurate mouse position mapping to game events
       const padding = { left: this.isMobile ? 0 : 20, right: this.isMobile ? 0 : 20 }
       const chartWidth = canvas.offsetWidth - padding.left - padding.right
-
       const relativeX = mouseX - padding.left
 
-      // If mouse is outside chart area, don't show tooltip
-      if (relativeX < 0 || relativeX > chartWidth) {
-        this.hoveredPlay = null
-        this.hoveredPlayIndex = null
-        this.redrawChart()
-        return
-      }
+      if (relativeX < 0 || relativeX > chartWidth) return null
 
-      // Calculate x-positions for all plays based on game time
       const maxTime = this.getMaxTime()
       const xScale = (time) => (time / maxTime) * chartWidth
 
-      // Create zones for each play based on midpoints between adjacent plays
-      // This ensures every play is accessible
       let selectedIndex = 1
-
       for (let i = 1; i < this.gameFlowData.length; i++) {
         const currentX = xScale(this.gameFlowData[i].time)
-
-        // Determine zone boundaries
         let zoneStart, zoneEnd
-
         if (i === 1) {
-          // First play: zone starts at 0
           zoneStart = 0
         } else {
-          // Zone starts at midpoint with previous play
           const prevX = xScale(this.gameFlowData[i - 1].time)
           zoneStart = (prevX + currentX) / 2
         }
-
         if (i === this.gameFlowData.length - 1) {
-          // Last play: zone extends to end
           zoneEnd = chartWidth
         } else {
-          // Zone ends at midpoint with next play
           const nextX = xScale(this.gameFlowData[i + 1].time)
           zoneEnd = (currentX + nextX) / 2
         }
-
-        // Check if mouse is in this zone
         if (relativeX >= zoneStart && relativeX < zoneEnd) {
           selectedIndex = i
           break
         }
       }
-
-      const play = this.gameFlowData[selectedIndex]
-      this.hoveredPlayIndex = selectedIndex
+      return selectedIndex
+    },
+    setHoverFromIndex(index) {
+      if (index == null) {
+        this.hoveredPlay = null
+        this.hoveredPlayIndex = null
+        return
+      }
+      const play = this.gameFlowData[index]
+      this.hoveredPlayIndex = index
       this.hoveredPlay = {
         time: play.clock,
         quarter: play.periodDisplay,
@@ -610,22 +610,149 @@ const GameRow = {
         homeScore: play.homeScore,
         description: play.description
       }
+    },
+    clearRange() {
+      this.rangeStartIndex = null
+      this.rangeEndIndex = null
+    },
+    handleCanvasMouseDown(event) {
+      if (this.isMobile) return
+      const idx = this.getPlayIndexAtEvent(event)
+      if (idx == null) return
+      this.mouseDownX = event.clientX
+      this.mouseDownIndex = idx
+      this.isDraggingRange = false
+    },
+    handleCanvasMouseUp(event) {
+      if (this.isMobile) return
+      if (this.isDraggingRange) {
+        // Drag complete - keep range locked
+        if (this.rangeStartIndex === this.rangeEndIndex) {
+          this.clearRange()
+        }
+      } else if (this.mouseDownIndex != null) {
+        // Plain click - if range was set, clear it; resume hover
+        if (this.rangeStartIndex != null || this.rangeEndIndex != null) {
+          this.clearRange()
+          this.setHoverFromIndex(this.mouseDownIndex)
+          this.redrawChart()
+        }
+      }
+      this.isDraggingRange = false
+      this.mouseDownX = null
+      this.mouseDownIndex = null
+    },
+    handleCanvasHover(event) {
+      const canvas = this.$refs.gameFlowCanvas
+      if (!canvas || !this.gameFlowData) return
+
+      // Desktop drag-to-select range
+      if (!this.isMobile && this.mouseDownIndex != null) {
+        const dx = Math.abs(event.clientX - this.mouseDownX)
+        if (dx > 5 || this.isDraggingRange) {
+          if (!this.isDraggingRange) {
+            this.isDraggingRange = true
+            this.rangeStartIndex = this.mouseDownIndex
+            this.hoveredPlay = null
+            this.hoveredPlayIndex = null
+          }
+          const curIdx = this.getPlayIndexAtEvent(event)
+          if (curIdx != null) {
+            this.rangeEndIndex = curIdx
+            this.redrawChart()
+          }
+          return
+        }
+      }
+
+      // If a range is locked (and not currently dragging), don't update hover
+      if (!this.isDraggingRange && this.rangeStartIndex != null && this.rangeEndIndex != null) {
+        return
+      }
+      // If only one endpoint is locked (mobile mid-selection), still allow hover preview
+      const idx = this.getPlayIndexAtEvent(event)
+      this.setHoverFromIndex(idx)
       this.redrawChart()
     },
     handleCanvasLeave() {
+      if (this.isDraggingRange) {
+        // Finalize drag at current end position so we don't get stuck if mouseup fires off-canvas
+        this.isDraggingRange = false
+        if (this.rangeStartIndex === this.rangeEndIndex) {
+          this.clearRange()
+        }
+        this.mouseDownX = null
+        this.mouseDownIndex = null
+        this.hoveredPlay = null
+        this.hoveredPlayIndex = null
+        this.redrawChart()
+        return
+      }
+      this.mouseDownX = null
+      this.mouseDownIndex = null
       this.hoveredPlay = null
       this.hoveredPlayIndex = null
       this.redrawChart()
     },
     handleTouchStart(event) {
-      // Don't prevent default - allow scrolling
-      // Just update hover state
+      if (event.touches && event.touches[0]) {
+        this.touchStartX = event.touches[0].clientX
+        this.touchStartY = event.touches[0].clientY
+        this.touchMoved = false
+      }
+      // Show preview unless fully-locked range exists (next tap will clear it)
+      if (this.rangeStartIndex != null && this.rangeEndIndex != null) return
       this.handleCanvasHover(event)
     },
     handleCanvasTouchMove(event) {
-      // Don't prevent default - allow scrolling to work
-      // Just update hover state as touch moves
+      if (event.touches && event.touches[0]) {
+        const dx = Math.abs(event.touches[0].clientX - (this.touchStartX || 0))
+        const dy = Math.abs(event.touches[0].clientY - (this.touchStartY || 0))
+        if (dx > 8 || dy > 8) this.touchMoved = true
+      }
+      if (this.rangeStartIndex != null && this.rangeEndIndex != null) return
       this.handleCanvasHover(event)
+    },
+    handleTouchEnd(event) {
+      const wasTap = !this.touchMoved
+      this.touchMoved = false
+      this.touchStartX = null
+      this.touchStartY = null
+
+      if (!wasTap) {
+        // Drag/scroll - clear preview if no anchor locked yet
+        if (this.rangeStartIndex == null) {
+          this.hoveredPlay = null
+          this.hoveredPlayIndex = null
+          this.redrawChart()
+        }
+        return
+      }
+
+      const idx = this.getPlayIndexAtEvent(event)
+      if (idx == null) return
+
+      if (this.rangeStartIndex != null && this.rangeEndIndex != null) {
+        // Third tap - clear
+        this.clearRange()
+        this.hoveredPlay = null
+        this.hoveredPlayIndex = null
+      } else if (this.rangeStartIndex == null) {
+        // First tap - lock anchor
+        this.rangeStartIndex = idx
+        this.hoveredPlay = null
+        this.hoveredPlayIndex = null
+      } else {
+        // Second tap - lock end
+        if (idx === this.rangeStartIndex) {
+          this.clearRange()
+        } else {
+          this.rangeEndIndex = idx
+        }
+        this.hoveredPlay = null
+        this.hoveredPlayIndex = null
+      }
+      this.redrawChart()
     },
     getColorDistance(hex1, hex2) {
       // Convert hex to RGB
@@ -1004,25 +1131,31 @@ const GameRow = {
       })
       ctx.stroke()
 
-      // Highlight hovered segment with dots at endpoints
-      if (this.hoveredPlayIndex !== null && this.hoveredPlayIndex > 0) {
-        const i = this.hoveredPlayIndex
+      // Shade the range region if two endpoints are set
+      if (this.rangeStartIndex != null && this.rangeEndIndex != null && this.rangeStartIndex !== this.rangeEndIndex) {
+        const aIdx = Math.min(this.rangeStartIndex, this.rangeEndIndex)
+        const bIdx = Math.max(this.rangeStartIndex, this.rangeEndIndex)
+        const xA = xScale(this.gameFlowData[aIdx].time)
+        const xB = xScale(this.gameFlowData[bIdx].time)
+        ctx.fillStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'
+        ctx.fillRect(xA, padding.top, xB - xA, height - padding.top - padding.bottom)
+      }
+
+      // Highlight selected/hovered points with dots
+      const dotRadius = this.isMobile ? 4 : 5
+      this.highlightIndices.forEach(i => {
+        if (i === 0) return
         const point = this.gameFlowData[i]
         const x = xScale(point.time)
-        const dotRadius = this.isMobile ? 4 : 5
-
-        // Draw dot for away team score
         ctx.fillStyle = awayColor
         ctx.beginPath()
         ctx.arc(x, yScale(point.awayScore), dotRadius, 0, 2 * Math.PI)
         ctx.fill()
-
-        // Draw dot for home team score
         ctx.fillStyle = homeColor
         ctx.beginPath()
         ctx.arc(x, yScale(point.homeScore), dotRadius, 0, 2 * Math.PI)
         ctx.fill()
-      }
+      })
 
       // Draw axis labels
       ctx.fillStyle = this.isDarkMode ? '#aaa' : '#495057'
@@ -1282,29 +1415,32 @@ const GameRow = {
         ctx.stroke()
       }
 
-      // Highlight hovered segment on lead tracker with dot at endpoint
-      if (this.hoveredPlayIndex !== null && this.hoveredPlayIndex > 0) {
-        const i = this.hoveredPlayIndex
+      // Shade the range region if two endpoints are set
+      if (this.rangeStartIndex != null && this.rangeEndIndex != null && this.rangeStartIndex !== this.rangeEndIndex) {
+        const aIdx = Math.min(this.rangeStartIndex, this.rangeEndIndex)
+        const bIdx = Math.max(this.rangeStartIndex, this.rangeEndIndex)
+        const xA = xScale(leadData[aIdx].time)
+        const xB = xScale(leadData[bIdx].time)
+        ctx.fillStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'
+        ctx.fillRect(xA, padding.top, xB - xA, height - padding.top - padding.bottom)
+      }
+
+      // Highlight selected/hovered points on lead tracker
+      const dotRadius = this.isMobile ? 4 : 5
+      this.highlightIndices.forEach(i => {
+        if (i === 0) return
         const point = leadData[i]
+        if (!point) return
         const x = xScale(point.time)
-        const dotRadius = this.isMobile ? 4 : 5
-
-        // Determine color based on the lead
         let highlightColor
-        if (point.lead > 0) {
-          highlightColor = awayColor
-        } else if (point.lead < 0) {
-          highlightColor = homeColor
-        } else {
-          highlightColor = this.isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.3)'
-        }
-
-        // Draw dot at endpoint
+        if (point.lead > 0) highlightColor = awayColor
+        else if (point.lead < 0) highlightColor = homeColor
+        else highlightColor = this.isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.3)'
         ctx.fillStyle = highlightColor
         ctx.beginPath()
         ctx.arc(x, yScale(point.lead), dotRadius, 0, 2 * Math.PI)
         ctx.fill()
-      }
+      })
 
       // Draw axis labels
       ctx.fillStyle = this.isDarkMode ? '#aaa' : '#495057'
@@ -1397,6 +1533,43 @@ const GameRow = {
     }
   },
   computed: {
+    highlightIndices() {
+      if (this.rangeStartIndex != null && this.rangeEndIndex != null) {
+        return [this.rangeStartIndex, this.rangeEndIndex]
+      }
+      if (this.rangeStartIndex != null) {
+        return [this.rangeStartIndex]
+      }
+      if (this.hoveredPlayIndex != null && this.hoveredPlayIndex > 0) {
+        return [this.hoveredPlayIndex]
+      }
+      return []
+    },
+    rangeTooltip() {
+      if (this.rangeStartIndex == null || this.rangeEndIndex == null) return null
+      if (this.rangeStartIndex === this.rangeEndIndex) return null
+      const data = this.gameFlowData
+      if (!data) return null
+      let aIdx = this.rangeStartIndex
+      let bIdx = this.rangeEndIndex
+      if (aIdx > bIdx) [aIdx, bIdx] = [bIdx, aIdx]
+      const a = data[aIdx]
+      const b = data[bIdx]
+      if (!a || !b) return null
+      const awayPts = b.awayScore - a.awayScore
+      const homePts = b.homeScore - a.homeScore
+      const diff = awayPts - homePts
+      const away = this.game.awayTeam
+      const home = this.game.homeTeam
+      let leadStr
+      if (diff === 0) leadStr = 'Even'
+      else if (diff > 0) leadStr = `${away} +${diff}`
+      else leadStr = `${home} +${Math.abs(diff)}`
+      return {
+        timeRange: `${a.clock} ${a.periodDisplay} → ${b.clock} ${b.periodDisplay} · ${leadStr}`,
+        scoreLine: `${away} ${awayPts} - ${home} ${homePts}`,
+      }
+    },
     started: function () {
       return this.game.state !== 'pre' && this.game.state !== 'postponed'
     },
