@@ -276,6 +276,8 @@ const GameRow = {
   beforeUnmount() {
     window.removeEventListener('resize', this.handleResize)
     document.removeEventListener('close-local-tooltips', this.handleCloseTooltip)
+    document.removeEventListener('mousemove', this.handleDocumentMouseMove)
+    document.removeEventListener('mouseup', this.handleDocumentMouseUp)
   },
   watch: {
     gameFlowData(newVal) {
@@ -550,7 +552,7 @@ const GameRow = {
       }
       return lastDataTime
     },
-    getPlayIndexAtEvent(event) {
+    getPlayIndexAtEvent(event, { clamp = false } = {}) {
       const canvas = this.$refs.gameFlowCanvas
       if (!canvas || !this.gameFlowData) return null
 
@@ -564,14 +566,19 @@ const GameRow = {
       // IMPORTANT: These padding values must match the padding used in drawScoreFlow() and drawLeadTracker()
       const padding = { left: this.isMobile ? 0 : 20, right: this.isMobile ? 0 : 20 }
       const chartWidth = canvas.offsetWidth - padding.left - padding.right
-      const relativeX = mouseX - padding.left
+      let relativeX = mouseX - padding.left
 
-      if (relativeX < 0 || relativeX > chartWidth) return null
+      if (relativeX < 0 || relativeX > chartWidth) {
+        if (!clamp) return null
+        relativeX = Math.max(0, Math.min(chartWidth, relativeX))
+      }
 
       const maxTime = this.getMaxTime()
       const xScale = (time) => (time / maxTime) * chartWidth
 
-      let selectedIndex = 1
+      // Default to last play so the exact-right-edge case (relativeX === chartWidth)
+      // snaps to end-of-game rather than start-of-game
+      let selectedIndex = this.gameFlowData.length - 1
       for (let i = 1; i < this.gameFlowData.length; i++) {
         const currentX = xScale(this.gameFlowData[i].time)
         let zoneStart, zoneEnd
@@ -623,11 +630,25 @@ const GameRow = {
       this.mouseDownX = event.clientX
       this.mouseDownIndex = idx
       this.isDraggingRange = false
+      // Track movement and release at the document level so the drag continues
+      // even when the cursor leaves the canvas
+      document.addEventListener('mousemove', this.handleDocumentMouseMove)
+      document.addEventListener('mouseup', this.handleDocumentMouseUp)
+    },
+    handleDocumentMouseMove(event) {
+      this.handleCanvasHover(event)
+    },
+    handleDocumentMouseUp(event) {
+      document.removeEventListener('mousemove', this.handleDocumentMouseMove)
+      document.removeEventListener('mouseup', this.handleDocumentMouseUp)
+      this.finalizeMouseGesture(event)
     },
     handleCanvasMouseUp(event) {
+      // No-op: finalization happens via the document-level mouseup
+    },
+    finalizeMouseGesture(event) {
       if (this.isMobile) return
       if (this.isDraggingRange) {
-        // Drag complete - keep range locked
         if (this.rangeStartIndex === this.rangeEndIndex) {
           this.clearRange()
         }
@@ -660,7 +681,7 @@ const GameRow = {
             this.hoveredPlay = null
             this.hoveredPlayIndex = null
           }
-          const curIdx = this.getPlayIndexAtEvent(event)
+          const curIdx = this.getPlayIndexAtEvent(event, { clamp: true })
           if (curIdx != null) {
             this.rangeEndIndex = curIdx
             this.redrawChart()
@@ -681,21 +702,8 @@ const GameRow = {
     handleCanvasLeave() {
       // Ignore synthesized mouseleave on mobile
       if (this.isMobile) return
-      if (this.isDraggingRange) {
-        // Finalize drag at current end position so we don't get stuck if mouseup fires off-canvas
-        this.isDraggingRange = false
-        if (this.rangeStartIndex === this.rangeEndIndex) {
-          this.clearRange()
-        }
-        this.mouseDownX = null
-        this.mouseDownIndex = null
-        this.hoveredPlay = null
-        this.hoveredPlayIndex = null
-        this.redrawChart()
-        return
-      }
-      this.mouseDownX = null
-      this.mouseDownIndex = null
+      // If a drag is in progress, document-level listeners keep tracking — don't finalize
+      if (this.mouseDownIndex != null || this.isDraggingRange) return
       this.hoveredPlay = null
       this.hoveredPlayIndex = null
       this.redrawChart()
@@ -755,7 +763,7 @@ const GameRow = {
       if (this.touchMode === 'clear-on-release') return
       if (this.touchMode === 'extend') {
         // Live-update the second endpoint as finger moves
-        const idx = this.getPlayIndexAtEvent(event)
+        const idx = this.getPlayIndexAtEvent(event, { clamp: true })
         if (idx != null) {
           this.rangeEndIndex = idx
           this.redrawChart()
