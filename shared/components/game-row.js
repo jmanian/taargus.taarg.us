@@ -66,7 +66,7 @@ const gameRowTemplate = `
         <div v-if="gameFlowData" class="game-flow-chart-container">
           <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousemove="handleCanvasHover" @mouseleave="handleCanvasLeave" @touchstart="handleTouchStart" @touchmove="handleCanvasTouchMove" @touchend="handleCanvasLeave"></canvas>
           <div v-if="hoveredPlay" class="game-flow-tooltip">
-            <div class="tooltip-time">{{ hoveredPlay.time }} - {{ hoveredPlay.quarter }}</div>
+            <div class="tooltip-time">{{ hoveredPlay.time }} - {{ hoveredPlay.quarter }} · {{ formatLead(hoveredPlay) }}</div>
             <div class="tooltip-score">{{ hoveredPlay.awayTeam }} {{ hoveredPlay.awayScore }} - {{ hoveredPlay.homeTeam }} {{ hoveredPlay.homeScore }}</div>
             <div class="tooltip-description">{{ hoveredPlay.description }}</div>
           </div>
@@ -1352,6 +1352,12 @@ const GameRow = {
       ctx.fillText(this.game.awayTeam, padding.left + 30, padding.top + 12)
       const bottomGridlineY = yScale(-maxHomeLeadRounded)
       ctx.fillText(this.game.homeTeam, padding.left + 30, bottomGridlineY - 3)
+    },
+    formatLead(play) {
+      const diff = play.awayScore - play.homeScore
+      if (diff === 0) return 'Tied'
+      const leader = diff > 0 ? play.awayTeam : play.homeTeam
+      return `${leader} +${Math.abs(diff)}`
     },
     formatLeaders(leaders) {
       if (!leaders) return []
