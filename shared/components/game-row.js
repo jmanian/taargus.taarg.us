@@ -264,6 +264,7 @@ const GameRow = {
       touchStartY: null,
       touchMoved: false,
       touchMode: null,
+      adjustingEndpoint: null,
       resizeTimeout: null,
       showLocalTooltip: false
     }
@@ -708,9 +709,9 @@ const GameRow = {
       this.hoveredPlayIndex = null
       this.redrawChart()
     },
-    distanceToAnchorPx(event) {
+    distanceToIndexPx(event, index) {
       const canvas = this.$refs.gameFlowCanvas
-      if (!canvas || this.rangeStartIndex == null) return Infinity
+      if (!canvas || index == null) return Infinity
       const rect = canvas.getBoundingClientRect()
       const touch = event.touches && event.touches[0]
       if (!touch) return Infinity
@@ -719,8 +720,8 @@ const GameRow = {
       const chartWidth = canvas.offsetWidth - padding.left - padding.right
       const maxTime = this.getMaxTime()
       const xScale = (time) => (time / maxTime) * chartWidth
-      const anchorX = padding.left + xScale(this.gameFlowData[this.rangeStartIndex].time)
-      return Math.abs(touchX - anchorX)
+      const dotX = padding.left + xScale(this.gameFlowData[index].time)
+      return Math.abs(touchX - dotX)
     },
     handleTouchStart(event) {
       if (!event.touches || !event.touches[0]) return
@@ -730,13 +731,27 @@ const GameRow = {
 
       // Determine gesture mode from current state and touch position
       if (this.rangeStartIndex != null && this.rangeEndIndex != null) {
-        // State C: any touch clears
-        this.touchMode = 'clear-on-release'
+        // State C: near either endpoint → adjust that endpoint; far → replace range
+        const distStart = this.distanceToIndexPx(event, this.rangeStartIndex)
+        const distEnd = this.distanceToIndexPx(event, this.rangeEndIndex)
+        const nearest = Math.min(distStart, distEnd)
+        if (nearest <= 30) {
+          this.touchMode = 'adjust-endpoint'
+          this.adjustingEndpoint = distStart <= distEnd ? 'start' : 'end'
+          this.hoveredPlay = null
+          this.hoveredPlayIndex = null
+          this.redrawChart()
+          return
+        }
+        // Far from both endpoints: clear range and set a fresh anchor
+        this.touchMode = 'set-anchor'
+        this.clearRange()
+        this.handleCanvasHover(event)
         return
       }
       if (this.rangeStartIndex != null) {
-        // State B: near anchor → extend; far → replace anchor
-        if (this.distanceToAnchorPx(event) <= 30) {
+        // State B: near anchor → extend; far → set a fresh anchor
+        if (this.distanceToIndexPx(event, this.rangeStartIndex) <= 30) {
           this.touchMode = 'extend'
           const idx = this.getPlayIndexAtEvent(event)
           this.rangeEndIndex = idx
@@ -745,12 +760,10 @@ const GameRow = {
           this.redrawChart()
           return
         }
-        this.touchMode = 'replace-anchor'
         // Clear the old anchor immediately so the visible dot tracks the new touch
         this.clearRange()
-      } else {
-        this.touchMode = 'set-anchor'
       }
+      this.touchMode = 'set-anchor'
       // Preview the hovered point while finger is down
       this.handleCanvasHover(event)
     },
@@ -760,12 +773,19 @@ const GameRow = {
         const dy = Math.abs(event.touches[0].clientY - (this.touchStartY || 0))
         if (dx > 8 || dy > 8) this.touchMoved = true
       }
-      if (this.touchMode === 'clear-on-release') return
       if (this.touchMode === 'extend') {
-        // Live-update the second endpoint as finger moves
         const idx = this.getPlayIndexAtEvent(event, { clamp: true })
         if (idx != null) {
           this.rangeEndIndex = idx
+          this.redrawChart()
+        }
+        return
+      }
+      if (this.touchMode === 'adjust-endpoint') {
+        const idx = this.getPlayIndexAtEvent(event, { clamp: true })
+        if (idx != null) {
+          if (this.adjustingEndpoint === 'start') this.rangeStartIndex = idx
+          else this.rangeEndIndex = idx
           this.redrawChart()
         }
         return
@@ -775,18 +795,12 @@ const GameRow = {
     handleTouchEnd(event) {
       const mode = this.touchMode
       const moved = this.touchMoved
+      const adjusting = this.adjustingEndpoint
       this.touchMode = null
+      this.adjustingEndpoint = null
       this.touchMoved = false
       this.touchStartX = null
       this.touchStartY = null
-
-      if (mode === 'clear-on-release') {
-        this.clearRange()
-        this.hoveredPlay = null
-        this.hoveredPlayIndex = null
-        this.redrawChart()
-        return
-      }
 
       if (mode === 'extend') {
         if (!moved || this.rangeStartIndex === this.rangeEndIndex) {
@@ -799,7 +813,24 @@ const GameRow = {
         return
       }
 
-      // 'set-anchor' or 'replace-anchor' — lock anchor at release position
+      if (mode === 'adjust-endpoint') {
+        if (!moved) {
+          // Tap on the endpoint dot without dragging → remove that endpoint
+          if (adjusting === 'start') {
+            this.rangeStartIndex = this.rangeEndIndex
+          }
+          this.rangeEndIndex = null
+        } else if (this.rangeStartIndex === this.rangeEndIndex) {
+          // Endpoint dragged onto the other → collapse to single anchor
+          this.rangeEndIndex = null
+        }
+        this.hoveredPlay = null
+        this.hoveredPlayIndex = null
+        this.redrawChart()
+        return
+      }
+
+      // 'set-anchor' — lock anchor at release position
       const idx = this.getPlayIndexAtEvent(event)
       this.hoveredPlay = null
       this.hoveredPlayIndex = null
