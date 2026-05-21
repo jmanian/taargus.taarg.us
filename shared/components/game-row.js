@@ -525,10 +525,17 @@ const GameRow = {
       const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
       const endOfRegulation = LEAGUE.regulationPeriods * LEAGUE.periodSeconds
 
-      // If game is ongoing and hasn't reached end of regulation, extend x-axis to end of regulation
-      return this.playing && maxPeriod <= LEAGUE.regulationPeriods && lastDataTime < endOfRegulation
-        ? endOfRegulation
-        : lastDataTime
+      // If game is ongoing, extend x-axis to the end of the current period (regulation or OT)
+      if (this.playing) {
+        if (maxPeriod <= LEAGUE.regulationPeriods) {
+          if (lastDataTime < endOfRegulation) return endOfRegulation
+        } else {
+          const otNum = maxPeriod - LEAGUE.regulationPeriods
+          const endOfCurrentOT = endOfRegulation + otNum * LEAGUE.otSeconds
+          if (lastDataTime < endOfCurrentOT) return endOfCurrentOT
+        }
+      }
+      return lastDataTime
     },
     handleCanvasHover(event) {
       const canvas = this.$refs.gameFlowCanvas
