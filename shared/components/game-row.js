@@ -69,10 +69,10 @@ const gameRowTemplate = `
             <div class="tooltip-time">{{ rangeTooltip.timeRange }}</div>
             <div class="tooltip-score">{{ rangeTooltip.scoreLine }}</div>
           </div>
-          <div v-else-if="hoveredPlay" class="game-flow-tooltip">
-            <div class="tooltip-time">{{ hoveredPlay.time }} - {{ hoveredPlay.quarter }} · {{ formatLead(hoveredPlay) }}</div>
-            <div class="tooltip-score">{{ hoveredPlay.awayTeam }} {{ hoveredPlay.awayScore }} - {{ hoveredPlay.homeTeam }} {{ hoveredPlay.homeScore }}</div>
-            <div class="tooltip-description">{{ hoveredPlay.description }}</div>
+          <div v-else-if="singlePointTooltip" class="game-flow-tooltip">
+            <div class="tooltip-time">{{ singlePointTooltip.time }} - {{ singlePointTooltip.quarter }} · {{ formatLead(singlePointTooltip) }}</div>
+            <div class="tooltip-score">{{ singlePointTooltip.awayTeam }} {{ singlePointTooltip.awayScore }} - {{ singlePointTooltip.homeTeam }} {{ singlePointTooltip.homeScore }}</div>
+            <div class="tooltip-description">{{ singlePointTooltip.description }}</div>
           </div>
         </div>
       </div>
@@ -253,7 +253,6 @@ const GameRow = {
       boxScoreData: null,
       boxScoreActiveTeam: 'away', // 'away' or 'home'
       teamColors: null,
-      hoveredPlay: null,
       hoveredPlayIndex: null,
       rangeStartIndex: null,
       rangeEndIndex: null,
@@ -603,22 +602,7 @@ const GameRow = {
       return selectedIndex
     },
     setHoverFromIndex(index) {
-      if (index == null) {
-        this.hoveredPlay = null
-        this.hoveredPlayIndex = null
-        return
-      }
-      const play = this.gameFlowData[index]
       this.hoveredPlayIndex = index
-      this.hoveredPlay = {
-        time: play.clock,
-        quarter: play.periodDisplay,
-        awayTeam: this.game.awayTeam,
-        homeTeam: this.game.homeTeam,
-        awayScore: play.awayScore,
-        homeScore: play.homeScore,
-        description: play.description
-      }
     },
     clearRange() {
       this.rangeStartIndex = null
@@ -679,7 +663,6 @@ const GameRow = {
           if (!this.isDraggingRange) {
             this.isDraggingRange = true
             this.rangeStartIndex = this.mouseDownIndex
-            this.hoveredPlay = null
             this.hoveredPlayIndex = null
           }
           const curIdx = this.getPlayIndexAtEvent(event, { clamp: true })
@@ -705,7 +688,6 @@ const GameRow = {
       if (this.isMobile) return
       // If a drag is in progress, document-level listeners keep tracking — don't finalize
       if (this.mouseDownIndex != null || this.isDraggingRange) return
-      this.hoveredPlay = null
       this.hoveredPlayIndex = null
       this.redrawChart()
     },
@@ -738,7 +720,6 @@ const GameRow = {
         if (nearest <= 30) {
           this.touchMode = 'adjust-endpoint'
           this.adjustingEndpoint = distStart <= distEnd ? 'start' : 'end'
-          this.hoveredPlay = null
           this.hoveredPlayIndex = null
           this.redrawChart()
           return
@@ -755,7 +736,6 @@ const GameRow = {
           this.touchMode = 'extend'
           const idx = this.getPlayIndexAtEvent(event)
           this.rangeEndIndex = idx
-          this.hoveredPlay = null
           this.hoveredPlayIndex = null
           this.redrawChart()
           return
@@ -807,7 +787,6 @@ const GameRow = {
           // Tap on the anchor dot, or drag that ended on the anchor → clear it
           this.clearRange()
         }
-        this.hoveredPlay = null
         this.hoveredPlayIndex = null
         this.redrawChart()
         return
@@ -824,7 +803,6 @@ const GameRow = {
           // Endpoint dragged onto the other → collapse to single anchor
           this.rangeEndIndex = null
         }
-        this.hoveredPlay = null
         this.hoveredPlayIndex = null
         this.redrawChart()
         return
@@ -832,7 +810,6 @@ const GameRow = {
 
       // 'set-anchor' — lock anchor at release position
       const idx = this.getPlayIndexAtEvent(event)
-      this.hoveredPlay = null
       this.hoveredPlayIndex = null
       if (idx == null) {
         // Released off-chart — bail without changing state
@@ -1633,6 +1610,24 @@ const GameRow = {
         return [this.hoveredPlayIndex]
       }
       return []
+    },
+    singlePointTooltip() {
+      if (this.rangeTooltip) return null
+      const indices = this.highlightIndices
+      if (indices.length !== 1) return null
+      const idx = indices[0]
+      if (!this.gameFlowData || idx <= 0) return null
+      const play = this.gameFlowData[idx]
+      if (!play) return null
+      return {
+        time: play.clock,
+        quarter: play.periodDisplay,
+        awayTeam: this.game.awayTeam,
+        homeTeam: this.game.homeTeam,
+        awayScore: play.awayScore,
+        homeScore: play.homeScore,
+        description: play.description
+      }
     },
     rangeTooltip() {
       if (this.rangeStartIndex == null || this.rangeEndIndex == null) return null
