@@ -738,6 +738,8 @@ const GameRow = {
           return
         }
         this.touchMode = 'replace-anchor'
+        // Clear the old anchor immediately so the visible dot tracks the new touch
+        this.clearRange()
       } else {
         this.touchMode = 'set-anchor'
       }
