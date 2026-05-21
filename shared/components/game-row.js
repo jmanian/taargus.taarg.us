@@ -643,6 +643,9 @@ const GameRow = {
       this.mouseDownIndex = null
     },
     handleCanvasHover(event) {
+      // Ignore synthesized mouse events fired after touch on mobile
+      if (this.isMobile && event && event.type && event.type.startsWith('mouse')) return
+
       const canvas = this.$refs.gameFlowCanvas
       if (!canvas || !this.gameFlowData) return
 
@@ -675,6 +678,8 @@ const GameRow = {
       this.redrawChart()
     },
     handleCanvasLeave() {
+      // Ignore synthesized mouseleave on mobile
+      if (this.isMobile) return
       if (this.isDraggingRange) {
         // Finalize drag at current end position so we don't get stuck if mouseup fires off-canvas
         this.isDraggingRange = false
