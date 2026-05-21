@@ -1736,6 +1736,25 @@ body.dark-mode .box-score-table .totals-row {
   backdrop-filter: blur(10px);
 }
 
+.tooltip-close {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  line-height: 1;
+  padding: 6px 8px;
+  color: #6c757d;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.dark-mode .tooltip-close {
+  color: #adb5bd;
+}
+
 .tooltip-time {
   font-size: 11px;
   color: #6c757d;
