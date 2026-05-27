@@ -1738,13 +1738,17 @@ body.dark-mode .box-score-table .totals-row {
 
 .tooltip-close {
   position: absolute;
-  top: 2px;
-  right: 4px;
+  top: 0;
+  right: 0;
   background: none;
   border: none;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
-  padding: 6px 8px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #6c757d;
   cursor: pointer;
   pointer-events: auto;
