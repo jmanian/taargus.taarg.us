@@ -67,6 +67,7 @@ function parseEvent(event) {
     state: isPostponed ? 'postponed' : gameState,
     statusDetail: event.status.type.shortDetail.replace('-', '–'),
     clock: event.status.displayClock,
+    period: event.status.period,
     spread: odds?.details,
     spreadFormatted: spreadFormatted,
     total: odds?.overUnder,

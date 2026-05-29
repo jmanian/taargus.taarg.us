@@ -8,7 +8,7 @@ const gameRowTemplate = `
       <span class="team-record">{{ game.awaySeed ? '\xa0' : game.awayRecord }}</span>
     </div>
 
-    <div v-if="started" class="score away-score" :class="{'losing-score': isAwayLosing}">{{ game.awayScore }}</div>
+    <div v-if="started" class="score away-score" :class="{'losing-score': isAwayLosing}">{{ displayScoreboard.awayScore }}</div>
 
     <div class="game-center">
       <span class="game-time" :class="{'live-time': playing, 'pre-game': !started}">{{ timeLabel }}</span>
@@ -29,7 +29,7 @@ const gameRowTemplate = `
       </div>
     </div>
 
-    <div v-if="started" class="score home-score" :class="{'losing-score': isHomeLosing}">{{ game.homeScore }}</div>
+    <div v-if="started" class="score home-score" :class="{'losing-score': isHomeLosing}">{{ displayScoreboard.homeScore }}</div>
 
     <div class="team-side home-side">
       <img v-if="homeImageURL" class="team-logo" :src="homeImageURL">
@@ -536,10 +536,11 @@ const GameRow = {
       this.redrawChart()
     },
     getMaxTime() {
-      if (!this.gameFlowData || this.gameFlowData.length === 0) return 0
+      const data = this.chartData
+      if (!data || data.length === 0) return 0
 
-      const lastDataTime = this.gameFlowData[this.gameFlowData.length - 1].time
-      const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
+      const lastDataTime = data[data.length - 1].time
+      const maxPeriod = Math.max(...data.map(d => d.period))
       const endOfRegulation = LEAGUE.regulationPeriods * LEAGUE.periodSeconds
 
       // If game is ongoing, extend x-axis to the end of the current period (regulation or OT)
@@ -556,7 +557,8 @@ const GameRow = {
     },
     getPlayIndexAtEvent(event, { clamp = false } = {}) {
       const canvas = this.$refs.gameFlowCanvas
-      if (!canvas || !this.gameFlowData) return null
+      const data = this.chartData
+      if (!canvas || !data) return null
 
       const rect = canvas.getBoundingClientRect()
       const clientX = event.touches && event.touches[0]
@@ -580,20 +582,20 @@ const GameRow = {
 
       // Default to last play so the exact-right-edge case (relativeX === chartWidth)
       // snaps to end-of-game rather than start-of-game
-      let selectedIndex = this.gameFlowData.length - 1
-      for (let i = 1; i < this.gameFlowData.length; i++) {
-        const currentX = xScale(this.gameFlowData[i].time)
+      let selectedIndex = data.length - 1
+      for (let i = 1; i < data.length; i++) {
+        const currentX = xScale(data[i].time)
         let zoneStart, zoneEnd
         if (i === 1) {
           zoneStart = 0
         } else {
-          const prevX = xScale(this.gameFlowData[i - 1].time)
+          const prevX = xScale(data[i - 1].time)
           zoneStart = (prevX + currentX) / 2
         }
-        if (i === this.gameFlowData.length - 1) {
+        if (i === data.length - 1) {
           zoneEnd = chartWidth
         } else {
-          const nextX = xScale(this.gameFlowData[i + 1].time)
+          const nextX = xScale(data[i + 1].time)
           zoneEnd = (currentX + nextX) / 2
         }
         if (relativeX >= zoneStart && relativeX < zoneEnd) {
@@ -709,7 +711,9 @@ const GameRow = {
       const chartWidth = canvas.offsetWidth - padding.left - padding.right
       const maxTime = this.getMaxTime()
       const xScale = (time) => (time / maxTime) * chartWidth
-      const dotX = padding.left + xScale(this.gameFlowData[index].time)
+      const data = this.chartData
+      if (!data || !data[index]) return Infinity
+      const dotX = padding.left + xScale(data[index].time)
       return Math.abs(touchX - dotX)
     },
     handleTouchStart(event) {
@@ -915,33 +919,9 @@ const GameRow = {
 
       plays.forEach(play => {
         if (play.awayScore !== undefined && play.homeScore !== undefined) {
-          // Convert clock to seconds elapsed in game
           const period = play.period?.number || 1
           const clock = play.clock?.displayValue || '0:00'
-
-          // Parse clock - handle formats like "11:31", "0:45.2", "0.0"
-          let minutes = 0
-          let seconds = 0
-
-          if (clock.includes(':')) {
-            const parts = clock.split(':')
-            minutes = parseInt(parts[0]) || 0
-            seconds = parseFloat(parts[1]) || 0
-          } else {
-            // Handle formats like "0.0" (just seconds)
-            seconds = parseFloat(clock) || 0
-          }
-
-          let totalSeconds
-          if (period <= LEAGUE.regulationPeriods) {
-            // Regular quarters
-            const secondsIntoQuarter = LEAGUE.periodSeconds - (minutes * 60 + seconds)
-            totalSeconds = ((period - 1) * LEAGUE.periodSeconds) + secondsIntoQuarter
-          } else {
-            // Overtime periods
-            const secondsIntoOT = LEAGUE.otSeconds - (minutes * 60 + seconds)
-            totalSeconds = (LEAGUE.regulationPeriods * LEAGUE.periodSeconds) + ((period - LEAGUE.regulationPeriods - 1) * LEAGUE.otSeconds) + secondsIntoOT
-          }
+          const totalSeconds = clockToElapsedSeconds(period, clock)
 
           dataPoints.push({
             time: totalSeconds,
@@ -1077,7 +1057,8 @@ const GameRow = {
     },
     drawScoreFlow() {
       const canvas = this.$refs.gameFlowCanvas
-      if (!canvas || !this.gameFlowData || this.gameFlowData.length === 0) return
+      const data = this.chartData
+      if (!canvas || !data || data.length === 0) return
 
       const ctx = canvas.getContext('2d')
       const dpr = window.devicePixelRatio || 1
@@ -1103,19 +1084,19 @@ const GameRow = {
 
       // Find max score for scaling
       const actualMaxScore = Math.max(
-        ...this.gameFlowData.map(d => Math.max(d.awayScore, d.homeScore))
+        ...data.map(d => Math.max(d.awayScore, d.homeScore))
       )
       // Round up to nearest 25
       const maxScore = Math.ceil(actualMaxScore / 25) * 25
       const maxTime = this.getMaxTime()
-      const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
+      const maxPeriod = Math.max(...data.map(d => d.period))
 
       console.log('Drawing chart:', {
-        dataPoints: this.gameFlowData.length,
+        dataPoints: data.length,
         maxScore,
         maxTime,
-        firstPoint: this.gameFlowData[0],
-        lastPoint: this.gameFlowData[this.gameFlowData.length - 1]
+        firstPoint: data[0],
+        lastPoint: data[data.length - 1]
       })
 
       // Scales
@@ -1167,13 +1148,14 @@ const GameRow = {
       ctx.lineJoin = 'round'
       ctx.lineCap = 'butt'
       ctx.beginPath()
-      this.gameFlowData.forEach((point, i) => {
+      data.forEach((point, i) => {
+        if (point.synthetic) return
         const x = xScale(point.time)
         const y = yScale(point.awayScore)
         if (i === 0) {
           ctx.moveTo(x, y)
         } else {
-          const prevY = yScale(this.gameFlowData[i - 1].awayScore)
+          const prevY = yScale(data[i - 1].awayScore)
           // Draw horizontal line at previous score level
           ctx.lineTo(x, prevY)
           // Draw vertical line to new score
@@ -1189,13 +1171,14 @@ const GameRow = {
       ctx.lineJoin = 'round'
       ctx.lineCap = 'butt'
       ctx.beginPath()
-      this.gameFlowData.forEach((point, i) => {
+      data.forEach((point, i) => {
+        if (point.synthetic) return
         const x = xScale(point.time)
         const y = yScale(point.homeScore)
         if (i === 0) {
           ctx.moveTo(x, y)
         } else {
-          const prevY = yScale(this.gameFlowData[i - 1].homeScore)
+          const prevY = yScale(data[i - 1].homeScore)
           // Draw horizontal line at previous score level
           ctx.lineTo(x, prevY)
           // Draw vertical line to new score
@@ -1204,12 +1187,28 @@ const GameRow = {
       })
       ctx.stroke()
 
+      // Draw disconnected dot(s) for any synthetic trailing point.
+      // Diameter matches the score-flow line width.
+      const syntheticDotRadius = (this.isMobile ? 1.5 : 2) / 2
+      data.forEach(point => {
+        if (!point.synthetic) return
+        const x = xScale(point.time)
+        ctx.fillStyle = awayColor
+        ctx.beginPath()
+        ctx.arc(x, yScale(point.awayScore), syntheticDotRadius, 0, 2 * Math.PI)
+        ctx.fill()
+        ctx.fillStyle = homeColor
+        ctx.beginPath()
+        ctx.arc(x, yScale(point.homeScore), syntheticDotRadius, 0, 2 * Math.PI)
+        ctx.fill()
+      })
+
       // Shade the range region if two endpoints are set
       if (this.rangeStartIndex != null && this.rangeEndIndex != null && this.rangeStartIndex !== this.rangeEndIndex) {
         const aIdx = Math.min(this.rangeStartIndex, this.rangeEndIndex)
         const bIdx = Math.max(this.rangeStartIndex, this.rangeEndIndex)
-        const xA = xScale(this.gameFlowData[aIdx].time)
-        const xB = xScale(this.gameFlowData[bIdx].time)
+        const xA = xScale(data[aIdx].time)
+        const xB = xScale(data[bIdx].time)
         ctx.fillStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'
         ctx.fillRect(xA, padding.top, xB - xA, height - padding.top - padding.bottom)
       }
@@ -1218,7 +1217,8 @@ const GameRow = {
       const dotRadius = this.isMobile ? 4 : 5
       this.highlightIndices.forEach(i => {
         if (i === 0) return
-        const point = this.gameFlowData[i]
+        const point = data[i]
+        if (!point) return
         const x = xScale(point.time)
         ctx.fillStyle = awayColor
         ctx.beginPath()
@@ -1267,7 +1267,8 @@ const GameRow = {
     },
     drawLeadTracker() {
       const canvas = this.$refs.gameFlowCanvas
-      if (!canvas || !this.gameFlowData || this.gameFlowData.length === 0) return
+      const data = this.chartData
+      if (!canvas || !data || data.length === 0) return
 
       const ctx = canvas.getContext('2d')
       const dpr = window.devicePixelRatio || 1
@@ -1291,11 +1292,13 @@ const GameRow = {
       const chartWidth = width - padding.left - padding.right
       const chartHeight = height - padding.top - padding.bottom
 
-      // Calculate lead differential for each point
-      const leadData = this.gameFlowData.map(point => ({
+      // Calculate lead differential for each point. Preserve synthetic flag so
+      // we can skip those points when drawing the connecting line/fill.
+      const leadData = data.map(point => ({
         time: point.time,
         lead: point.awayScore - point.homeScore, // positive = away leading, negative = home leading
-        period: point.period
+        period: point.period,
+        synthetic: !!point.synthetic
       }))
 
       // Determine each side's y-axis bound independently from each team's biggest lead.
@@ -1306,7 +1309,7 @@ const GameRow = {
       const maxHomeLeadRounded = Math.max(5, Math.ceil(homeMaxLead / 5) * 5)
       const totalLeadRange = maxAwayLeadRounded + maxHomeLeadRounded
       const maxTime = this.getMaxTime()
-      const maxPeriod = Math.max(...this.gameFlowData.map(d => d.period))
+      const maxPeriod = Math.max(...data.map(d => d.period))
 
       // Scales
       const xScale = (time) => padding.left + (time / maxTime) * chartWidth
@@ -1364,23 +1367,25 @@ const GameRow = {
       }
       ctx.setLineDash([])
 
-      // Draw filled area chart
+      // Draw filled area chart (excludes any trailing synthetic point so the
+      // disconnected dot doesn't pull the polygon to the new x).
+      const realLeadData = leadData.filter(p => !p.synthetic)
       ctx.beginPath()
-      ctx.moveTo(xScale(leadData[0].time), yScale(0))
+      ctx.moveTo(xScale(realLeadData[0].time), yScale(0))
 
-      leadData.forEach((point, i) => {
+      realLeadData.forEach((point, i) => {
         const x = xScale(point.time)
         const y = yScale(point.lead)
         if (i === 0) {
           ctx.lineTo(x, y)
         } else {
-          const prevY = yScale(leadData[i - 1].lead)
+          const prevY = yScale(realLeadData[i - 1].lead)
           ctx.lineTo(x, prevY)
           ctx.lineTo(x, y)
         }
       })
 
-      ctx.lineTo(xScale(leadData[leadData.length - 1].time), yScale(0))
+      ctx.lineTo(xScale(realLeadData[realLeadData.length - 1].time), yScale(0))
       ctx.closePath()
 
       // Fill with gradient (capped at 30-point lead = 100% opacity)
@@ -1419,6 +1424,7 @@ const GameRow = {
           currentPath = { color: null, segments: [] }
           return
         }
+        if (point.synthetic) return
 
         const x = xScale(point.time)
         const y = yScale(point.lead)
@@ -1512,6 +1518,22 @@ const GameRow = {
         ctx.fillStyle = highlightColor
         ctx.beginPath()
         ctx.arc(x, yScale(point.lead), dotRadius, 0, 2 * Math.PI)
+        ctx.fill()
+      })
+
+      // Draw disconnected dot for any synthetic trailing point.
+      // Diameter matches the lead line width.
+      const syntheticLeadDotRadius = (this.isMobile ? 1 : 1.5) / 2
+      leadData.forEach(point => {
+        if (!point.synthetic) return
+        const x = xScale(point.time)
+        let color
+        if (point.lead > 0) color = awayColor
+        else if (point.lead < 0) color = homeColor
+        else color = this.isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.3)'
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(x, yScale(point.lead), syntheticLeadDotRadius, 0, 2 * Math.PI)
         ctx.fill()
       })
 
@@ -1623,8 +1645,8 @@ const GameRow = {
       const indices = this.highlightIndices
       if (indices.length !== 1) return null
       const idx = indices[0]
-      if (!this.gameFlowData || idx <= 0) return null
-      const play = this.gameFlowData[idx]
+      if (!this.chartData || idx <= 0) return null
+      const play = this.chartData[idx]
       if (!play) return null
       return {
         time: play.clock,
@@ -1639,7 +1661,7 @@ const GameRow = {
     rangeTooltip() {
       if (this.rangeStartIndex == null || this.rangeEndIndex == null) return null
       if (this.rangeStartIndex === this.rangeEndIndex) return null
-      const data = this.gameFlowData
+      const data = this.chartData
       if (!data) return null
       let aIdx = this.rangeStartIndex
       let bIdx = this.rangeEndIndex
@@ -1687,9 +1709,70 @@ const GameRow = {
         case 'postponed':
           return 'Postponed'
         case 'in':
+          if (this.freshSource === 'pbp') {
+            const pbpLast = this.gameFlowData[this.gameFlowData.length - 1]
+            // Preserve statusDetail's "3rd – 5:23" shape; just swap in the
+            // fresher clock value from the play-by-play feed.
+            const sd = this.game.statusDetail || ''
+            if (this.game.clock && sd.includes(this.game.clock)) {
+              return sd.replace(this.game.clock, pbpLast.clock)
+            }
+            return sd
+          }
+          return this.game.statusDetail
         case 'post':
           return this.game.statusDetail
       }
+    },
+    // 'pbp' | 'scoreboard' | 'sync' — which source is more up-to-date.
+    // Only active while the game is live; otherwise treated as in sync.
+    freshSource: function () {
+      if (this.game.state !== 'in') return 'sync'
+      if (!this.gameFlowData || this.gameFlowData.length === 0) return 'sync'
+      const pbpLast = this.gameFlowData[this.gameFlowData.length - 1]
+      const sbElapsed = clockToElapsedSeconds(this.game.period, this.game.clock)
+      const pbpElapsed = pbpLast.time
+      if (pbpElapsed > sbElapsed) return 'pbp'
+      if (sbElapsed > pbpElapsed) return 'scoreboard'
+      // Tiebreak: higher score for either team wins.
+      const sbMax = Math.max(this.game.awayScore, this.game.homeScore)
+      const pbpMax = Math.max(pbpLast.awayScore, pbpLast.homeScore)
+      if (pbpMax > sbMax) return 'pbp'
+      if (sbMax > pbpMax) return 'scoreboard'
+      return 'sync'
+    },
+    displayScoreboard: function () {
+      if (this.freshSource === 'pbp') {
+        const pbpLast = this.gameFlowData[this.gameFlowData.length - 1]
+        return {
+          awayScore: pbpLast.awayScore,
+          homeScore: pbpLast.homeScore
+        }
+      }
+      return {
+        awayScore: this.game.awayScore,
+        homeScore: this.game.homeScore
+      }
+    },
+    // PBP data, plus a single trailing synthetic point when the scoreboard
+    // is fresher. Consumed by the chart drawing + hover code.
+    chartData: function () {
+      if (!this.gameFlowData) return null
+      if (this.freshSource !== 'scoreboard') return this.gameFlowData
+      const sbElapsed = clockToElapsedSeconds(this.game.period, this.game.clock)
+      return [
+        ...this.gameFlowData,
+        {
+          time: sbElapsed,
+          awayScore: this.game.awayScore,
+          homeScore: this.game.homeScore,
+          period: this.game.period,
+          clock: this.game.clock,
+          periodDisplay: this.game.statusDetail || '',
+          description: '',
+          synthetic: true
+        }
+      ]
     },
     awayImageURL: function () {
       // Depend on isDarkMode so this recomputes when dark mode changes
