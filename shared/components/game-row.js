@@ -1103,6 +1103,18 @@ const GameRow = {
       const xScale = (time) => padding.left + (time / maxTime) * chartWidth
       const yScale = (score) => padding.top + chartHeight - (score / maxScore) * chartHeight
 
+      // Draw minor grid lines at every point
+      ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.03)'
+      ctx.lineWidth = 1
+      for (let score = 1; score <= maxScore; score++) {
+        if (score % 25 === 0) continue
+        const y = yScale(score)
+        ctx.beginPath()
+        ctx.moveTo(padding.left, y)
+        ctx.lineTo(width - padding.right, y)
+        ctx.stroke()
+      }
+
       // Draw grid lines at 25-point intervals
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'
       ctx.lineWidth = 1
@@ -1319,6 +1331,18 @@ const GameRow = {
       const yScale = (lead) => lead >= 0
         ? zeroY - (lead / maxAwayLeadRounded) * awayHeight
         : zeroY + (-lead / maxHomeLeadRounded) * homeHeight
+
+      // Draw minor grid lines at every point
+      ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.03)'
+      ctx.lineWidth = 1
+      for (let lead = -maxHomeLeadRounded; lead <= maxAwayLeadRounded; lead++) {
+        if (lead === 0 || lead % 5 === 0) continue
+        const y = yScale(lead)
+        ctx.beginPath()
+        ctx.moveTo(padding.left, y)
+        ctx.lineTo(width - padding.right, y)
+        ctx.stroke()
+      }
 
       // Draw grid lines at 5-point intervals
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'
