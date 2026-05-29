@@ -60,6 +60,13 @@ const gameRowTemplate = `
               @click.stop="setChartMode('score')">
               Scores
             </button>
+            <button
+              v-if="hasWinProb"
+              class="game-flow-tab"
+              :class="{'active': chartMode === 'winProb'}"
+              @click.stop="setChartMode('winProb')">
+              Win Prob.
+            </button>
           </div>
         </div>
         <div v-if="gameFlowLoading && !gameFlowData" class="game-flow-loading">Loading...</div>
@@ -72,7 +79,7 @@ const gameRowTemplate = `
           </div>
           <div v-else-if="singlePointTooltip" class="game-flow-tooltip">
             <button v-if="isMobile && rangeStartIndex != null" class="tooltip-close" @click.stop="clearChartSelection" aria-label="Clear selection">✕</button>
-            <div class="tooltip-time">{{ singlePointTooltip.time }} - {{ singlePointTooltip.quarter }} · {{ formatLead(singlePointTooltip) }}</div>
+            <div class="tooltip-time">{{ singlePointTooltip.time }} - {{ singlePointTooltip.quarter }} · {{ chartMode === 'winProb' && singlePointTooltip.homeWinPct != null ? formatWinProb(singlePointTooltip) : formatLead(singlePointTooltip) }}</div>
             <div class="tooltip-score">{{ singlePointTooltip.awayTeam }} {{ singlePointTooltip.awayScore }} - {{ singlePointTooltip.homeTeam }} {{ singlePointTooltip.homeScore }}</div>
             <div class="tooltip-description">{{ singlePointTooltip.description }}</div>
           </div>
@@ -901,7 +908,7 @@ const GameRow = {
         }
 
         if (data.plays && data.plays.length > 0) {
-          this.gameFlowData = this.processGameFlowData(data.plays)
+          this.gameFlowData = this.processGameFlowData(data.plays, data.winprobability)
           console.log('Processed game flow data:', this.gameFlowData.length, 'points')
           // The watch will handle drawing when the canvas is rendered
         } else {
@@ -913,7 +920,17 @@ const GameRow = {
         this.gameFlowLoading = false
       }
     },
-    processGameFlowData(plays) {
+    processGameFlowData(plays, winprobability) {
+      // Build a map of playId -> homeWinPercentage from winprobability array
+      const winProbMap = {}
+      if (winprobability && winprobability.length) {
+        winprobability.forEach(wp => {
+          if (wp.playId != null) {
+            winProbMap[wp.playId] = wp.homeWinPercentage
+          }
+        })
+      }
+
       // Filter to only scoring plays and collect data points
       const dataPoints = []
 
@@ -923,6 +940,8 @@ const GameRow = {
           const clock = play.clock?.displayValue || '0:00'
           const totalSeconds = clockToElapsedSeconds(period, clock)
 
+          const homeWinPct = winProbMap[play.id]
+
           dataPoints.push({
             time: totalSeconds,
             awayScore: play.awayScore,
@@ -930,7 +949,8 @@ const GameRow = {
             period: period,
             clock: clock,
             periodDisplay: play.period?.displayValue || '',
-            description: play.text || ''
+            description: play.text || '',
+            homeWinPct: homeWinPct != null ? homeWinPct : null
           })
         }
       })
@@ -1049,7 +1069,9 @@ const GameRow = {
       return result
     },
     drawGameFlow() {
-      if (this.chartMode === 'lead') {
+      if (this.chartMode === 'winProb' && this.hasWinProb) {
+        this.drawWinProb()
+      } else if (this.chartMode === 'lead') {
         this.drawLeadTracker()
       } else {
         this.drawScoreFlow()
@@ -1276,6 +1298,211 @@ const GameRow = {
         // Draw label just inside the chart area, below the gridline
         ctx.fillText(score.toString(), padding.left + 5, y + 12)
       }
+    },
+    drawWinProb() {
+      const canvas = this.$refs.gameFlowCanvas
+      const data = this.chartData
+      if (!canvas || !data || data.length === 0) return
+
+      const ctx = canvas.getContext('2d')
+      const dpr = window.devicePixelRatio || 1
+
+      const width = canvas.offsetWidth
+      const height = 300
+      canvas.width = width * dpr
+      canvas.height = height * dpr
+      canvas.style.width = width + 'px'
+      canvas.style.height = height + 'px'
+      ctx.scale(dpr, dpr)
+
+      const padding = {
+        top: 20,
+        right: this.isMobile ? 0 : 20,
+        bottom: 40,
+        left: this.isMobile ? 0 : 20
+      }
+      const chartWidth = width - padding.left - padding.right
+      const chartHeight = height - padding.top - padding.bottom
+
+      // Build win prob data points. Value is awayWinPct - homeWinPct on a -100..+100 scale
+      // (positive = away favored, matching lead chart convention).
+      // Skip plays with no winprobability entry. Preserve synthetic flag.
+      const wpData = data
+        .map(point => point.homeWinPct == null ? null : {
+          time: point.time,
+          // homeWinPct is 0..1. value = (away - home) * 100, where away = 1 - home - tie (tie ~0)
+          value: (1 - 2 * point.homeWinPct) * 100,
+          homeWinPct: point.homeWinPct,
+          period: point.period,
+          synthetic: !!point.synthetic
+        })
+        .filter(p => p !== null)
+
+      if (wpData.length === 0) return
+
+      const maxTime = this.getMaxTime()
+      const maxPeriod = Math.max(...data.map(d => d.period))
+
+      // Fixed bounds: ±100
+      const maxBound = 100
+      const xScale = (time) => padding.left + (time / maxTime) * chartWidth
+      const halfHeight = chartHeight / 2
+      const zeroY = padding.top + halfHeight
+      const yScale = (value) => zeroY - (value / maxBound) * halfHeight
+
+      // Major gridlines at ±50 (75% favored) and ±100 (100% favored)
+      ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'
+      ctx.lineWidth = 1
+      ;[-100, -50, 50, 100].forEach(v => {
+        const y = yScale(v)
+        ctx.beginPath()
+        ctx.moveTo(padding.left, y)
+        ctx.lineTo(width - padding.right, y)
+        ctx.stroke()
+      })
+
+      // Center line (50/50) thicker
+      ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.3)'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.moveTo(padding.left, zeroY)
+      ctx.lineTo(width - padding.right, zeroY)
+      ctx.stroke()
+
+      // Quarter lines
+      ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)'
+      ctx.lineWidth = 1
+      ctx.setLineDash([3, 3])
+      for (let quarter = 1; quarter < LEAGUE.regulationPeriods; quarter++) {
+        const x = xScale(quarter * LEAGUE.periodSeconds)
+        ctx.beginPath()
+        ctx.moveTo(x, padding.top)
+        ctx.lineTo(x, height - padding.bottom)
+        ctx.stroke()
+      }
+      if (maxPeriod > LEAGUE.regulationPeriods) {
+        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
+          const x = xScale(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
+          ctx.beginPath()
+          ctx.moveTo(x, padding.top)
+          ctx.lineTo(x, height - padding.bottom)
+          ctx.stroke()
+        }
+      }
+      ctx.setLineDash([])
+
+      // Filled area chart (smooth line, not stepped — win prob updates between plays)
+      const realData = wpData.filter(p => !p.synthetic)
+      if (realData.length > 0) {
+        ctx.beginPath()
+        ctx.moveTo(xScale(realData[0].time), zeroY)
+        realData.forEach(point => {
+          ctx.lineTo(xScale(point.time), yScale(point.value))
+        })
+        ctx.lineTo(xScale(realData[realData.length - 1].time), zeroY)
+        ctx.closePath()
+
+        const chartColors = this.getChartColors()
+        const awayColor = `#${chartColors.away}`
+        const homeColor = `#${chartColors.home}`
+
+        // Linear opacity ramp: transparent at 50/50, full opacity at 100% certain.
+        const opacityMax = 0.8
+        const gradient = ctx.createLinearGradient(0, yScale(maxBound), 0, yScale(-maxBound))
+        const endAlphaHex = Math.round(opacityMax * 255).toString(16).padStart(2, '0')
+        gradient.addColorStop(0, awayColor + endAlphaHex)
+        gradient.addColorStop(0.5, '#ffffff00')
+        gradient.addColorStop(1, homeColor + endAlphaHex)
+        ctx.fillStyle = gradient
+        ctx.fill()
+
+        // Draw line, colored by which team is favored at each segment
+        ctx.lineWidth = this.isMobile ? 1 : 1.5
+        ctx.lineJoin = 'round'
+        ctx.lineCap = 'butt'
+
+        for (let i = 1; i < realData.length; i++) {
+          const prev = realData[i - 1]
+          const curr = realData[i]
+          let segColor
+          if (curr.value > 0) segColor = awayColor
+          else if (curr.value < 0) segColor = homeColor
+          else if (prev.value > 0) segColor = awayColor
+          else if (prev.value < 0) segColor = homeColor
+          else segColor = this.isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.3)'
+
+          ctx.strokeStyle = segColor
+          ctx.beginPath()
+          ctx.moveTo(xScale(prev.time), yScale(prev.value))
+          ctx.lineTo(xScale(curr.time), yScale(curr.value))
+          ctx.stroke()
+        }
+      }
+
+      // Shade selected range
+      if (this.rangeStartIndex != null && this.rangeEndIndex != null && this.rangeStartIndex !== this.rangeEndIndex) {
+        const aIdx = Math.min(this.rangeStartIndex, this.rangeEndIndex)
+        const bIdx = Math.max(this.rangeStartIndex, this.rangeEndIndex)
+        const xA = xScale(data[aIdx].time)
+        const xB = xScale(data[bIdx].time)
+        ctx.fillStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'
+        ctx.fillRect(xA, padding.top, xB - xA, height - padding.top - padding.bottom)
+      }
+
+      // Highlight selected/hovered points
+      const chartColors = this.getChartColors()
+      const awayColor = `#${chartColors.away}`
+      const homeColor = `#${chartColors.home}`
+      const dotRadius = this.isMobile ? 4 : 5
+      this.highlightIndices.forEach(i => {
+        if (i === 0) return
+        const point = data[i]
+        if (!point || point.homeWinPct == null) return
+        const value = (1 - 2 * point.homeWinPct) * 100
+        const x = xScale(point.time)
+        let color
+        if (value > 0) color = awayColor
+        else if (value < 0) color = homeColor
+        else color = this.isDarkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.3)'
+        ctx.fillStyle = color
+        ctx.beginPath()
+        ctx.arc(x, yScale(value), dotRadius, 0, 2 * Math.PI)
+        ctx.fill()
+      })
+
+      // Axis labels
+      ctx.fillStyle = this.isDarkMode ? '#aaa' : '#495057'
+      ctx.font = '12px sans-serif'
+      ctx.textAlign = 'center'
+
+      const quarterLabels = ['1st', '2nd', '3rd', '4th']
+      quarterLabels.forEach((label, i) => {
+        const x = xScale((i + 0.5) * LEAGUE.periodSeconds)
+        ctx.fillText(label, x, height - 10)
+      })
+      if (maxPeriod > LEAGUE.regulationPeriods) {
+        const numOvertimes = maxPeriod - LEAGUE.regulationPeriods
+        for (let otNum = 1; otNum <= numOvertimes; otNum++) {
+          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
+          const otEnd = otNum === numOvertimes ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
+          const x = xScale((otStart + otEnd) / 2)
+          const label = otNum === 1 ? 'OT' : `OT${otNum}`
+          ctx.fillText(label, x, height - 10)
+        }
+      }
+
+      // Y-axis labels: only 50% (centerline) and 100% on each end.
+      ctx.textAlign = 'left'
+      ctx.font = '11px sans-serif'
+      ctx.fillText('50%', padding.left + 5, zeroY - 3)
+      ctx.fillText('100%', padding.left + 5, yScale(100) + 12)
+      ctx.fillText('100%', padding.left + 5, yScale(-100) - 3)
+
+      // Team labels in corners
+      ctx.textAlign = 'left'
+      ctx.font = 'bold 11px sans-serif'
+      ctx.fillText(this.game.awayTeam, padding.left + 40, padding.top + 12)
+      ctx.fillText(this.game.homeTeam, padding.left + 40, padding.top + chartHeight - 3)
     },
     drawLeadTracker() {
       const canvas = this.$refs.gameFlowCanvas
@@ -1614,6 +1841,18 @@ const GameRow = {
       const leader = diff > 0 ? play.awayTeam : play.homeTeam
       return `${leader} +${Math.abs(diff)}`
     },
+    formatWinProb(play) {
+      const homePct = play.homeWinPct * 100
+      const awayPct = 100 - homePct
+      const fmt = (p) => {
+        if (p >= 99.95) return '100%'
+        if (p < 0.05) return '0%'
+        // One decimal at the extremes so both sides stay symmetric (e.g. 0.1% / 99.9%)
+        if (p < 10 || p > 90) return p.toFixed(1) + '%'
+        return Math.round(p) + '%'
+      }
+      return `${this.game.awayTeam} ${fmt(awayPct)} · ${this.game.homeTeam} ${fmt(homePct)}`
+    },
     formatLeaders(leaders) {
       if (!leaders) return []
 
@@ -1679,8 +1918,12 @@ const GameRow = {
         homeTeam: this.game.homeTeam,
         awayScore: play.awayScore,
         homeScore: play.homeScore,
+        homeWinPct: play.homeWinPct,
         description: play.description
       }
+    },
+    hasWinProb() {
+      return !!(this.gameFlowData && this.gameFlowData.some(p => p.homeWinPct != null))
     },
     rangeTooltip() {
       if (this.rangeStartIndex == null || this.rangeEndIndex == null) return null
