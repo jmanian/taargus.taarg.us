@@ -1188,7 +1188,8 @@ const GameRow = {
       ctx.stroke()
 
       // Draw disconnected dot(s) for any synthetic trailing point.
-      const syntheticDotRadius = this.isMobile ? 3 : 3.5
+      // Diameter matches the score-flow line width.
+      const syntheticDotRadius = (this.isMobile ? 1.5 : 2) / 2
       data.forEach(point => {
         if (!point.synthetic) return
         const x = xScale(point.time)
@@ -1521,7 +1522,8 @@ const GameRow = {
       })
 
       // Draw disconnected dot for any synthetic trailing point.
-      const syntheticLeadDotRadius = this.isMobile ? 3 : 3.5
+      // Diameter matches the lead line width.
+      const syntheticLeadDotRadius = (this.isMobile ? 1 : 1.5) / 2
       leadData.forEach(point => {
         if (!point.synthetic) return
         const x = xScale(point.time)
