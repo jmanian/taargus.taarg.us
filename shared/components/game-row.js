@@ -684,10 +684,10 @@ const GameRow = {
       // Default to last play so the exact-right-edge case (relativeX === chartWidth)
       // snaps to end-of-game rather than start-of-game
       let selectedIndex = data.length - 1
-      for (let i = 1; i < data.length; i++) {
+      for (let i = 0; i < data.length; i++) {
         const currentX = xScale(data[i].time)
         let zoneStart, zoneEnd
-        if (i === 1) {
+        if (i === 0) {
           zoneStart = 0
         } else {
           const prevX = xScale(data[i - 1].time)
@@ -1377,7 +1377,6 @@ const GameRow = {
       // Highlight selected/hovered points with dots
       const dotRadius = this.isMobile ? 4 : 5
       this.highlightIndices.forEach(i => {
-        if (i === 0) return
         const point = data[i]
         if (!point) return
         const x = xScale(point.time)
@@ -1589,7 +1588,6 @@ const GameRow = {
       const homeColor = `#${chartColors.home}`
       const dotRadius = this.isMobile ? 4 : 5
       this.highlightIndices.forEach(i => {
-        if (i === 0) return
         const point = data[i]
         if (!point || point.homeWinPct == null) return
         const value = (1 - 2 * point.homeWinPct) * 100
@@ -1899,7 +1897,6 @@ const GameRow = {
       // Highlight selected/hovered points on lead tracker
       const dotRadius = this.isMobile ? 4 : 5
       this.highlightIndices.forEach(i => {
-        if (i === 0) return
         const point = leadData[i]
         if (!point) return
         const x = xScale(point.time)
@@ -2044,7 +2041,7 @@ const GameRow = {
       if (this.rangeStartIndex != null) {
         return [this.rangeStartIndex]
       }
-      if (this.hoveredPlayIndex != null && this.hoveredPlayIndex > 0) {
+      if (this.hoveredPlayIndex != null) {
         return [this.hoveredPlayIndex]
       }
       return []
@@ -2054,7 +2051,7 @@ const GameRow = {
       const indices = this.highlightIndices
       if (indices.length !== 1) return null
       const idx = indices[0]
-      if (!this.chartData || idx <= 0) return null
+      if (!this.chartData || idx < 0) return null
       const play = this.chartData[idx]
       if (!play) return null
       return {
