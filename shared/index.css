@@ -1658,7 +1658,6 @@ body.dark-mode .box-score-table .totals-row {
   display: flex;
   gap: 8px;
   justify-content: center;
-  position: relative;
 }
 
 .game-flow-tab {
@@ -1780,74 +1779,49 @@ body.dark-mode .tooltip-close {
   line-height: 1.4;
 }
 
-.tooltip-zoom {
+.game-flow-zoom-action {
   position: absolute;
-  top: 50%;
+  top: 8px;
   right: 8px;
-  transform: translateY(-50%);
-  background-color: #0d6efd;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
+  background-color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: #495057;
+  padding: 4px 10px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
+  border-radius: 999px;
+  cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  cursor: pointer;
-  pointer-events: auto;
-  box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3);
+  z-index: 5;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 @media (hover: hover) {
-  .tooltip-zoom:hover {
-    background-color: #0b5ed7;
-  }
-}
-
-.tooltip-zoom:active {
-  transform: translateY(-50%) scale(0.96);
-}
-
-.game-flow-reset-zoom {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  color: #495057;
-  padding: 6px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-@media (hover: hover) {
-  .game-flow-reset-zoom:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+  .game-flow-zoom-action:hover {
+    background-color: #ffffff;
     color: #212529;
     border-color: rgba(0, 0, 0, 0.25);
   }
 }
 
-.game-flow-reset-zoom:active {
-  transform: translateY(-50%) scale(0.96);
+.game-flow-zoom-action:active {
+  transform: scale(0.96);
 }
 
-body.dark-mode .game-flow-reset-zoom {
+body.dark-mode .game-flow-zoom-action {
+  background-color: rgba(42, 42, 42, 0.92);
   border-color: rgba(255, 255, 255, 0.2);
   color: #ced4da;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 @media (hover: hover) {
-  body.dark-mode .game-flow-reset-zoom:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+  body.dark-mode .game-flow-zoom-action:hover {
+    background-color: #333333;
     color: #e9ecef;
     border-color: rgba(255, 255, 255, 0.3);
   }

@@ -67,22 +67,17 @@ const gameRowTemplate = `
               @click.stop="setChartMode('winProb')">
               Win Prob.
             </button>
-            <button
-              v-if="isZoomed"
-              class="game-flow-reset-zoom"
-              @click.stop="resetZoom">
-              Reset zoom
-            </button>
           </div>
         </div>
         <div v-if="gameFlowLoading && !gameFlowData" class="game-flow-loading">Loading...</div>
         <div v-if="gameFlowData" class="game-flow-chart-container">
           <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousedown="handleCanvasMouseDown" @mousemove="handleCanvasHover" @mouseup="handleCanvasMouseUp" @mouseleave="handleCanvasLeave" @touchstart="handleTouchStart" @touchmove="handleCanvasTouchMove" @touchend="handleTouchEnd"></canvas>
+          <button v-if="rangeTooltip" class="game-flow-zoom-action" @click.stop="applyZoomFromSelection">Zoom</button>
+          <button v-else-if="isZoomed" class="game-flow-zoom-action" @click.stop="resetZoom" aria-label="Reset zoom">✕ Zoom</button>
           <div v-if="rangeTooltip" class="game-flow-tooltip">
             <button v-if="isMobile" class="tooltip-close" @click.stop="clearChartSelection" aria-label="Clear selection">✕</button>
             <div class="tooltip-time">{{ rangeTooltip.timeRange }}</div>
             <div class="tooltip-score">{{ rangeTooltip.scoreLine }}</div>
-            <button class="tooltip-zoom" @click.stop="applyZoomFromSelection">Zoom</button>
           </div>
           <div v-else-if="singlePointTooltip" class="game-flow-tooltip">
             <button v-if="isMobile && rangeStartIndex != null" class="tooltip-close" @click.stop="clearChartSelection" aria-label="Clear selection">✕</button>
