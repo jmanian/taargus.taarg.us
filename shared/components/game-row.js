@@ -75,7 +75,7 @@ const gameRowTemplate = `
           <button v-if="rangeTooltip" class="game-flow-zoom-action" @click.stop="applyZoomFromSelection">Zoom</button>
           <button v-else-if="isZoomed" class="game-flow-zoom-action" @click.stop="resetZoom" aria-label="Reset zoom">✕ Zoom</button>
           <div v-if="rangeTooltip" class="game-flow-tooltip">
-            <button v-if="isMobile" class="tooltip-close" @click.stop="clearChartSelection" aria-label="Clear selection">✕</button>
+            <button class="tooltip-close" @click.stop="clearChartSelection" aria-label="Clear selection">✕</button>
             <div class="tooltip-time">{{ rangeTooltip.timeRange }}</div>
             <div class="tooltip-score">{{ rangeTooltip.scoreLine }}</div>
           </div>
