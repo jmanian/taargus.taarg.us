@@ -1738,25 +1738,63 @@ body.dark-mode .box-score-table .totals-row {
 
 .tooltip-close {
   position: absolute;
-  top: 0;
-  right: 0;
-  background: none;
-  border: none;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: #f8f9fa;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #6c757d;
   font-size: 16px;
   line-height: 1;
-  width: 44px;
-  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6c757d;
+  border-radius: 4px;
   cursor: pointer;
   pointer-events: auto;
+  transition: all 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Invisible padding to grow the tap target around the small visible button. */
+.tooltip-close::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+}
+
+@media (hover: hover) {
+  .tooltip-close:hover {
+    background-color: #e9ecef;
+    color: #495057;
+    border-color: rgba(0, 0, 0, 0.12);
+    transform: scale(1.1);
+  }
+}
+
+.tooltip-close:active {
+  transform: scale(0.95);
+  background-color: #dee2e6;
+}
+
 body.dark-mode .tooltip-close {
+  background: #333333;
+  border-color: rgba(255, 255, 255, 0.1);
   color: #adb5bd;
+}
+
+@media (hover: hover) {
+  body.dark-mode .tooltip-close:hover {
+    background-color: #3a3a3a;
+    color: #dee2e6;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+body.dark-mode .tooltip-close:active {
+  background-color: #404040;
 }
 
 .tooltip-time {
