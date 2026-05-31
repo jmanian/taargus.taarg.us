@@ -67,6 +67,12 @@ const gameRowTemplate = `
               @click.stop="setChartMode('winProb')">
               Win Prob.
             </button>
+            <button
+              v-if="isZoomed"
+              class="game-flow-reset-zoom"
+              @click.stop="resetZoom">
+              Reset zoom
+            </button>
           </div>
         </div>
         <div v-if="gameFlowLoading && !gameFlowData" class="game-flow-loading">Loading...</div>
@@ -76,6 +82,7 @@ const gameRowTemplate = `
             <button v-if="isMobile" class="tooltip-close" @click.stop="clearChartSelection" aria-label="Clear selection">✕</button>
             <div class="tooltip-time">{{ rangeTooltip.timeRange }}</div>
             <div class="tooltip-score">{{ rangeTooltip.scoreLine }}</div>
+            <button class="tooltip-zoom" @click.stop="applyZoomFromSelection">Zoom</button>
           </div>
           <div v-else-if="singlePointTooltip" class="game-flow-tooltip">
             <button v-if="isMobile && rangeStartIndex != null" class="tooltip-close" @click.stop="clearChartSelection" aria-label="Clear selection">✕</button>
@@ -274,7 +281,12 @@ const GameRow = {
       touchMode: null,
       adjustingEndpoint: null,
       resizeTimeout: null,
-      showLocalTooltip: false
+      showLocalTooltip: false,
+      zoomStartIndex: null,
+      zoomEndIndex: null,
+      zoomAnimMin: null,
+      zoomAnimMax: null,
+      zoomAnimRAF: null
     }
   },
   mounted() {
@@ -542,6 +554,83 @@ const GameRow = {
       this.$emit('chart-mode-change', mode)
       this.redrawChart()
     },
+    getXDomain() {
+      if (this.zoomAnimMin != null && this.zoomAnimMax != null) {
+        return { minTime: this.zoomAnimMin, maxTime: this.zoomAnimMax }
+      }
+      if (this.zoomStartIndex != null && this.zoomEndIndex != null && this.chartData) {
+        const data = this.chartData
+        const aIdx = Math.min(this.zoomStartIndex, this.zoomEndIndex)
+        const bIdx = Math.max(this.zoomStartIndex, this.zoomEndIndex)
+        const a = data[aIdx]
+        const b = data[bIdx]
+        if (a && b) return { minTime: a.time, maxTime: b.time }
+      }
+      return { minTime: 0, maxTime: this.getMaxTime() }
+    },
+    applyZoomFromSelection() {
+      if (this.rangeStartIndex == null || this.rangeEndIndex == null) return
+      if (this.rangeStartIndex === this.rangeEndIndex) return
+      const data = this.chartData
+      if (!data) return
+      const aIdx = Math.min(this.rangeStartIndex, this.rangeEndIndex)
+      const bIdx = Math.max(this.rangeStartIndex, this.rangeEndIndex)
+      if (data[aIdx].time === data[bIdx].time) return
+      this.animateZoomToIndices(aIdx, bIdx)
+    },
+    animateZoomToIndices(targetStartIdx, targetEndIdx) {
+      const data = this.chartData
+      if (!data || !data[targetStartIdx] || !data[targetEndIdx]) return
+      const fromDomain = this.getXDomain()
+      const fromMin = fromDomain.minTime
+      const fromMax = fromDomain.maxTime
+      const targetMin = data[targetStartIdx].time
+      const targetMax = data[targetEndIdx].time
+
+      this.zoomStartIndex = targetStartIdx
+      this.zoomEndIndex = targetEndIdx
+      this.runZoomAnim(fromMin, fromMax, targetMin, targetMax, () => {
+        this.zoomAnimMin = null
+        this.zoomAnimMax = null
+      })
+    },
+    resetZoom() {
+      if (this.zoomStartIndex == null) return
+      const fromDomain = this.getXDomain()
+      const targetMin = 0
+      const targetMax = this.getMaxTime()
+      this.runZoomAnim(fromDomain.minTime, fromDomain.maxTime, targetMin, targetMax, () => {
+        this.zoomStartIndex = null
+        this.zoomEndIndex = null
+        this.zoomAnimMin = null
+        this.zoomAnimMax = null
+      })
+    },
+    runZoomAnim(fromMin, fromMax, targetMin, targetMax, onDone) {
+      if (this.zoomAnimRAF != null) {
+        cancelAnimationFrame(this.zoomAnimRAF)
+        this.zoomAnimRAF = null
+      }
+      const duration = 300
+      const startTs = performance.now()
+      const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+      const step = (now) => {
+        const elapsed = now - startTs
+        const t = Math.min(1, elapsed / duration)
+        const k = ease(t)
+        this.zoomAnimMin = fromMin + (targetMin - fromMin) * k
+        this.zoomAnimMax = fromMax + (targetMax - fromMax) * k
+        this.drawGameFlow()
+        if (t < 1) {
+          this.zoomAnimRAF = requestAnimationFrame(step)
+        } else {
+          this.zoomAnimRAF = null
+          if (onDone) onDone()
+          this.drawGameFlow()
+        }
+      }
+      this.zoomAnimRAF = requestAnimationFrame(step)
+    },
     getMaxTime() {
       const data = this.chartData
       if (!data || data.length === 0) return 0
@@ -584,8 +673,9 @@ const GameRow = {
         relativeX = Math.max(0, Math.min(chartWidth, relativeX))
       }
 
-      const maxTime = this.getMaxTime()
-      const xScale = (time) => (time / maxTime) * chartWidth
+      const { minTime, maxTime } = this.getXDomain()
+      const span = maxTime - minTime || 1
+      const xScale = (time) => ((time - minTime) / span) * chartWidth
 
       // Default to last play so the exact-right-edge case (relativeX === chartWidth)
       // snaps to end-of-game rather than start-of-game
@@ -716,8 +806,9 @@ const GameRow = {
       const touchX = touch.clientX - rect.left
       const padding = { left: this.isMobile ? 0 : 20, right: this.isMobile ? 0 : 20 }
       const chartWidth = canvas.offsetWidth - padding.left - padding.right
-      const maxTime = this.getMaxTime()
-      const xScale = (time) => (time / maxTime) * chartWidth
+      const { minTime, maxTime } = this.getXDomain()
+      const span = maxTime - minTime || 1
+      const xScale = (time) => ((time - minTime) / span) * chartWidth
       const data = this.chartData
       if (!data || !data[index]) return Infinity
       const dotX = padding.left + xScale(data[index].time)
@@ -1111,18 +1202,12 @@ const GameRow = {
       // Round up to nearest 25
       const maxScore = Math.ceil(actualMaxScore / 25) * 25
       const maxTime = this.getMaxTime()
+      const { minTime: xMin, maxTime: xMax } = this.getXDomain()
+      const xSpan = xMax - xMin || 1
       const maxPeriod = Math.max(...data.map(d => d.period))
 
-      console.log('Drawing chart:', {
-        dataPoints: data.length,
-        maxScore,
-        maxTime,
-        firstPoint: data[0],
-        lastPoint: data[data.length - 1]
-      })
-
       // Scales
-      const xScale = (time) => padding.left + (time / maxTime) * chartWidth
+      const xScale = (time) => padding.left + ((time - xMin) / xSpan) * chartWidth
       const yScale = (score) => padding.top + chartHeight - (score / maxScore) * chartHeight
 
       // Draw minor grid lines at every point
@@ -1174,6 +1259,14 @@ const GameRow = {
       }
       ctx.setLineDash([])
 
+      // Clip lines/fills/shading to the chart area so off-domain points don't bleed
+      // into axis/label space when zoomed. Dot markers are drawn after restore so
+      // they remain fully visible when positioned at the very chart edges.
+      ctx.save()
+      ctx.beginPath()
+      ctx.rect(padding.left, padding.top, chartWidth, chartHeight)
+      ctx.clip()
+
       // Draw away team line (as steps) with rounded corners
       const chartColors = this.getChartColors()
       const awayColor = `#${chartColors.away}`
@@ -1221,22 +1314,6 @@ const GameRow = {
       })
       ctx.stroke()
 
-      // Draw disconnected dot(s) for any synthetic trailing point.
-      // Diameter matches the score-flow line width.
-      const syntheticDotRadius = (this.isMobile ? 1.5 : 2) / 2
-      data.forEach(point => {
-        if (!point.synthetic) return
-        const x = xScale(point.time)
-        ctx.fillStyle = awayColor
-        ctx.beginPath()
-        ctx.arc(x, yScale(point.awayScore), syntheticDotRadius, 0, 2 * Math.PI)
-        ctx.fill()
-        ctx.fillStyle = homeColor
-        ctx.beginPath()
-        ctx.arc(x, yScale(point.homeScore), syntheticDotRadius, 0, 2 * Math.PI)
-        ctx.fill()
-      })
-
       // Shade the range region if two endpoints are set
       if (this.rangeStartIndex != null && this.rangeEndIndex != null && this.rangeStartIndex !== this.rangeEndIndex) {
         const aIdx = Math.min(this.rangeStartIndex, this.rangeEndIndex)
@@ -1247,6 +1324,25 @@ const GameRow = {
         ctx.fillRect(xA, padding.top, xB - xA, height - padding.top - padding.bottom)
       }
 
+      ctx.restore()
+
+      // Draw disconnected dot(s) for any synthetic trailing point.
+      // Diameter matches the score-flow line width.
+      const syntheticDotRadius = (this.isMobile ? 1.5 : 2) / 2
+      data.forEach(point => {
+        if (!point.synthetic) return
+        const x = xScale(point.time)
+        if (x < padding.left - 1 || x > padding.left + chartWidth + 1) return
+        ctx.fillStyle = awayColor
+        ctx.beginPath()
+        ctx.arc(x, yScale(point.awayScore), syntheticDotRadius, 0, 2 * Math.PI)
+        ctx.fill()
+        ctx.fillStyle = homeColor
+        ctx.beginPath()
+        ctx.arc(x, yScale(point.homeScore), syntheticDotRadius, 0, 2 * Math.PI)
+        ctx.fill()
+      })
+
       // Highlight selected/hovered points with dots
       const dotRadius = this.isMobile ? 4 : 5
       this.highlightIndices.forEach(i => {
@@ -1254,6 +1350,7 @@ const GameRow = {
         const point = data[i]
         if (!point) return
         const x = xScale(point.time)
+        if (x < padding.left - dotRadius || x > padding.left + chartWidth + dotRadius) return
         ctx.fillStyle = awayColor
         ctx.beginPath()
         ctx.arc(x, yScale(point.awayScore), dotRadius, 0, 2 * Math.PI)
@@ -1341,11 +1438,13 @@ const GameRow = {
       if (wpData.length === 0) return
 
       const maxTime = this.getMaxTime()
+      const { minTime: xMin, maxTime: xMax } = this.getXDomain()
+      const xSpan = xMax - xMin || 1
       const maxPeriod = Math.max(...data.map(d => d.period))
 
       // Fixed bounds: ±100
       const maxBound = 100
-      const xScale = (time) => padding.left + (time / maxTime) * chartWidth
+      const xScale = (time) => padding.left + ((time - xMin) / xSpan) * chartWidth
       const halfHeight = chartHeight / 2
       const zeroY = padding.top + halfHeight
       const yScale = (value) => zeroY - (value / maxBound) * halfHeight
@@ -1390,6 +1489,12 @@ const GameRow = {
         }
       }
       ctx.setLineDash([])
+
+      // Clip lines/fills/shading to the chart area. Dots are drawn after restore.
+      ctx.save()
+      ctx.beginPath()
+      ctx.rect(padding.left, padding.top, chartWidth, chartHeight)
+      ctx.clip()
 
       // Filled area chart (smooth line, not stepped — win prob updates between plays)
       const realData = wpData.filter(p => !p.synthetic)
@@ -1449,6 +1554,8 @@ const GameRow = {
         ctx.fillRect(xA, padding.top, xB - xA, height - padding.top - padding.bottom)
       }
 
+      ctx.restore()
+
       // Highlight selected/hovered points
       const chartColors = this.getChartColors()
       const awayColor = `#${chartColors.away}`
@@ -1460,6 +1567,7 @@ const GameRow = {
         if (!point || point.homeWinPct == null) return
         const value = (1 - 2 * point.homeWinPct) * 100
         const x = xScale(point.time)
+        if (x < padding.left - dotRadius || x > padding.left + chartWidth + dotRadius) return
         let color
         if (value > 0) color = awayColor
         else if (value < 0) color = homeColor
@@ -1548,10 +1656,12 @@ const GameRow = {
       const maxHomeLeadRounded = Math.max(5, Math.ceil(homeMaxLead / 5) * 5)
       const totalLeadRange = maxAwayLeadRounded + maxHomeLeadRounded
       const maxTime = this.getMaxTime()
+      const { minTime: xMin, maxTime: xMax } = this.getXDomain()
+      const xSpan = xMax - xMin || 1
       const maxPeriod = Math.max(...data.map(d => d.period))
 
       // Scales
-      const xScale = (time) => padding.left + (time / maxTime) * chartWidth
+      const xScale = (time) => padding.left + ((time - xMin) / xSpan) * chartWidth
       const awayHeight = (maxAwayLeadRounded / totalLeadRange) * chartHeight
       const homeHeight = chartHeight - awayHeight
       const zeroY = padding.top + awayHeight
@@ -1617,6 +1727,12 @@ const GameRow = {
         }
       }
       ctx.setLineDash([])
+
+      // Clip lines/fills/shading to the chart area. Dots are drawn after restore.
+      ctx.save()
+      ctx.beginPath()
+      ctx.rect(padding.left, padding.top, chartWidth, chartHeight)
+      ctx.clip()
 
       // Draw filled area chart (excludes any trailing synthetic point so the
       // disconnected dot doesn't pull the polygon to the new x).
@@ -1755,6 +1871,8 @@ const GameRow = {
         ctx.fillRect(xA, padding.top, xB - xA, height - padding.top - padding.bottom)
       }
 
+      ctx.restore()
+
       // Highlight selected/hovered points on lead tracker
       const dotRadius = this.isMobile ? 4 : 5
       this.highlightIndices.forEach(i => {
@@ -1762,6 +1880,7 @@ const GameRow = {
         const point = leadData[i]
         if (!point) return
         const x = xScale(point.time)
+        if (x < padding.left - dotRadius || x > padding.left + chartWidth + dotRadius) return
         let highlightColor
         if (point.lead > 0) highlightColor = awayColor
         else if (point.lead < 0) highlightColor = homeColor
@@ -1778,6 +1897,7 @@ const GameRow = {
       leadData.forEach(point => {
         if (!point.synthetic) return
         const x = xScale(point.time)
+        if (x < padding.left - 1 || x > padding.left + chartWidth + 1) return
         let color
         if (point.lead > 0) color = awayColor
         else if (point.lead < 0) color = homeColor
@@ -1891,6 +2011,9 @@ const GameRow = {
     }
   },
   computed: {
+    isZoomed() {
+      return this.zoomStartIndex != null
+    },
     highlightIndices() {
       if (this.rangeStartIndex != null && this.rangeEndIndex != null) {
         return [this.rangeStartIndex, this.rangeEndIndex]
