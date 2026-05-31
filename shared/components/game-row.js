@@ -554,14 +554,22 @@ const GameRow = {
       this.$emit('chart-mode-change', mode)
       this.redrawChart()
     },
+    orderedRange(a, b) {
+      return a <= b ? [a, b] : [b, a]
+    },
+    clipToChartArea(ctx, padding, chartWidth, chartHeight) {
+      ctx.save()
+      ctx.beginPath()
+      ctx.rect(padding.left, padding.top, chartWidth, chartHeight)
+      ctx.clip()
+    },
     getXDomain() {
       if (this.zoomAnimMin != null && this.zoomAnimMax != null) {
         return { minTime: this.zoomAnimMin, maxTime: this.zoomAnimMax }
       }
       if (this.zoomStartIndex != null && this.zoomEndIndex != null && this.chartData) {
         const data = this.chartData
-        const aIdx = Math.min(this.zoomStartIndex, this.zoomEndIndex)
-        const bIdx = Math.max(this.zoomStartIndex, this.zoomEndIndex)
+        const [aIdx, bIdx] = this.orderedRange(this.zoomStartIndex, this.zoomEndIndex)
         const a = data[aIdx]
         const b = data[bIdx]
         if (a && b) return { minTime: a.time, maxTime: b.time }
@@ -573,8 +581,7 @@ const GameRow = {
       if (this.rangeStartIndex === this.rangeEndIndex) return
       const data = this.chartData
       if (!data) return
-      const aIdx = Math.min(this.rangeStartIndex, this.rangeEndIndex)
-      const bIdx = Math.max(this.rangeStartIndex, this.rangeEndIndex)
+      const [aIdx, bIdx] = this.orderedRange(this.rangeStartIndex, this.rangeEndIndex)
       if (data[aIdx].time === data[bIdx].time) return
       this.animateZoomToIndices(aIdx, bIdx)
     },
@@ -618,12 +625,14 @@ const GameRow = {
         const elapsed = now - startTs
         const t = Math.min(1, elapsed / duration)
         const k = ease(t)
-        this.zoomAnimMin = fromMin + (targetMin - fromMin) * k
-        this.zoomAnimMax = fromMax + (targetMax - fromMax) * k
-        this.drawGameFlow()
         if (t < 1) {
+          this.zoomAnimMin = fromMin + (targetMin - fromMin) * k
+          this.zoomAnimMax = fromMax + (targetMax - fromMax) * k
+          this.drawGameFlow()
           this.zoomAnimRAF = requestAnimationFrame(step)
         } else {
+          // Clear anim state first so getXDomain returns the index-derived
+          // (or unzoomed) domain. The final draw lands on the exact target.
           this.zoomAnimRAF = null
           if (onDone) onDone()
           this.drawGameFlow()
@@ -721,6 +730,17 @@ const GameRow = {
       this.mouseDownX = event.clientX
       this.mouseDownIndex = idx
       this.isDraggingRange = false
+      // If a range is already locked, mousedown near either endpoint grabs that
+      // endpoint for dragging instead of starting a fresh selection.
+      if (this.rangeStartIndex != null && this.rangeEndIndex != null) {
+        const distStart = this.distanceToIndexPx(event, this.rangeStartIndex)
+        const distEnd = this.distanceToIndexPx(event, this.rangeEndIndex)
+        const grabRadius = 10
+        if (Math.min(distStart, distEnd) <= grabRadius) {
+          this.adjustingEndpoint = distStart <= distEnd ? 'start' : 'end'
+          this.hoveredPlayIndex = null
+        }
+      }
       // Track movement and release at the document level so the drag continues
       // even when the cursor leaves the canvas
       document.addEventListener('mousemove', this.handleDocumentMouseMove)
@@ -739,7 +759,13 @@ const GameRow = {
     },
     finalizeMouseGesture(event) {
       if (this.isMobile) return
-      if (this.isDraggingRange) {
+      if (this.adjustingEndpoint != null) {
+        // Endpoint drag finished. If endpoints collapsed, drop the range.
+        if (this.rangeStartIndex === this.rangeEndIndex) {
+          this.clearRange()
+          this.redrawChart()
+        }
+      } else if (this.isDraggingRange) {
         if (this.rangeStartIndex === this.rangeEndIndex) {
           this.clearRange()
         }
@@ -751,6 +777,7 @@ const GameRow = {
           this.redrawChart()
         }
       }
+      this.adjustingEndpoint = null
       this.isDraggingRange = false
       this.mouseDownX = null
       this.mouseDownIndex = null
@@ -761,6 +788,17 @@ const GameRow = {
 
       const canvas = this.$refs.gameFlowCanvas
       if (!canvas || !this.gameFlowData) return
+
+      // Desktop endpoint-adjust drag (mousedown started on an existing endpoint dot)
+      if (!this.isMobile && this.adjustingEndpoint != null) {
+        const curIdx = this.getPlayIndexAtEvent(event, { clamp: true })
+        if (curIdx != null) {
+          if (this.adjustingEndpoint === 'start') this.rangeStartIndex = curIdx
+          else this.rangeEndIndex = curIdx
+          this.redrawChart()
+        }
+        return
+      }
 
       // Desktop drag-to-select range
       if (!this.isMobile && this.mouseDownIndex != null) {
@@ -801,9 +839,11 @@ const GameRow = {
       const canvas = this.$refs.gameFlowCanvas
       if (!canvas || index == null) return Infinity
       const rect = canvas.getBoundingClientRect()
-      const touch = event.touches && event.touches[0]
-      if (!touch) return Infinity
-      const touchX = touch.clientX - rect.left
+      const clientX = event.touches && event.touches[0]
+        ? event.touches[0].clientX
+        : event.clientX
+      if (clientX == null) return Infinity
+      const touchX = clientX - rect.left
       const padding = { left: this.isMobile ? 0 : 20, right: this.isMobile ? 0 : 20 }
       const chartWidth = canvas.offsetWidth - padding.left - padding.right
       const { minTime, maxTime } = this.getXDomain()
@@ -1262,10 +1302,7 @@ const GameRow = {
       // Clip lines/fills/shading to the chart area so off-domain points don't bleed
       // into axis/label space when zoomed. Dot markers are drawn after restore so
       // they remain fully visible when positioned at the very chart edges.
-      ctx.save()
-      ctx.beginPath()
-      ctx.rect(padding.left, padding.top, chartWidth, chartHeight)
-      ctx.clip()
+      this.clipToChartArea(ctx, padding, chartWidth, chartHeight)
 
       // Draw away team line (as steps) with rounded corners
       const chartColors = this.getChartColors()
@@ -1316,8 +1353,7 @@ const GameRow = {
 
       // Shade the range region if two endpoints are set
       if (this.rangeStartIndex != null && this.rangeEndIndex != null && this.rangeStartIndex !== this.rangeEndIndex) {
-        const aIdx = Math.min(this.rangeStartIndex, this.rangeEndIndex)
-        const bIdx = Math.max(this.rangeStartIndex, this.rangeEndIndex)
+        const [aIdx, bIdx] = this.orderedRange(this.rangeStartIndex, this.rangeEndIndex)
         const xA = xScale(data[aIdx].time)
         const xB = xScale(data[bIdx].time)
         ctx.fillStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'
@@ -1491,10 +1527,7 @@ const GameRow = {
       ctx.setLineDash([])
 
       // Clip lines/fills/shading to the chart area. Dots are drawn after restore.
-      ctx.save()
-      ctx.beginPath()
-      ctx.rect(padding.left, padding.top, chartWidth, chartHeight)
-      ctx.clip()
+      this.clipToChartArea(ctx, padding, chartWidth, chartHeight)
 
       // Filled area chart (smooth line, not stepped — win prob updates between plays)
       const realData = wpData.filter(p => !p.synthetic)
@@ -1546,8 +1579,7 @@ const GameRow = {
 
       // Shade selected range
       if (this.rangeStartIndex != null && this.rangeEndIndex != null && this.rangeStartIndex !== this.rangeEndIndex) {
-        const aIdx = Math.min(this.rangeStartIndex, this.rangeEndIndex)
-        const bIdx = Math.max(this.rangeStartIndex, this.rangeEndIndex)
+        const [aIdx, bIdx] = this.orderedRange(this.rangeStartIndex, this.rangeEndIndex)
         const xA = xScale(data[aIdx].time)
         const xB = xScale(data[bIdx].time)
         ctx.fillStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'
@@ -1729,10 +1761,7 @@ const GameRow = {
       ctx.setLineDash([])
 
       // Clip lines/fills/shading to the chart area. Dots are drawn after restore.
-      ctx.save()
-      ctx.beginPath()
-      ctx.rect(padding.left, padding.top, chartWidth, chartHeight)
-      ctx.clip()
+      this.clipToChartArea(ctx, padding, chartWidth, chartHeight)
 
       // Draw filled area chart (excludes any trailing synthetic point so the
       // disconnected dot doesn't pull the polygon to the new x).
@@ -1863,8 +1892,7 @@ const GameRow = {
 
       // Shade the range region if two endpoints are set
       if (this.rangeStartIndex != null && this.rangeEndIndex != null && this.rangeStartIndex !== this.rangeEndIndex) {
-        const aIdx = Math.min(this.rangeStartIndex, this.rangeEndIndex)
-        const bIdx = Math.max(this.rangeStartIndex, this.rangeEndIndex)
+        const [aIdx, bIdx] = this.orderedRange(this.rangeStartIndex, this.rangeEndIndex)
         const xA = xScale(leadData[aIdx].time)
         const xB = xScale(leadData[bIdx].time)
         ctx.fillStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)'
@@ -2053,9 +2081,7 @@ const GameRow = {
       if (this.rangeStartIndex === this.rangeEndIndex) return null
       const data = this.chartData
       if (!data) return null
-      let aIdx = this.rangeStartIndex
-      let bIdx = this.rangeEndIndex
-      if (aIdx > bIdx) [aIdx, bIdx] = [bIdx, aIdx]
+      const [aIdx, bIdx] = this.orderedRange(this.rangeStartIndex, this.rangeEndIndex)
       const a = data[aIdx]
       const b = data[bIdx]
       if (!a || !b) return null
