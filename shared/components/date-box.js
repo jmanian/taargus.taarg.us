@@ -1,14 +1,14 @@
 const dateBoxTemplate = `
 <div class="date-box" :class="{'date-box-today': isToday, 'date-box-collapsed': !isOpen}">
-  <div class="date-header" @click="toggleOpen">
+  <div class="date-header" :class="{'date-header-no-games': hasNoGames}" @click="toggleOpen">
     <span>{{ dateHeader }}</span>
     <span class="header-right">
       <span class="game-count">{{ gameCountText }}</span>
-      <span class="toggle-icon">{{ isOpen ? '▼' : '▶' }}</span>
+      <span v-if="!hasNoGames" class="toggle-icon">{{ isOpen ? '▼' : '▶' }}</span>
     </span>
   </div>
   <transition name="slide">
-    <div class="games-list" v-show="isOpen">
+    <div class="games-list" v-show="isOpen && !hasNoGames">
       <game-row
         v-for="game in sortedGames"
         :key="game.id"
@@ -19,9 +19,6 @@ const dateBoxTemplate = `
       </game-row>
       <div v-if="dateData.loading" class="no-games">
         Loading...
-      </div>
-      <div v-else-if="sortedGames.length === 0" class="no-games">
-        No games scheduled
       </div>
     </div>
   </transition>
@@ -48,11 +45,15 @@ const DateBox = {
       const monthDay = date.toFormat('MMM d')
       return `${dayOfWeek}, ${monthDay}`
     },
+    hasNoGames: function () {
+      return !this.dateData.loading && this.dateData.games.length === 0
+    },
     gameCountText: function () {
       if (this.dateData.loading) {
         return 'Loading...'
       }
       const count = this.dateData.games.length
+      if (count === 0) return 'No games'
       return count === 1 ? '1 game' : `${count} games`
     },
     sortedGames: function () {
@@ -70,6 +71,7 @@ const DateBox = {
   },
   methods: {
     toggleOpen() {
+      if (this.hasNoGames) return
       this.isOpen = !this.isOpen
     }
   }
