@@ -85,6 +85,37 @@ const app = createApp({
       }
     })
 
+    const groupedDates = Vue.computed(() => {
+      const result = []
+      let run = []
+
+      const flush = () => {
+        if (run.length >= 2) {
+          result.push({
+            type: 'empty-range',
+            key: run[0].dateString + '-range',
+            dates: run,
+            containsToday: run.some(d => d.dateString === todayString.value)
+          })
+        } else {
+          run.forEach(d => result.push({ type: 'date', key: d.dateString, data: d }))
+        }
+        run = []
+      }
+
+      for (const d of displayedDates.value) {
+        if (!d.loading && d.games.length === 0) {
+          run.push(d)
+        } else {
+          flush()
+          result.push({ type: 'date', key: d.dateString, data: d })
+        }
+      }
+      flush()
+
+      return result
+    })
+
     const formatSelectedDate = Vue.computed(() => {
       if (selectedDate.value) {
         const date = DateTime.fromISO(selectedDate.value)
@@ -242,6 +273,7 @@ const app = createApp({
       isDarkMode: isDarkMode,
       toggleDarkMode: toggleDarkMode,
       dates: displayedDates,
+      groupedDates: groupedDates,
       todayString: todayString,
       selectedDate: selectedDate,
       selectedTeams: selectedTeams,
@@ -279,7 +311,8 @@ const app = createApp({
   },
   components: {
     'date-box': DateBox,
-    'game-row': GameRow
+    'game-row': GameRow,
+    'empty-date-range': EmptyDateRange
   },
   watch: {
     selectedDate(newDate) {

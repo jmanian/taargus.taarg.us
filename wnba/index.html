@@ -29,6 +29,7 @@
     <!-- load components -->
     <script type="text/javascript" src="../shared/components/game-row.js?v=1768882993"></script>
     <script type="text/javascript" src="../shared/components/date-box.js"></script>
+    <script type="text/javascript" src="../shared/components/empty-date-range.js"></script>
 
     <!-- root element -->
     <div id="app">
@@ -187,17 +188,22 @@
             </div>
           </div>
           <a v-if="viewMode === 'games' && !selectedDate" href="#" @click.prevent="loadPrevious" class="load-link">↑ Load previous week</a>
-          <date-box
-            v-if="viewMode === 'games'"
-            v-for="dateData in dates"
-            :key="dateData.dateString"
-            :date-data="dateData"
-            :is-today="dateData.dateString === todayString"
-            :is-past="dateData.dateString < todayString"
-            :refresh-trigger="refreshTrigger"
-            :chart-mode="chartMode"
-            @chart-mode-change="handleChartModeChange">
-          </date-box>
+          <template v-if="viewMode === 'games'" v-for="item in groupedDates" :key="item.key">
+            <date-box
+              v-if="item.type === 'date'"
+              :date-data="item.data"
+              :is-today="item.data.dateString === todayString"
+              :is-past="item.data.dateString < todayString"
+              :refresh-trigger="refreshTrigger"
+              :chart-mode="chartMode"
+              @chart-mode-change="handleChartModeChange">
+            </date-box>
+            <empty-date-range
+              v-else
+              :dates="item.dates"
+              :contains-today="item.containsToday">
+            </empty-date-range>
+          </template>
           <a v-if="viewMode === 'games' && !selectedDate" href="#" @click.prevent="loadMore" class="load-link">Load more ↓</a>
         </div>
       </div>
