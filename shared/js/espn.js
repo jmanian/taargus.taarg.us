@@ -77,8 +77,33 @@ function parseEvent(event) {
     homeStats: getTeamStats(homeTeam, gameStarted),
     awayStats: getTeamStats(awayTeam, gameStarted),
     homeLeaders: getTeamLeaders(homeTeam),
-    awayLeaders: getTeamLeaders(awayTeam)
+    awayLeaders: getTeamLeaders(awayTeam),
+    homeProbable: getProbablePitcher(homeTeam),
+    awayProbable: getProbablePitcher(awayTeam)
   }
+}
+
+// Probable starting pitcher (baseball). Null for sports without probables.
+function getProbablePitcher(competitor) {
+  const probables = competitor.probables;
+  if (!probables || !probables.length) return null;
+  const probable = probables.find(p => p.name === 'probableStartingPitcher') || probables[0];
+  const athlete = probable && probable.athlete;
+  if (!athlete) return null;
+  const stat = name => {
+    const s = probable.statistics && probable.statistics.find(s => s.name === name);
+    return s ? s.displayValue : null;
+  };
+  const wins = stat('wins');
+  const losses = stat('losses');
+  const era = stat('ERA');
+  const parts = [];
+  if (wins != null && losses != null) parts.push(`${wins}-${losses}`);
+  if (era != null) parts.push(`${era} ERA`);
+  return {
+    name: athlete.shortName || athlete.displayName,
+    line: parts.join(', ')
+  };
 }
 
 function getOverallRecord(competitor) {
@@ -109,6 +134,8 @@ function findNationalBroadcast(broadcasts) {
 }
 
 function getBroadcastInfo(broadcasts) {
+  if (LEAGUE.parseBroadcast) return LEAGUE.parseBroadcast(broadcasts);
+
   // First check for national broadcast
   const national = broadcasts.find(bc => bc.market.toLowerCase() === 'national')
 
@@ -139,6 +166,7 @@ function findRecap(headlines) {
 }
 
 function getTeamStats(competitor, gameStarted) {
+  if (LEAGUE.parseTeamStats) return LEAGUE.parseTeamStats(competitor, gameStarted);
   if (!competitor.statistics) return null;
 
   const stats = competitor.statistics;
@@ -156,6 +184,7 @@ function getTeamStats(competitor, gameStarted) {
 }
 
 function getTeamLeaders(competitor) {
+  if (LEAGUE.parseLeaders) return LEAGUE.parseLeaders(competitor);
   if (!competitor.leaders) return null;
 
   const leaders = competitor.leaders;

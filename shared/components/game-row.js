@@ -46,26 +46,15 @@ const gameRowTemplate = `
   <transition name="expand">
     <div v-if="isExpanded" class="game-details">
       <div v-if="showGameFlow" class="game-flow-section">
-        <div class="game-flow-header-container">
+        <div class="game-flow-header-container" v-if="chartTabs.length > 1">
           <div class="game-flow-tabs">
             <button
+              v-for="tab in chartTabs"
+              :key="tab.mode"
               class="game-flow-tab"
-              :class="{'active': chartMode === 'lead'}"
-              @click.stop="setChartMode('lead')">
-              Lead
-            </button>
-            <button
-              class="game-flow-tab"
-              :class="{'active': chartMode === 'score'}"
-              @click.stop="setChartMode('score')">
-              Scores
-            </button>
-            <button
-              v-if="hasWinProb"
-              class="game-flow-tab"
-              :class="{'active': chartMode === 'winProb'}"
-              @click.stop="setChartMode('winProb')">
-              Win Prob.
+              :class="{'active': chartMode === tab.mode}"
+              @click.stop="setChartMode(tab.mode)">
+              {{ tab.label }}
             </button>
           </div>
         </div>
@@ -120,7 +109,34 @@ const gameRowTemplate = `
             {{ boxScoreData.home.teamName }}
           </button>
         </div>
-        <div class="box-score-table-wrapper">
+        <template v-if="boxScoreGeneric">
+          <div v-for="table in boxScoreData[boxScoreActiveTeam].tables" :key="table.title" class="box-score-group">
+            <div class="box-score-subhead">{{ table.title }}</div>
+            <div class="box-score-table-wrapper">
+              <div class="box-score-table-scroll">
+                <table class="box-score-table">
+                  <thead>
+                    <tr>
+                      <th class="sticky-col">{{ table.playerLabel }}</th>
+                      <th v-for="(col, i) in table.columns" :key="i">{{ col }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="row in table.rows" :key="row.name">
+                      <td class="sticky-col player-name">{{ row.name }}<span v-if="row.position" class="player-position">{{ row.position }}</span></td>
+                      <td v-for="(c, i) in row.cells" :key="i">{{ c }}</td>
+                    </tr>
+                    <tr v-if="table.totals" class="totals-row">
+                      <td class="sticky-col">TEAM</td>
+                      <td v-for="(c, i) in table.totals" :key="i">{{ c }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </template>
+        <div v-else class="box-score-table-wrapper">
           <div class="box-score-table-scroll">
             <table class="box-score-table">
             <thead>
@@ -193,6 +209,21 @@ const gameRowTemplate = `
           </table>
           </div>
         </div>
+      </div>
+      <div v-if="hasProbables && !started" class="stats-section">
+        <div class="stats-header">PROBABLE PITCHERS</div>
+        <table class="stats-table">
+          <tbody>
+            <tr>
+              <td class="team-abbr">{{ game.awayTeam }}</td>
+              <td>{{ awayProbableText }}</td>
+            </tr>
+            <tr>
+              <td class="team-abbr">{{ game.homeTeam }}</td>
+              <td>{{ homeProbableText }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div v-if="hasStats && !started" class="stats-section">
         <div class="stats-header">TEAM STATS</div>
@@ -641,6 +672,10 @@ const GameRow = {
 
       const lastDataTime = data[data.length - 1].time
       const maxPeriod = Math.max(...data.map(d => d.period))
+
+      // Sports without a fixed game length (baseball) decide their own axis max.
+      if (LEAGUE.liveMaxTime) return LEAGUE.liveMaxTime(maxPeriod, lastDataTime, this.playing)
+
       const endOfRegulation = LEAGUE.regulationPeriods * LEAGUE.periodSeconds
 
       // If game is ongoing, extend x-axis to the end of the current period (regulation or OT)
@@ -1060,20 +1095,31 @@ const GameRow = {
       // Filter to only scoring plays and collect data points
       const dataPoints = []
 
-      plays.forEach(play => {
+      // Sports without a game clock (baseball) map plays onto the x-axis by
+      // period (inning) instead of elapsed seconds.
+      const elapsed = LEAGUE.elapsedForPlays ? LEAGUE.elapsedForPlays(plays) : null
+
+      plays.forEach((play, idx) => {
         if (play.awayScore !== undefined && play.homeScore !== undefined) {
           const period = play.period?.number || 1
           const clock = play.clock?.displayValue || '0:00'
-          const totalSeconds = clockToElapsedSeconds(period, clock)
+          const totalSeconds = elapsed ? elapsed[idx] : clockToElapsedSeconds(period, clock)
 
           const homeWinPct = winProbMap[play.id]
+
+          // For clockless sports show the half-inning (Top/Bot) in place of a clock.
+          let clockLabel = clock
+          if (elapsed) {
+            const half = play.period?.type
+            clockLabel = half === 'Bottom' ? 'Bot' : (half === 'Top' ? 'Top' : '')
+          }
 
           dataPoints.push({
             time: totalSeconds,
             awayScore: play.awayScore,
             homeScore: play.homeScore,
             period: period,
-            clock: clock,
+            clock: clockLabel,
             periodDisplay: play.period?.displayValue || '',
             description: play.text || '',
             homeWinPct: homeWinPct != null ? homeWinPct : null
@@ -1098,7 +1144,43 @@ const GameRow = {
       const percentage = Math.round((made / attempted) * 1000) / 10
       return { made: stat, pct: percentage.toFixed(1) }
     },
+    titleCase(s) {
+      return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''
+    },
+    // Generic box score: one table per ESPN statistics group (e.g. baseball's
+    // batting & pitching), driven by the group's own labels — matches espn.com.
+    processBoxScoreGeneric(playersData, teamsData) {
+      const teamHomeAwayMap = {}
+      teamsData.forEach(t => { teamHomeAwayMap[t.team.id] = t.homeAway })
+
+      const result = { away: null, home: null }
+      playersData.forEach(teamData => {
+        const homeAway = teamHomeAwayMap[teamData.team.id]
+        const tables = (teamData.statistics || []).map(group => {
+          const title = this.titleCase(group.type || group.name || '')
+          return {
+            title: title,
+            playerLabel: title === 'Pitching' ? 'Pitchers' : 'Hitters',
+            columns: group.labels || [],
+            rows: (group.athletes || []).map(a => ({
+              name: a.athlete.shortName || a.athlete.displayName,
+              position: (a.athlete.position && a.athlete.position.abbreviation) || '',
+              starter: a.starter || false,
+              cells: a.stats || []
+            })),
+            totals: group.totals || null
+          }
+        }).filter(t => t.columns.length && t.rows.length)
+
+        result[homeAway] = { teamName: teamData.team.name, tables: tables }
+      })
+      return result
+    },
     processBoxScoreData(playersData, teamsData) {
+      if (LEAGUE.boxScore && LEAGUE.boxScore.generic) {
+        return this.processBoxScoreGeneric(playersData, teamsData)
+      }
+
       const result = { away: null, home: null }
 
       // Create a map of team ID to homeAway from teamsData
@@ -1194,9 +1276,41 @@ const GameRow = {
 
       return result
     },
+    // x positions (in chart "time" units) of the vertical period gridlines.
+    // Default reproduces basketball quarter + OT boundaries; leagues may override.
+    periodGridTimes(maxPeriod, maxTime) {
+      if (LEAGUE.periodGridTimes) return LEAGUE.periodGridTimes(maxPeriod, maxTime)
+      const times = []
+      for (let q = 1; q < LEAGUE.regulationPeriods; q++) times.push(q * LEAGUE.periodSeconds)
+      if (maxPeriod > LEAGUE.regulationPeriods) {
+        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
+          times.push(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
+        }
+      }
+      return times
+    },
+    // {time, label} pairs for the period labels along the x-axis.
+    periodLabels(maxPeriod, maxTime) {
+      if (LEAGUE.periodLabels) return LEAGUE.periodLabels(maxPeriod, maxTime)
+      const labels = []
+      const names = ['1st', '2nd', '3rd', '4th']
+      for (let i = 0; i < LEAGUE.regulationPeriods; i++) {
+        labels.push({ time: (i + 0.5) * LEAGUE.periodSeconds, label: names[i] || String(i + 1) })
+      }
+      if (maxPeriod > LEAGUE.regulationPeriods) {
+        const numOT = maxPeriod - LEAGUE.regulationPeriods
+        for (let otNum = 1; otNum <= numOT; otNum++) {
+          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
+          const otEnd = otNum === numOT ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
+          labels.push({ time: (otStart + otEnd) / 2, label: otNum === 1 ? 'OT' : `OT${otNum}` })
+        }
+      }
+      return labels
+    },
     drawGameFlow() {
-      if (this.chartMode === 'winProb' && this.hasWinProb) {
-        this.drawWinProb()
+      if (this.chartMode === 'winProb') {
+        if (this.hasWinProb) this.drawWinProb()
+        return
       } else if (this.chartMode === 'lead') {
         this.drawLeadTracker()
       } else {
@@ -1498,26 +1612,17 @@ const GameRow = {
       ctx.lineTo(width - padding.right, zeroY)
       ctx.stroke()
 
-      // Quarter lines
+      // Period lines (quarters for basketball, innings for baseball)
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)'
       ctx.lineWidth = 1
       ctx.setLineDash([3, 3])
-      for (let quarter = 1; quarter < LEAGUE.regulationPeriods; quarter++) {
-        const x = xScale(quarter * LEAGUE.periodSeconds)
+      this.periodGridTimes(maxPeriod, maxTime).forEach(t => {
+        const x = xScale(t)
         ctx.beginPath()
         ctx.moveTo(x, padding.top)
         ctx.lineTo(x, height - padding.bottom)
         ctx.stroke()
-      }
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
-          const x = xScale(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
-          ctx.beginPath()
-          ctx.moveTo(x, padding.top)
-          ctx.lineTo(x, height - padding.bottom)
-          ctx.stroke()
-        }
-      }
+      })
       ctx.setLineDash([])
 
       // Clip lines/fills/shading to the chart area. Dots are drawn after restore.
@@ -1608,21 +1713,9 @@ const GameRow = {
       ctx.font = '12px sans-serif'
       ctx.textAlign = 'center'
 
-      const quarterLabels = ['1st', '2nd', '3rd', '4th']
-      quarterLabels.forEach((label, i) => {
-        const x = xScale((i + 0.5) * LEAGUE.periodSeconds)
-        ctx.fillText(label, x, height - 10)
+      this.periodLabels(maxPeriod, maxTime).forEach(({ time, label }) => {
+        ctx.fillText(label, xScale(time), height - 10)
       })
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        const numOvertimes = maxPeriod - LEAGUE.regulationPeriods
-        for (let otNum = 1; otNum <= numOvertimes; otNum++) {
-          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
-          const otEnd = otNum === numOvertimes ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
-          const x = xScale((otStart + otEnd) / 2)
-          const label = otNum === 1 ? 'OT' : `OT${otNum}`
-          ctx.fillText(label, x, height - 10)
-        }
-      }
 
       // Y-axis labels: only 50% (centerline) and 100% on each end.
       ctx.textAlign = 'left'
@@ -1994,6 +2087,7 @@ const GameRow = {
       return `${this.game.awayTeam} ${fmt(awayPct)} · ${this.game.homeTeam} ${fmt(homePct)}`
     },
     formatLeaders(leaders) {
+      if (LEAGUE.formatLeaders) return LEAGUE.formatLeaders(leaders)
       if (!leaders) return []
 
       // Create a map of players and their stats
@@ -2193,18 +2287,39 @@ const GameRow = {
       return teamImageURL(this.game.homeTeam, mode)
     },
     hasExpandableContent: function () {
-      return this.game.state !== 'postponed' && !!(this.game.spreadFormatted || this.game.total || this.game.recap || this.hasStats || this.hasLeaders)
+      return this.game.state !== 'postponed' && !!(this.game.spreadFormatted || this.game.total || this.game.recap || this.hasStats || this.hasLeaders || this.hasProbables)
     },
     hasStats: function () {
       return !!(this.game.homeStats && this.game.awayStats)
     },
     hasLeaders: function () {
-      const homeHasData = this.game.homeLeaders && (this.game.homeLeaders.points || this.game.homeLeaders.rebounds || this.game.homeLeaders.assists)
-      const awayHasData = this.game.awayLeaders && (this.game.awayLeaders.points || this.game.awayLeaders.rebounds || this.game.awayLeaders.assists)
-      return homeHasData || awayHasData
+      const has = l => l && Object.values(l).some(v => v)
+      return has(this.game.homeLeaders) || has(this.game.awayLeaders)
+    },
+    hasProbables: function () {
+      return !!(this.game.homeProbable || this.game.awayProbable)
+    },
+    probableText: function () {
+      return p => p ? (p.name + (p.line ? ` (${p.line})` : '')) : 'TBD'
+    },
+    awayProbableText: function () {
+      return this.probableText(this.game.awayProbable)
+    },
+    homeProbableText: function () {
+      return this.probableText(this.game.homeProbable)
+    },
+    boxScoreGeneric: function () {
+      return !!(LEAGUE.boxScore && LEAGUE.boxScore.generic)
+    },
+    chartTabs: function () {
+      const modes = LEAGUE.chartModes || ['lead', 'score', 'winProb']
+      const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.' }
+      return modes
+        .filter(m => m !== 'winProb' || this.hasWinProb)
+        .map(m => ({ mode: m, label: labels[m] || m }))
     },
     showGameFlow: function () {
-      return this.started
+      return this.started && this.chartTabs.length > 0
     },
     headlineLines: function () {
       const h = this.game.headline

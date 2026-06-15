@@ -1912,6 +1912,23 @@ body.dark-mode .game-flow-zoom-action {
   margin-bottom: 12px;
 }
 
+/* Sub-table heading (e.g. Batting / Pitching) for generic box scores */
+.box-score-group + .box-score-group {
+  margin-top: 14px;
+}
+
+.box-score-subhead {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+  margin-bottom: 6px;
+}
+
+body.dark-mode .box-score-subhead {
+  color: #9aa0a6;
+}
+
 .box-score-tab {
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.12);

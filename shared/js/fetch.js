@@ -14,7 +14,15 @@ const selectedDate = ref(initialDate)
 const selectedTeams = ref(initialTeams)
 const teamDropdownOpen = ref(false)
 const refreshTrigger = ref(0)
-const chartMode = ref(localStorage.getItem('gameFlowChartMode') || 'lead')
+// localStorage is shared across all leagues on this origin, so a stored mode
+// from another sport may not be valid here; fall back to the league default.
+const availableChartModes = LEAGUE.chartModes || ['lead', 'score', 'winProb']
+const storedChartMode = localStorage.getItem('gameFlowChartMode')
+const chartMode = ref(
+  availableChartModes.includes(storedChartMode)
+    ? storedChartMode
+    : (LEAGUE.defaultChartMode || availableChartModes[0])
+)
 const viewMode = ref('games')
 const standingsData = ref(null)
 const standingsLoading = ref(false)
