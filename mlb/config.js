@@ -46,6 +46,14 @@ const LEAGUE = {
   },
 
   // ---- Win-probability chart axis (innings instead of a game clock) ----
+  // ESPN emits a play for every pitch; the win-probability chart should step
+  // once per plate appearance. Each winprobability entry is one completed plate
+  // appearance, so keep only the plays that carry a win-probability value
+  // (this also drops mid-at-bat baserunning "Play Result" plays like steals).
+  selectChartPlays(plays, winprobability) {
+    const wpPlayIds = new Set((winprobability || []).map(wp => wp.playId));
+    return plays.filter(p => wpPlayIds.has(p.id));
+  },
   // Each inning occupies one x-unit. Plays are spread evenly within their
   // inning so the line reads left-to-right like the NBA chart.
   elapsedForPlays(plays) {

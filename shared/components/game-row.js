@@ -1165,11 +1165,15 @@ const GameRow = {
       // Filter to only scoring plays and collect data points
       const dataPoints = []
 
+      // Some sports (baseball) emit a play per pitch; restrict the chart to one
+      // play per plate appearance so each step is a PA, not a pitch.
+      const chartPlays = LEAGUE.selectChartPlays ? LEAGUE.selectChartPlays(plays, winprobability) : plays
+
       // Sports without a game clock (baseball) map plays onto the x-axis by
       // period (inning) instead of elapsed seconds.
-      const elapsed = LEAGUE.elapsedForPlays ? LEAGUE.elapsedForPlays(plays) : null
+      const elapsed = LEAGUE.elapsedForPlays ? LEAGUE.elapsedForPlays(chartPlays) : null
 
-      plays.forEach((play, idx) => {
+      chartPlays.forEach((play, idx) => {
         if (play.awayScore !== undefined && play.homeScore !== undefined) {
           const period = play.period?.number || 1
           const clock = play.clock?.displayValue || '0:00'
