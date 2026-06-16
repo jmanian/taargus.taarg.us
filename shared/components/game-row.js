@@ -1628,14 +1628,21 @@ const GameRow = {
       // Clip lines/fills/shading to the chart area. Dots are drawn after restore.
       this.clipToChartArea(ctx, padding, chartWidth, chartHeight)
 
-      // Filled area chart (smooth line, not stepped — win prob updates between plays)
+      // Filled area chart. Basketball updates win prob continuously (smooth line);
+      // baseball changes it at discrete plays (stepped — hold then jump).
+      const stepped = !!LEAGUE.winProbStepped
       const realData = wpData.filter(p => !p.synthetic)
       if (realData.length > 0) {
         ctx.beginPath()
         ctx.moveTo(xScale(realData[0].time), zeroY)
-        realData.forEach(point => {
-          ctx.lineTo(xScale(point.time), yScale(point.value))
-        })
+        ctx.lineTo(xScale(realData[0].time), yScale(realData[0].value))
+        for (let i = 1; i < realData.length; i++) {
+          if (stepped) {
+            // hold the previous win prob across the play before jumping
+            ctx.lineTo(xScale(realData[i].time), yScale(realData[i - 1].value))
+          }
+          ctx.lineTo(xScale(realData[i].time), yScale(realData[i].value))
+        }
         ctx.lineTo(xScale(realData[realData.length - 1].time), zeroY)
         ctx.closePath()
 
@@ -1671,6 +1678,10 @@ const GameRow = {
           ctx.strokeStyle = segColor
           ctx.beginPath()
           ctx.moveTo(xScale(prev.time), yScale(prev.value))
+          if (stepped) {
+            // horizontal hold across the play, then a vertical jump at the event
+            ctx.lineTo(xScale(curr.time), yScale(prev.value))
+          }
           ctx.lineTo(xScale(curr.time), yScale(curr.value))
           ctx.stroke()
         }

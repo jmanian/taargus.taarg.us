@@ -21,6 +21,8 @@ const LEAGUE = {
   // flow charts don't apply.
   chartModes: ['winProb'],
   defaultChartMode: 'winProb',
+  // Win expectancy changes at discrete plays, so draw the chart as steps.
+  winProbStepped: true,
   // ESPN's scoreboard, standings and teams endpoints all use the same MLB
   // abbreviations, so no remapping is needed.
   translateTeamCode(code) {
