@@ -58,8 +58,31 @@ const gameRowTemplate = `
             </button>
           </div>
         </div>
-        <div v-if="gameFlowLoading && !gameFlowData" class="game-flow-loading">Loading...</div>
-        <div v-if="gameFlowData" class="game-flow-chart-container">
+        <div v-if="isLineScoreMode" class="line-score-wrapper">
+          <table class="line-score-table" v-if="lineScoreData">
+            <thead>
+              <tr>
+                <th class="line-score-team"></th>
+                <th v-for="n in lineScoreData.innings" :key="n">{{ n }}</th>
+                <th class="line-score-total">R</th>
+                <th class="line-score-total">H</th>
+                <th class="line-score-total">E</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in lineScoreData.rows" :key="row.abbr">
+                <td class="line-score-team">{{ row.abbr }}</td>
+                <td v-for="(runs, i) in row.runs" :key="i">{{ runs }}</td>
+                <td class="line-score-total">{{ row.r }}</td>
+                <td class="line-score-total">{{ row.h }}</td>
+                <td class="line-score-total">{{ row.e }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div v-else-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
+        </div>
+        <div v-if="gameFlowLoading && !gameFlowData && !isLineScoreMode" class="game-flow-loading">Loading...</div>
+        <div v-if="gameFlowData && !isLineScoreMode" class="game-flow-chart-container">
           <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousedown="handleCanvasMouseDown" @mousemove="handleCanvasHover" @mouseup="handleCanvasMouseUp" @mouseleave="handleCanvasLeave" @touchstart="handleTouchStart" @touchmove="handleCanvasTouchMove" @touchend="handleTouchEnd"></canvas>
           <button v-if="rangeTooltip" class="game-flow-zoom-action" @click.stop="applyZoomFromSelection">Zoom</button>
           <button v-else-if="isZoomed" class="game-flow-zoom-action" @click.stop="resetZoom" aria-label="Reset zoom">✕ Zoom</button>
@@ -292,6 +315,7 @@ const GameRow = {
       isExpanded: false,
       gameFlowData: null,
       gameFlowLoading: false,
+      lineScoreData: null,
       boxScoreData: null,
       boxScoreActiveTeam: 'away', // 'away' or 'home'
       teamColors: null,
@@ -1062,6 +1086,12 @@ const GameRow = {
         // Team colors are already set from scoreboard data via initializeTeamColors()
         // No need to extract them again from the event API
 
+        // Extract the runs-by-inning line score (baseball)
+        const competitors = data.header?.competitions?.[0]?.competitors
+        if (competitors) {
+          this.lineScoreData = this.processLineScore(competitors)
+        }
+
         // Extract player box scores
         if (data.boxscore?.players && data.boxscore?.teams) {
           this.boxScoreData = this.processBoxScoreData(data.boxscore.players, data.boxscore.teams)
@@ -1079,6 +1109,46 @@ const GameRow = {
         console.error('Failed to fetch game flow:', error)
       } finally {
         this.gameFlowLoading = false
+      }
+    },
+    // Build the runs-by-inning line score from the summary's header
+    // competitors (each has a per-inning linescores array plus R/H/E totals).
+    processLineScore(competitors) {
+      const away = competitors.find(c => c.homeAway === 'away')
+      const home = competitors.find(c => c.homeAway === 'home')
+      if (!away || !home) return null
+
+      const maxInnings = Math.max(
+        (away.linescores || []).length,
+        (home.linescores || []).length
+      )
+      if (maxInnings === 0) return null
+
+      const innings = []
+      for (let i = 1; i <= maxInnings; i++) innings.push(i)
+
+      const buildRow = (comp, abbr) => {
+        const ls = comp.linescores || []
+        const runs = []
+        for (let i = 0; i < maxInnings; i++) {
+          runs.push(ls[i] ? ls[i].displayValue : '')
+        }
+        return {
+          abbr: abbr,
+          runs: runs,
+          r: comp.score != null ? String(comp.score) : '',
+          h: comp.hits != null ? String(comp.hits) : '',
+          e: comp.errors != null ? String(comp.errors) : ''
+        }
+      }
+
+      // Away team on top, home team on the bottom.
+      return {
+        innings: innings,
+        rows: [
+          buildRow(away, this.game.awayTeam),
+          buildRow(home, this.game.homeTeam)
+        ]
       }
     },
     processGameFlowData(plays, winprobability) {
@@ -1308,6 +1378,8 @@ const GameRow = {
       return labels
     },
     drawGameFlow() {
+      // The line score is a table, not a canvas chart — nothing to draw.
+      if (this.chartMode === 'lineScore') return
       if (this.chartMode === 'winProb') {
         if (this.hasWinProb) this.drawWinProb()
         return
@@ -2324,10 +2396,14 @@ const GameRow = {
     },
     chartTabs: function () {
       const modes = LEAGUE.chartModes || ['lead', 'score', 'winProb']
-      const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.' }
+      const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.', lineScore: 'Line Score' }
       return modes
         .filter(m => m !== 'winProb' || this.hasWinProb)
+        .filter(m => m !== 'lineScore' || !!this.lineScoreData)
         .map(m => ({ mode: m, label: labels[m] || m }))
+    },
+    isLineScoreMode: function () {
+      return this.chartMode === 'lineScore'
     },
     showGameFlow: function () {
       return this.started && this.chartTabs.length > 0

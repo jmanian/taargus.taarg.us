@@ -17,10 +17,10 @@ const LEAGUE = {
     cutoffs: [{ index: 5, class: 'playoff-cutoff' }],
     clincher: false
   },
-  // Baseball only gets the win-probability chart; the clock-based lead/score
-  // flow charts don't apply.
-  chartModes: ['winProb'],
-  defaultChartMode: 'winProb',
+  // Baseball gets a runs-by-inning line score plus the win-probability chart;
+  // the clock-based lead/score flow charts don't apply.
+  chartModes: ['lineScore', 'winProb'],
+  defaultChartMode: 'lineScore',
   // Win expectancy changes at discrete plays, so draw the chart as steps.
   winProbStepped: true,
   // ESPN's scoreboard, standings and teams endpoints all use the same MLB
