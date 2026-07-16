@@ -79,11 +79,15 @@ const LEAGUE = {
     for (let i = 1; i < total; i++) times.push(i);
     return times;
   },
-  // Inning-number labels centered within each inning.
+  // Top/bottom-of-inning labels (T1, B1, T2, B2, ...), each centered within
+  // its half of the inning.
   periodLabels(maxPeriod) {
     const total = Math.max(maxPeriod, this.regulationPeriods);
     const labels = [];
-    for (let i = 1; i <= total; i++) labels.push({ time: i - 0.5, label: String(i) });
+    for (let i = 1; i <= total; i++) {
+      labels.push({ time: i - 0.75, label: `T${i}` });
+      labels.push({ time: i - 0.25, label: `B${i}` });
+    }
     return labels;
   },
 
