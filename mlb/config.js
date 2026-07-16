@@ -70,21 +70,21 @@ const LEAGUE = {
       return (n - 1) + (j + 0.5) / counts[n];
     });
   },
-  // Vertical gridlines at inning boundaries (1, 2, ... maxInning-1).
+  // Vertical gridlines at inning boundaries (1, 2, ... maxInning-1). Always
+  // covers a full regulation game so the axis reads 1-9 even before the game
+  // has reached the later innings.
   periodGridTimes(maxPeriod) {
+    const total = Math.max(maxPeriod, this.regulationPeriods);
     const times = [];
-    for (let i = 1; i < maxPeriod; i++) times.push(i);
+    for (let i = 1; i < total; i++) times.push(i);
     return times;
   },
   // Inning-number labels centered within each inning.
   periodLabels(maxPeriod) {
+    const total = Math.max(maxPeriod, this.regulationPeriods);
     const labels = [];
-    for (let i = 1; i <= maxPeriod; i++) labels.push({ time: i - 0.5, label: String(i) });
+    for (let i = 1; i <= total; i++) labels.push({ time: i - 0.5, label: String(i) });
     return labels;
-  },
-  // Don't stretch a live game's axis to the 9th inning; end at the latest play.
-  liveMaxTime(maxPeriod, lastDataTime) {
-    return lastDataTime;
   },
 
   // ---- Box score: batting + pitching tables, rendered generically from the

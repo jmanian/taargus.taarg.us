@@ -1714,6 +1714,10 @@ body.dark-mode .box-score-table .totals-row {
   overflow-x: auto;
   display: flex;
   justify-content: center;
+  align-items: center;
+  /* Match the win-prob chart's fixed canvas height (see the `height` const
+     in drawWinProb) so toggling tabs doesn't resize the card. */
+  min-height: 260px;
 }
 
 .line-score-table {
@@ -1721,6 +1725,9 @@ body.dark-mode .box-score-table .totals-row {
   border-spacing: 0;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
+  /* Bias the vertically-centered table upward: the wrapper centers this
+     margin box, so a bottom-only margin shifts the visible content up. */
+  margin-bottom: 24px;
 }
 
 .line-score-table th,
@@ -1751,12 +1758,8 @@ body.dark-mode .box-score-table .totals-row {
   color: #212529;
 }
 
-.line-score-table thead .line-score-total {
+.line-score-table .line-score-runs {
   border-left: 1px solid #dee2e6;
-}
-.line-score-table thead .line-score-total:first-of-type,
-.line-score-table tbody td.line-score-total:first-of-type {
-  border-left: 2px solid #dee2e6;
 }
 
 .line-score-table tbody tr:last-child td {
@@ -1778,11 +1781,7 @@ body.dark-mode .line-score-table .line-score-total {
   color: #e9ecef;
 }
 
-body.dark-mode .line-score-table thead .line-score-total {
-  border-left-color: rgba(255, 255, 255, 0.18);
-}
-body.dark-mode .line-score-table thead .line-score-total:first-of-type,
-body.dark-mode .line-score-table tbody td.line-score-total:first-of-type {
+body.dark-mode .line-score-table .line-score-runs {
   border-left-color: rgba(255, 255, 255, 0.28);
 }
 

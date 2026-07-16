@@ -64,7 +64,7 @@ const gameRowTemplate = `
               <tr>
                 <th class="line-score-team"></th>
                 <th v-for="n in lineScoreData.innings" :key="n">{{ n }}</th>
-                <th class="line-score-total">R</th>
+                <th class="line-score-total line-score-runs">R</th>
                 <th class="line-score-total">H</th>
                 <th class="line-score-total">E</th>
               </tr>
@@ -73,7 +73,7 @@ const gameRowTemplate = `
               <tr v-for="row in lineScoreData.rows" :key="row.abbr">
                 <td class="line-score-team">{{ row.abbr }}</td>
                 <td v-for="(runs, i) in row.runs" :key="i">{{ runs }}</td>
-                <td class="line-score-total">{{ row.r }}</td>
+                <td class="line-score-total line-score-runs">{{ row.r }}</td>
                 <td class="line-score-total">{{ row.h }}</td>
                 <td class="line-score-total">{{ row.e }}</td>
               </tr>
@@ -1118,11 +1118,16 @@ const GameRow = {
       const home = competitors.find(c => c.homeAway === 'home')
       if (!away || !home) return null
 
-      const maxInnings = Math.max(
+      const rawMaxInnings = Math.max(
         (away.linescores || []).length,
         (home.linescores || []).length
       )
-      if (maxInnings === 0) return null
+      if (rawMaxInnings === 0) return null
+
+      // While the game's still in progress, pad the table out to a full
+      // regulation-length game so the remaining innings show up as blank
+      // columns instead of the table growing inning by inning.
+      const maxInnings = this.playing ? Math.max(rawMaxInnings, LEAGUE.regulationPeriods) : rawMaxInnings
 
       const innings = []
       for (let i = 1; i <= maxInnings; i++) innings.push(i)
@@ -1625,7 +1630,7 @@ const GameRow = {
       const dpr = window.devicePixelRatio || 1
 
       const width = canvas.offsetWidth
-      const height = 300
+      const height = 260
       canvas.width = width * dpr
       canvas.height = height * dpr
       canvas.style.width = width + 'px'
@@ -1668,6 +1673,25 @@ const GameRow = {
       const halfHeight = chartHeight / 2
       const zeroY = padding.top + halfHeight
       const yScale = (value) => zeroY - (value / maxBound) * halfHeight
+
+      // Shade the top half of each inning a light gray so top/bottom are easy
+      // to tell apart at a glance; bottom halves are left unshaded.
+      if (LEAGUE.elapsedForPlays) {
+        ctx.fillStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.045)'
+        for (let p = 1; p <= maxPeriod; p++) {
+          const periodPoints = data.filter(d => d.period === p)
+          const topPoints = periodPoints.filter(d => d.clock === 'Top')
+          if (topPoints.length === 0) continue
+          const botPoints = periodPoints.filter(d => d.clock === 'Bot')
+          const periodEnd = Math.min(p, xMax)
+          const splitTime = botPoints.length > 0
+            ? (Math.max(...topPoints.map(d => d.time)) + Math.min(...botPoints.map(d => d.time))) / 2
+            : periodEnd
+          const xStart = xScale(Math.max(p - 1, xMin))
+          const xEnd = xScale(Math.min(splitTime, xMax))
+          if (xEnd > xStart) ctx.fillRect(xStart, padding.top, xEnd - xStart, chartHeight)
+        }
+      }
 
       // Major gridlines at ±50 (75% favored) and ±100 (100% favored)
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'
@@ -1783,7 +1807,17 @@ const GameRow = {
         const point = data[i]
         if (!point || point.homeWinPct == null) return
         const value = (1 - 2 * point.homeWinPct) * 100
-        const x = xScale(point.time)
+        // The last play of a half-inning holds its win pct on the line until the
+        // next half-inning's first play — put the dot at that boundary rather
+        // than at the play's own (evenly-spread) x position.
+        let dotTime = point.time
+        if (LEAGUE.elapsedForPlays) {
+          const next = data.slice(i + 1).find(d => d.homeWinPct != null)
+          if (next && (next.period !== point.period || next.clock !== point.clock)) {
+            dotTime = (point.time + next.time) / 2
+          }
+        }
+        const x = xScale(dotTime)
         if (x < padding.left - dotRadius || x > padding.left + chartWidth + dotRadius) return
         let color
         if (value > 0) color = awayColor
