@@ -197,7 +197,6 @@
               </div>
             </div>
           </div>
-          <a v-if="viewMode === 'games' && !selectedDate" href="#" @click.prevent="loadPrevious" class="load-link">↑ Load previous week</a>
           <template v-if="viewMode === 'games'" v-for="item in groupedDates" :key="item.key">
             <date-box
               v-if="item.type === 'date'"
@@ -214,7 +213,6 @@
               :contains-today="item.containsToday">
             </empty-date-range>
           </template>
-          <a v-if="viewMode === 'games' && !selectedDate" href="#" @click.prevent="loadMore" class="load-link">Load more ↓</a>
         </div>
       </div>
     </div>

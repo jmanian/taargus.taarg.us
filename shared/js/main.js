@@ -379,6 +379,8 @@ const app = createApp({
     // Sticky header scroll behavior
     let lastScrollY = window.scrollY
     let ticking = false
+    let isLoadingMore = false
+    let isLoadingPrevious = false
 
     const filterBar = document.querySelector('.filter-bar')
 
@@ -401,6 +403,31 @@ const app = createApp({
       } else if (currentScrollY < lastScrollY) {
         // Scrolling up
         filterBar.classList.remove('hidden')
+      }
+
+      // Infinite scroll: trigger date loading when reaching scroll edges
+      if (viewMode.value === 'games' && !selectedDate.value) {
+        const scrollingDown = currentScrollY > lastScrollY
+        const scrollingUp = currentScrollY < lastScrollY
+        const nearBottom = currentScrollY + window.innerHeight >= document.body.scrollHeight - 400
+        const nearTop = currentScrollY < 400
+
+        if (scrollingDown && nearBottom && !isLoadingMore) {
+          isLoadingMore = true
+          loadMore()
+          setTimeout(() => { isLoadingMore = false }, 1000)
+        }
+
+        if (scrollingUp && nearTop && !isLoadingPrevious) {
+          isLoadingPrevious = true
+          const prevScrollHeight = document.body.scrollHeight
+          const prevScrollY = currentScrollY
+          loadPrevious()
+          Vue.nextTick(() => {
+            window.scrollTo(0, prevScrollY + (document.body.scrollHeight - prevScrollHeight))
+            setTimeout(() => { isLoadingPrevious = false }, 1000)
+          })
+        }
       }
 
       lastScrollY = currentScrollY
