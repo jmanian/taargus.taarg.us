@@ -78,32 +78,16 @@ function parseEvent(event) {
     awayStats: getTeamStats(awayTeam, gameStarted),
     homeLeaders: getTeamLeaders(homeTeam),
     awayLeaders: getTeamLeaders(awayTeam),
-    homeProbable: getProbablePitcher(homeTeam),
-    awayProbable: getProbablePitcher(awayTeam)
+    homeProbable: getProbable(homeTeam),
+    awayProbable: getProbable(awayTeam)
   }
 }
 
-// Probable starting pitcher (baseball). Null for sports without probables.
-function getProbablePitcher(competitor) {
-  const probables = competitor.probables;
-  if (!probables || !probables.length) return null;
-  const probable = probables.find(p => p.name === 'probableStartingPitcher') || probables[0];
-  const athlete = probable && probable.athlete;
-  if (!athlete) return null;
-  const stat = name => {
-    const s = probable.statistics && probable.statistics.find(s => s.name === name);
-    return s ? s.displayValue : null;
-  };
-  const wins = stat('wins');
-  const losses = stat('losses');
-  const era = stat('ERA');
-  const parts = [];
-  if (wins != null && losses != null) parts.push(`${wins}-${losses}`);
-  if (era != null) parts.push(`${era} ERA`);
-  return {
-    name: athlete.shortName || athlete.displayName,
-    line: parts.join(', ')
-  };
+// Probable starter (e.g. baseball's probable pitcher). No sport gets one by
+// default — a league defines LEAGUE.parseProbable to opt in.
+function getProbable(competitor) {
+  if (LEAGUE.parseProbable) return LEAGUE.parseProbable(competitor);
+  return null;
 }
 
 function getOverallRecord(competitor) {

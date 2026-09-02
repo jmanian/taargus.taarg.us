@@ -177,9 +177,32 @@ const LEAGUE = {
   },
 
   // ---- Pre-game has no team shooting stats; the probable pitchers are shown
-  // instead (see espn.js getProbablePitcher), so suppress the team-stats table. ----
+  // instead (see parseProbable below), so suppress the team-stats table. ----
   parseTeamStats() {
     return null;
+  },
+
+  // ---- Probable starting pitcher, shown pre-game in place of team stats. ----
+  parseProbable(competitor) {
+    const probables = competitor.probables;
+    if (!probables || !probables.length) return null;
+    const probable = probables.find(p => p.name === 'probableStartingPitcher') || probables[0];
+    const athlete = probable && probable.athlete;
+    if (!athlete) return null;
+    const stat = name => {
+      const s = probable.statistics && probable.statistics.find(s => s.name === name);
+      return s ? s.displayValue : null;
+    };
+    const wins = stat('wins');
+    const losses = stat('losses');
+    const era = stat('ERA');
+    const parts = [];
+    if (wins != null && losses != null) parts.push(`${wins}-${losses}`);
+    if (era != null) parts.push(`${era} ERA`);
+    return {
+      name: athlete.shortName || athlete.displayName,
+      line: parts.join(', ')
+    };
   },
 
   // ---- Leaders: batting average, home runs, RBIs. ----
