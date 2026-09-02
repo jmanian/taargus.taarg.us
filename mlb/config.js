@@ -177,10 +177,10 @@ const LEAGUE = {
   },
 
   // ---- Pre-game has no team shooting stats; the probable pitchers are shown
-  // instead (see parseProbable below), so suppress the team-stats table. ----
-  parseTeamStats() {
-    return null;
-  },
+  // instead. No parseTeamStats override needed — the default getTeamStats
+  // (shared/js/espn.js) returns null itself when none of its basketball-
+  // specific fields are present on competitor.statistics, which is always
+  // true for baseball. ----
 
   // ---- Probable starting pitcher, shown pre-game in place of team stats. ----
   parseProbable(competitor) {

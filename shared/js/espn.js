@@ -159,12 +159,16 @@ function getTeamStats(competitor, gameStarted) {
     return stat?.displayValue || null;
   };
 
-  return {
+  const result = {
     fgPct: findStat('fieldGoalPct'),
     threePct: findStat('threePointFieldGoalPct'),
     rebounds: gameStarted ? findStat('rebounds') : findStat('avgRebounds'),
     assists: gameStarted ? findStat('assists') : findStat('avgAssists')
   };
+  // None of these basketball-specific fields were found on competitor.statistics
+  // (e.g. a sport with no shooting-stats concept) — nothing to show.
+  if (Object.values(result).every(v => v == null)) return null;
+  return result;
 }
 
 function getTeamLeaders(competitor) {
