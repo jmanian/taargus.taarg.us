@@ -23,6 +23,10 @@ const LEAGUE = {
   defaultChartMode: 'lineScore',
   // Win expectancy changes at discrete plays, so draw the chart as steps.
   winProbStepped: true,
+  // Shrink the win-prob chart to match the line-score tab's height
+  // (.line-score-wrapper's min-height, in shared/index.css) so switching
+  // between MLB's two tabs doesn't resize the card.
+  chartHeight: 260,
   // ESPN's scoreboard, standings and teams endpoints all use the same MLB
   // abbreviations, so no remapping is needed.
   translateTeamCode(code) {

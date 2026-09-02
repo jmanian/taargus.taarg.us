@@ -1715,8 +1715,8 @@ body.dark-mode .box-score-table .totals-row {
   display: flex;
   justify-content: center;
   align-items: center;
-  /* Match the win-prob chart's fixed canvas height (see the `height` const
-     in drawWinProb) so toggling tabs doesn't resize the card. */
+  /* Match the win-prob chart's canvas height (LEAGUE.chartHeight, see
+     drawWinProb) so toggling tabs doesn't resize the card. */
   min-height: 260px;
 }
 

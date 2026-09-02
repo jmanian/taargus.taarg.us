@@ -1630,7 +1630,7 @@ const GameRow = {
       const dpr = window.devicePixelRatio || 1
 
       const width = canvas.offsetWidth
-      const height = 260
+      const height = LEAGUE.chartHeight || 300
       canvas.width = width * dpr
       canvas.height = height * dpr
       canvas.style.width = width + 'px'
