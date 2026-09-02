@@ -42,8 +42,11 @@ const LEAGUE = {
   scoreboardURL(dateBasic) {
     return `https://site.web.api.espn.com/apis/site/v2/sports/baseball/${this.slug}/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&dates=${dateBasic}&tz=America%2FNew_York`;
   },
+  // level=3 groups standings by division (children[conference].children[division])
+  // instead of just by conference — needed for the Divisional/Wild Card tabs
+  // (see shared/js/standings.js).
   standingsURL() {
-    return `https://site.api.espn.com/apis/v2/sports/baseball/${this.slug}/standings`;
+    return `https://site.api.espn.com/apis/v2/sports/baseball/${this.slug}/standings?level=3`;
   },
   summaryURL(eventId) {
     return `https://site.api.espn.com/apis/site/v2/sports/baseball/${this.slug}/summary?event=${eventId}`;

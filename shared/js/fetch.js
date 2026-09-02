@@ -30,6 +30,8 @@ const chartMode = ref(
 const viewMode = ref('games')
 const standingsData = ref(null)
 const standingsLoading = ref(false)
+// Which standings sub-view is shown (MLB only — Divisional vs Wild Card).
+const standingsTab = ref('divisional')
 let isNavigating = false
 
 function initializeDates() {
@@ -355,15 +357,20 @@ function fetchStandings() {
 
 function populatePlayoffSeeds(data) {
   for (const k of Object.keys(playoffSeeds)) delete playoffSeeds[k]
-  data.children?.forEach(conference => {
-    conference.standings?.entries?.forEach(entry => {
+  // Walk recursively: NBA/WNBA's standings response nests entries directly
+  // under each conference, while MLB's (requested with ?level=3, see
+  // mlb/config.js) nests an extra level of divisions in between.
+  const walk = (node) => {
+    node.standings?.entries?.forEach(entry => {
       const tricode = translateEspnTeamCode(entry.team.abbreviation)
       const seedStat = entry.stats?.find(s => s.name === 'playoffSeed')
       if (tricode && seedStat?.value != null) {
         playoffSeeds[tricode] = seedStat.value
       }
     })
-  })
+    node.children?.forEach(walk)
+  }
+  data.children?.forEach(walk)
 }
 
 function applySeedsToLoadedGames() {

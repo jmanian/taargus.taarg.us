@@ -265,6 +265,13 @@ const app = createApp({
       })
     }
 
+    // Divisional/Wild Card standings (MLB only — see shared/js/standings.js).
+    // standingsData is grouped by division for MLB (LEAGUE's standingsURL
+    // requests ?level=3); on NBA/WNBA's ungrouped shape these just come back
+    // empty, since neither template references them.
+    const divisionStandings = Vue.computed(() => standingsData.value ? getDivisionStandings(standingsData.value) : [])
+    const wildCardStandings = Vue.computed(() => standingsData.value ? getWildCardStandings(standingsData.value) : [])
+
     // Provide dark mode state to all child components
     Vue.provide('isDarkMode', isDarkMode)
 
@@ -299,11 +306,14 @@ const app = createApp({
       viewMode: viewMode,
       standingsData: standingsData,
       standingsLoading: standingsLoading,
+      standingsTab: standingsTab,
       showStandings: showStandings,
       showGames: showGames,
       getStatValue: getStatValue,
       getStandingsTeamLogo: getStandingsTeamLogo,
       getSortedStandings: getSortedStandings,
+      divisionStandings: divisionStandings,
+      wildCardStandings: wildCardStandings,
       getClincher: getClincher,
       getClinchCode: getClinchCode,
       getCutoffClass: getCutoffClass

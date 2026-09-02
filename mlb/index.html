@@ -137,50 +137,156 @@
           <div v-if="viewMode === 'standings'" class="standings-container">
             <div v-if="standingsLoading && !standingsData" class="standings-loading">Loading standings...</div>
             <div v-if="standingsData">
-              <div v-for="conference in standingsData.children" :key="conference.id" class="conference-section">
-                <h3 class="conference-title">{{ conference.name }}</h3>
-                <div class="standings-table-wrapper">
-                  <table class="standings-table">
-                    <thead>
-                      <tr>
-                        <th class="team-col">{{ conference.name.includes('American') ? 'AL' : 'NL' }}</th>
-                        <th>W</th>
-                        <th>L</th>
-                        <th>PCT</th>
-                        <th>GB</th>
-                        <th>HOME</th>
-                        <th>AWAY</th>
-                        <th>RS</th>
-                        <th>RA</th>
-                        <th>DIFF</th>
-                        <th>STRK</th>
-                        <th>L10</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(entry, index) in getSortedStandings(conference.standings.entries)" :key="entry.team.id" :class="getCutoffClass(index)">
-                        <td class="team-col">
-                          <span class="rank-number">{{ index + 1 }}</span>
-                          <img :src="getStandingsTeamLogo(entry.team)" class="standings-team-logo" :alt="entry.team.abbreviation" />
-                          <span class="team-name-text">{{ entry.team.name }}</span>
-                          <span v-if="getClincher(entry.stats)" class="clincher-indicator" :data-tooltip="getClincher(entry.stats).description" tabindex="0">{{ getClinchCode(entry.stats) }}</span>
-                        </td>
-                        <td>{{ getStatValue(entry.stats, 'wins') }}</td>
-                        <td>{{ getStatValue(entry.stats, 'losses') }}</td>
-                        <td>{{ getStatValue(entry.stats, 'winPercent') }}</td>
-                        <td>{{ getStatValue(entry.stats, 'gamesBehind') }}</td>
-                        <td>{{ getStatValue(entry.stats, 'Home') }}</td>
-                        <td>{{ getStatValue(entry.stats, 'Road') }}</td>
-                        <td>{{ getStatValue(entry.stats, 'pointsFor') }}</td>
-                        <td>{{ getStatValue(entry.stats, 'pointsAgainst') }}</td>
-                        <td :class="{'positive-diff': parseFloat(getStatValue(entry.stats, 'pointDifferential')) > 0, 'negative-diff': parseFloat(getStatValue(entry.stats, 'pointDifferential')) < 0}">{{ getStatValue(entry.stats, 'pointDifferential') }}</td>
-                        <td>{{ getStatValue(entry.stats, 'streak') }}</td>
-                        <td>{{ getStatValue(entry.stats, 'Last Ten Games') }}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              <div class="standings-tabs">
+                <button
+                  class="standings-tab"
+                  :class="{'active': standingsTab === 'divisional'}"
+                  @click.stop="standingsTab = 'divisional'"
+                  type="button">
+                  Divisional
+                </button>
+                <button
+                  class="standings-tab"
+                  :class="{'active': standingsTab === 'wildcard'}"
+                  @click.stop="standingsTab = 'wildcard'"
+                  type="button">
+                  Wild Card
+                </button>
               </div>
+
+              <template v-if="standingsTab === 'divisional'">
+                <div v-for="division in divisionStandings" :key="division.id" class="conference-section">
+                  <div class="standings-table-wrapper">
+                    <table class="standings-table">
+                      <thead>
+                        <tr>
+                          <th class="team-col">{{ division.shortName }}</th>
+                          <th>W</th>
+                          <th>L</th>
+                          <th>PCT</th>
+                          <th>GB</th>
+                          <th>HOME</th>
+                          <th>AWAY</th>
+                          <th>RS</th>
+                          <th>RA</th>
+                          <th>DIFF</th>
+                          <th>STRK</th>
+                          <th>L10</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(entry, index) in division.entries" :key="entry.team.id">
+                          <td class="team-col">
+                            <span class="rank-number">{{ index + 1 }}</span>
+                            <img :src="getStandingsTeamLogo(entry.team)" class="standings-team-logo" :alt="entry.team.abbreviation" />
+                            <span class="team-name-text">{{ entry.team.name }}</span>
+                            <span v-if="getClincher(entry.stats)" class="clincher-indicator" :data-tooltip="getClincher(entry.stats).description" tabindex="0">{{ getClinchCode(entry.stats) }}</span>
+                          </td>
+                          <td>{{ getStatValue(entry.stats, 'wins') }}</td>
+                          <td>{{ getStatValue(entry.stats, 'losses') }}</td>
+                          <td>{{ getStatValue(entry.stats, 'winPercent') }}</td>
+                          <td>{{ getStatValue(entry.stats, 'divisionGamesBehind') }}</td>
+                          <td>{{ getStatValue(entry.stats, 'Home') }}</td>
+                          <td>{{ getStatValue(entry.stats, 'Road') }}</td>
+                          <td>{{ getStatValue(entry.stats, 'pointsFor') }}</td>
+                          <td>{{ getStatValue(entry.stats, 'pointsAgainst') }}</td>
+                          <td :class="{'positive-diff': parseFloat(getStatValue(entry.stats, 'pointDifferential')) > 0, 'negative-diff': parseFloat(getStatValue(entry.stats, 'pointDifferential')) < 0}">{{ getStatValue(entry.stats, 'pointDifferential') }}</td>
+                          <td>{{ getStatValue(entry.stats, 'streak') }}</td>
+                          <td>{{ getStatValue(entry.stats, 'Last Ten Games') }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </template>
+
+              <template v-else>
+                <div v-for="league in wildCardStandings" :key="league.id" class="conference-section">
+                  <h3 class="standings-section-title">{{ league.abbreviation }} Leaders</h3>
+                  <div class="standings-table-wrapper">
+                    <table class="standings-table">
+                      <thead>
+                        <tr>
+                          <th class="team-col">{{ league.abbreviation }}</th>
+                          <th>W</th>
+                          <th>L</th>
+                          <th>PCT</th>
+                          <th>WCGB</th>
+                          <th>HOME</th>
+                          <th>AWAY</th>
+                          <th>RS</th>
+                          <th>RA</th>
+                          <th>DIFF</th>
+                          <th>STRK</th>
+                          <th>L10</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="item in league.leaders" :key="item.entry.team.id">
+                          <td class="team-col">
+                            <img :src="getStandingsTeamLogo(item.entry.team)" class="standings-team-logo" :alt="item.entry.team.abbreviation" />
+                            <span class="team-name-text">{{ item.entry.team.name }} - {{ item.divisionAbbr }}</span>
+                            <span v-if="getClincher(item.entry.stats)" class="clincher-indicator" :data-tooltip="getClincher(item.entry.stats).description" tabindex="0">{{ getClinchCode(item.entry.stats) }}</span>
+                          </td>
+                          <td>{{ getStatValue(item.entry.stats, 'wins') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'losses') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'winPercent') }}</td>
+                          <td>-</td>
+                          <td>{{ getStatValue(item.entry.stats, 'Home') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'Road') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'pointsFor') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'pointsAgainst') }}</td>
+                          <td :class="{'positive-diff': parseFloat(getStatValue(item.entry.stats, 'pointDifferential')) > 0, 'negative-diff': parseFloat(getStatValue(item.entry.stats, 'pointDifferential')) < 0}">{{ getStatValue(item.entry.stats, 'pointDifferential') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'streak') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'Last Ten Games') }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <h3 class="standings-section-title">{{ league.abbreviation }} Wild Card</h3>
+                  <div class="standings-table-wrapper">
+                    <table class="standings-table">
+                      <thead>
+                        <tr>
+                          <th class="team-col"></th>
+                          <th>W</th>
+                          <th>L</th>
+                          <th>PCT</th>
+                          <th>WCGB</th>
+                          <th>HOME</th>
+                          <th>AWAY</th>
+                          <th>RS</th>
+                          <th>RA</th>
+                          <th>DIFF</th>
+                          <th>STRK</th>
+                          <th>L10</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="item in league.wildCard" :key="item.entry.team.id" :class="{'wildcard-cutoff': item.isCutoff}">
+                          <td class="team-col">
+                            <img :src="getStandingsTeamLogo(item.entry.team)" class="standings-team-logo" :alt="item.entry.team.abbreviation" />
+                            <span class="team-name-text">{{ item.entry.team.name }}</span>
+                            <span v-if="getClincher(item.entry.stats)" class="clincher-indicator" :data-tooltip="getClincher(item.entry.stats).description" tabindex="0">{{ getClinchCode(item.entry.stats) }}</span>
+                          </td>
+                          <td>{{ getStatValue(item.entry.stats, 'wins') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'losses') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'winPercent') }}</td>
+                          <td>{{ item.wcgb }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'Home') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'Road') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'pointsFor') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'pointsAgainst') }}</td>
+                          <td :class="{'positive-diff': parseFloat(getStatValue(item.entry.stats, 'pointDifferential')) > 0, 'negative-diff': parseFloat(getStatValue(item.entry.stats, 'pointDifferential')) < 0}">{{ getStatValue(item.entry.stats, 'pointDifferential') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'streak') }}</td>
+                          <td>{{ getStatValue(item.entry.stats, 'Last Ten Games') }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </template>
             </div>
           </div>
           <a v-if="viewMode === 'games' && !selectedDate" href="#" @click.prevent="loadPrevious" class="load-link">↑ Load previous week</a>
@@ -211,6 +317,7 @@
     <script src="../shared/js/helpers.js?v=1766463947"></script>
     <script src="../shared/js/espn.js?v=1766463947"></script>
     <script src="../shared/js/fetch.js?v=1766463947"></script>
+    <script src="../shared/js/standings.js?v=1766463947"></script>
     <script src="../shared/js/main.js?v=1766463947"></script>
   </body>
 </html>
