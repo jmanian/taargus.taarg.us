@@ -64,18 +64,14 @@ const gameRowTemplate = `
               <tr>
                 <th class="line-score-team"></th>
                 <th v-for="n in lineScoreData.innings" :key="n">{{ n }}</th>
-                <th class="line-score-total line-score-runs">R</th>
-                <th class="line-score-total">H</th>
-                <th class="line-score-total">E</th>
+                <th v-for="col in lineScoreData.columns" :key="col.key" :class="col.class">{{ col.label }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="row in lineScoreData.rows" :key="row.abbr">
                 <td class="line-score-team">{{ row.abbr }}</td>
                 <td v-for="(runs, i) in row.runs" :key="i">{{ runs }}</td>
-                <td class="line-score-total line-score-runs">{{ row.r }}</td>
-                <td class="line-score-total">{{ row.h }}</td>
-                <td class="line-score-total">{{ row.e }}</td>
+                <td v-for="col in lineScoreData.columns" :key="col.key" :class="col.class">{{ row.totals[col.key] }}</td>
               </tr>
             </tbody>
           </table>
@@ -1089,12 +1085,14 @@ const GameRow = {
         // Team colors are already set from scoreboard data via initializeTeamColors()
         // No need to extract them again from the event API
 
-        // Extract the runs-by-inning line score (baseball) — only for leagues
-        // that actually render the lineScore tab; otherwise this is wasted
-        // work on a hot path (every statusDetail change and 15s poll).
+        // Extract the runs-by-inning line score via a per-league hook — its
+        // shape (baseball's H/E columns) doesn't generalize across sports,
+        // so leagues that want a lineScore tab define this themselves. Only
+        // called when defined, so this is skipped as wasted work on a hot
+        // path (every statusDetail change and 15s poll) for leagues without it.
         const competitors = data.header?.competitions?.[0]?.competitors
-        if (competitors && LEAGUE.chartModes?.includes('lineScore')) {
-          this.lineScoreData = this.processLineScore(competitors)
+        if (competitors && LEAGUE.processLineScore) {
+          this.lineScoreData = LEAGUE.processLineScore(competitors, this.playing, this.game.awayTeam, this.game.homeTeam)
         }
 
         // Extract player box scores
@@ -1114,51 +1112,6 @@ const GameRow = {
         console.error('Failed to fetch game flow:', error)
       } finally {
         this.gameFlowLoading = false
-      }
-    },
-    // Build the runs-by-inning line score from the summary's header
-    // competitors (each has a per-inning linescores array plus R/H/E totals).
-    processLineScore(competitors) {
-      const away = competitors.find(c => c.homeAway === 'away')
-      const home = competitors.find(c => c.homeAway === 'home')
-      if (!away || !home) return null
-
-      const rawMaxInnings = Math.max(
-        (away.linescores || []).length,
-        (home.linescores || []).length
-      )
-      if (rawMaxInnings === 0) return null
-
-      // While the game's still in progress, pad the table out to a full
-      // regulation-length game so the remaining innings show up as blank
-      // columns instead of the table growing inning by inning.
-      const maxInnings = this.playing ? Math.max(rawMaxInnings, LEAGUE.regulationPeriods) : rawMaxInnings
-
-      const innings = []
-      for (let i = 1; i <= maxInnings; i++) innings.push(i)
-
-      const buildRow = (comp, abbr) => {
-        const ls = comp.linescores || []
-        const runs = []
-        for (let i = 0; i < maxInnings; i++) {
-          runs.push(ls[i] ? ls[i].displayValue : '')
-        }
-        return {
-          abbr: abbr,
-          runs: runs,
-          r: comp.score != null ? String(comp.score) : '',
-          h: comp.hits != null ? String(comp.hits) : '',
-          e: comp.errors != null ? String(comp.errors) : ''
-        }
-      }
-
-      // Away team on top, home team on the bottom.
-      return {
-        innings: innings,
-        rows: [
-          buildRow(away, this.game.awayTeam),
-          buildRow(home, this.game.homeTeam)
-        ]
       }
     },
     processGameFlowData(plays, winprobability) {

@@ -95,6 +95,62 @@ const LEAGUE = {
     return labels;
   },
 
+  // ---- Line score: runs-by-inning table with R/H/E totals. Baseball-only
+  // shape (no other league defines this hook, so the lineScore tab and its
+  // fetch-time parsing are both skipped for NBA/WNBA). ----
+  // competitors is the summary endpoint's header.competitions[0].competitors
+  // (each has a per-inning linescores array plus score/hits/errors totals).
+  processLineScore(competitors, playing, awayAbbr, homeAbbr) {
+    const away = competitors.find(c => c.homeAway === 'away');
+    const home = competitors.find(c => c.homeAway === 'home');
+    if (!away || !home) return null;
+
+    const rawMaxInnings = Math.max(
+      (away.linescores || []).length,
+      (home.linescores || []).length
+    );
+    if (rawMaxInnings === 0) return null;
+
+    // While the game's still in progress, pad the table out to a full
+    // regulation-length game so the remaining innings show up as blank
+    // columns instead of the table growing inning by inning.
+    const maxInnings = playing ? Math.max(rawMaxInnings, this.regulationPeriods) : rawMaxInnings;
+
+    const innings = [];
+    for (let i = 1; i <= maxInnings; i++) innings.push(i);
+
+    const columns = [
+      { key: 'r', label: 'R', class: 'line-score-total line-score-runs' },
+      { key: 'h', label: 'H', class: 'line-score-total' },
+      { key: 'e', label: 'E', class: 'line-score-total' }
+    ];
+
+    const buildRow = (comp, abbr) => {
+      const ls = comp.linescores || [];
+      const runs = [];
+      for (let i = 0; i < maxInnings; i++) runs.push(ls[i] ? ls[i].displayValue : '');
+      return {
+        abbr: abbr,
+        runs: runs,
+        totals: {
+          r: comp.score != null ? String(comp.score) : '',
+          h: comp.hits != null ? String(comp.hits) : '',
+          e: comp.errors != null ? String(comp.errors) : ''
+        }
+      };
+    };
+
+    // Away team on top, home team on the bottom.
+    return {
+      innings: innings,
+      columns: columns,
+      rows: [
+        buildRow(away, awayAbbr),
+        buildRow(home, homeAbbr)
+      ]
+    };
+  },
+
   // ---- Box score: batting + pitching tables, rendered generically from the
   // ESPN statistics group labels (matches espn.com's MLB box score). ----
   boxScore: { generic: true },
