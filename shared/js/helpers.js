@@ -14,6 +14,10 @@ function teamId(tricode) {
   return LEAGUE.teams[tricode].teamId;
 }
 
+function titleCase(s) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+}
+
 // Convert a (period, clock) pair into total seconds elapsed in the game.
 // `clock` is the remaining time in the current period, formatted as
 // "mm:ss", "ss.t", or "0.0". Used to compare freshness across data sources.

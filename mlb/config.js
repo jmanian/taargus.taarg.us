@@ -153,7 +153,10 @@ const LEAGUE = {
 
   // ---- Box score: batting + pitching tables, rendered generically from the
   // ESPN statistics group labels (matches espn.com's MLB box score). ----
-  boxScore: { generic: true },
+  boxScore: {
+    generic: true,
+    playerLabels: { Pitching: 'Pitchers', default: 'Hitters' }
+  },
 
   // ---- Broadcasts: baseball has no "League Pass"; fall back to local TV. ----
   parseBroadcast(broadcasts) {

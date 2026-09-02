@@ -1181,23 +1181,22 @@ const GameRow = {
       const percentage = Math.round((made / attempted) * 1000) / 10
       return { made: stat, pct: percentage.toFixed(1) }
     },
-    titleCase(s) {
-      return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''
-    },
     // Generic box score: one table per ESPN statistics group (e.g. baseball's
     // batting & pitching), driven by the group's own labels — matches espn.com.
-    processBoxScoreGeneric(playersData, teamsData) {
+    processBoxScoreByStatGroup(playersData, teamsData) {
       const teamHomeAwayMap = {}
       teamsData.forEach(t => { teamHomeAwayMap[t.team.id] = t.homeAway })
+
+      const playerLabels = (LEAGUE.boxScore && LEAGUE.boxScore.playerLabels) || {}
 
       const result = { away: null, home: null }
       playersData.forEach(teamData => {
         const homeAway = teamHomeAwayMap[teamData.team.id]
         const tables = (teamData.statistics || []).map(group => {
-          const title = this.titleCase(group.type || group.name || '')
+          const title = titleCase(group.type || group.name || '')
           return {
             title: title,
-            playerLabel: title === 'Pitching' ? 'Pitchers' : 'Hitters',
+            playerLabel: playerLabels[title] || playerLabels.default || 'Players',
             columns: group.labels || [],
             rows: (group.athletes || []).map(a => ({
               name: a.athlete.shortName || a.athlete.displayName,
@@ -1215,7 +1214,7 @@ const GameRow = {
     },
     processBoxScoreData(playersData, teamsData) {
       if (LEAGUE.boxScore && LEAGUE.boxScore.generic) {
-        return this.processBoxScoreGeneric(playersData, teamsData)
+        return this.processBoxScoreByStatGroup(playersData, teamsData)
       }
 
       const result = { away: null, home: null }
