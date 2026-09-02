@@ -14,10 +14,13 @@ const selectedDate = ref(initialDate)
 const selectedTeams = ref(initialTeams)
 const teamDropdownOpen = ref(false)
 const refreshTrigger = ref(0)
-// localStorage is shared across all leagues on this origin, so a stored mode
-// from another sport may not be valid here; fall back to the league default.
+// localStorage is shared across all leagues on this origin, so the chart-mode
+// preference is namespaced per league (see also handleChartModeChange in
+// shared/js/main.js, which writes the same key) — otherwise picking a mode
+// on one sport's page could silently override another's.
 const availableChartModes = LEAGUE.chartModes || ['lead', 'score', 'winProb']
-const storedChartMode = localStorage.getItem('gameFlowChartMode')
+const chartModeKey = `gameFlowChartMode:${LEAGUE.slug}`
+const storedChartMode = localStorage.getItem(chartModeKey)
 const chartMode = ref(
   availableChartModes.includes(storedChartMode)
     ? storedChartMode

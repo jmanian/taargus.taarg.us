@@ -222,7 +222,7 @@ const app = createApp({
 
     const handleChartModeChange = (mode) => {
       chartMode.value = mode
-      localStorage.setItem('gameFlowChartMode', mode)
+      localStorage.setItem(chartModeKey, mode)
     }
 
     const getStatValue = (stats, statName) => {
