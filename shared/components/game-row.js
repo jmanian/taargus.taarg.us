@@ -1086,9 +1086,11 @@ const GameRow = {
         // Team colors are already set from scoreboard data via initializeTeamColors()
         // No need to extract them again from the event API
 
-        // Extract the runs-by-inning line score (baseball)
+        // Extract the runs-by-inning line score (baseball) — only for leagues
+        // that actually render the lineScore tab; otherwise this is wasted
+        // work on a hot path (every statusDetail change and 15s poll).
         const competitors = data.header?.competitions?.[0]?.competitors
-        if (competitors) {
+        if (competitors && LEAGUE.chartModes?.includes('lineScore')) {
           this.lineScoreData = this.processLineScore(competitors)
         }
 
