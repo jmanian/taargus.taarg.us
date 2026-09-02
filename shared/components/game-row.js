@@ -1469,28 +1469,16 @@ const GameRow = {
         ctx.stroke()
       }
 
-      // Draw quarter lines
+      // Period lines (quarters for basketball, innings for baseball)
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)'
       ctx.setLineDash([3, 3])
-      for (let quarter = 1; quarter < LEAGUE.regulationPeriods; quarter++) {
-        const x = xScale(quarter * LEAGUE.periodSeconds)
+      this.periodGridTimes(maxPeriod, maxTime).forEach(t => {
+        const x = xScale(t)
         ctx.beginPath()
         ctx.moveTo(x, padding.top)
         ctx.lineTo(x, height - padding.bottom)
         ctx.stroke()
-      }
-
-      // Draw OT lines if game went to overtime
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        // Draw line at start of each OT period
-        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
-          const x = xScale(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
-          ctx.beginPath()
-          ctx.moveTo(x, padding.top)
-          ctx.lineTo(x, height - padding.bottom)
-          ctx.stroke()
-        }
-      }
+      })
       ctx.setLineDash([])
 
       // Clip lines/fills/shading to the chart area so off-domain points don't bleed
@@ -1595,24 +1583,9 @@ const GameRow = {
       ctx.font = '12px sans-serif'
       ctx.textAlign = 'center'
 
-      // Quarter labels
-      const quarterLabels = ['1st', '2nd', '3rd', '4th']
-      quarterLabels.forEach((label, i) => {
-        const x = xScale((i + 0.5) * LEAGUE.periodSeconds)
-        ctx.fillText(label, x, height - 10)
+      this.periodLabels(maxPeriod, maxTime).forEach(({ time, label }) => {
+        ctx.fillText(label, xScale(time), height - 10)
       })
-
-      // OT labels if game went to overtime
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        const numOvertimes = maxPeriod - LEAGUE.regulationPeriods
-        for (let otNum = 1; otNum <= numOvertimes; otNum++) {
-          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
-          const otEnd = otNum === numOvertimes ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
-          const x = xScale((otStart + otEnd) / 2)
-          const label = otNum === 1 ? 'OT' : `OT${otNum}`
-          ctx.fillText(label, x, height - 10)
-        }
-      }
 
       // Score labels (y-axis) - show every 25 points, skip 0, draw inside chart
       // Labels should be below the gridline
@@ -1947,28 +1920,17 @@ const GameRow = {
       ctx.lineTo(width - padding.right, centerY)
       ctx.stroke()
 
-      // Draw quarter lines
+      // Period lines (quarters for basketball, innings for baseball)
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)'
       ctx.lineWidth = 1
       ctx.setLineDash([3, 3])
-      for (let quarter = 1; quarter < LEAGUE.regulationPeriods; quarter++) {
-        const x = xScale(quarter * LEAGUE.periodSeconds)
+      this.periodGridTimes(maxPeriod, maxTime).forEach(t => {
+        const x = xScale(t)
         ctx.beginPath()
         ctx.moveTo(x, padding.top)
         ctx.lineTo(x, height - padding.bottom)
         ctx.stroke()
-      }
-
-      // Draw OT lines if game went to overtime
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
-          const x = xScale(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
-          ctx.beginPath()
-          ctx.moveTo(x, padding.top)
-          ctx.lineTo(x, height - padding.bottom)
-          ctx.stroke()
-        }
-      }
+      })
       ctx.setLineDash([])
 
       // Clip lines/fills/shading to the chart area. Dots are drawn after restore.
@@ -2151,24 +2113,9 @@ const GameRow = {
       ctx.font = '12px sans-serif'
       ctx.textAlign = 'center'
 
-      // Quarter labels
-      const quarterLabels = ['1st', '2nd', '3rd', '4th']
-      quarterLabels.forEach((label, i) => {
-        const x = xScale((i + 0.5) * LEAGUE.periodSeconds)
-        ctx.fillText(label, x, height - 10)
+      this.periodLabels(maxPeriod, maxTime).forEach(({ time, label }) => {
+        ctx.fillText(label, xScale(time), height - 10)
       })
-
-      // OT labels if game went to overtime
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        const numOvertimes = maxPeriod - LEAGUE.regulationPeriods
-        for (let otNum = 1; otNum <= numOvertimes; otNum++) {
-          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
-          const otEnd = otNum === numOvertimes ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
-          const x = xScale((otStart + otEnd) / 2)
-          const label = otNum === 1 ? 'OT' : `OT${otNum}`
-          ctx.fillText(label, x, height - 10)
-        }
-      }
 
       // Lead labels (y-axis) - skip 0, draw inside chart
       // Top half (positive): labels below gridline
