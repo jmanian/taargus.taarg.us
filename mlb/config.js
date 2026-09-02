@@ -84,13 +84,20 @@ const LEAGUE = {
     return times;
   },
   // Top/bottom-of-inning labels (T1, B1, T2, B2, ...), each centered within
-  // its half of the inning.
-  periodLabels(maxPeriod) {
-    const total = Math.max(maxPeriod, this.regulationPeriods);
+  // its half of the inning. While the game is still being played, stop at
+  // the half-inning currently in progress instead of pre-labeling the rest
+  // of the game — full regulation is only shown once the game has reached it
+  // (or is over).
+  periodLabels(maxPeriod, maxTime, playing, currentHalf) {
+    const total = playing ? maxPeriod : Math.max(maxPeriod, this.regulationPeriods);
     const labels = [];
     for (let i = 1; i <= total; i++) {
       labels.push({ time: i - 0.75, label: `T${i}` });
-      labels.push({ time: i - 0.25, label: `B${i}` });
+      // The bottom half of the current (live) inning hasn't started yet
+      // unless we're actually in it.
+      if (!playing || i < maxPeriod || currentHalf === 'Bot') {
+        labels.push({ time: i - 0.25, label: `B${i}` });
+      }
     }
     return labels;
   },

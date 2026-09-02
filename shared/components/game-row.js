@@ -1327,7 +1327,17 @@ const GameRow = {
     },
     // {time, label} pairs for the period labels along the x-axis.
     periodLabels(maxPeriod, maxTime) {
-      if (LEAGUE.periodLabels) return LEAGUE.periodLabels(maxPeriod, maxTime)
+      if (LEAGUE.periodLabels) {
+        // For leagues with half-period labels (baseball's Top/Bottom), tell
+        // the hook which half is currently in progress so it can stop
+        // labeling innings/halves that haven't happened yet while live. Uses
+        // the last real (non-synthetic) point — a synthetic trailing point's
+        // clock field is a raw scoreboard clock string, not 'Top'/'Bot'.
+        const data = this.chartData
+        const realPoints = data ? data.filter(d => !d.synthetic) : []
+        const lastPoint = realPoints.length ? realPoints[realPoints.length - 1] : null
+        return LEAGUE.periodLabels(maxPeriod, maxTime, this.playing, lastPoint && lastPoint.clock)
+      }
       const labels = []
       const names = ['1st', '2nd', '3rd', '4th']
       for (let i = 0; i < LEAGUE.regulationPeriods; i++) {
