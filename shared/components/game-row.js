@@ -1389,9 +1389,8 @@ const GameRow = {
     drawGameFlow() {
       // The line score is a table, not a canvas chart — nothing to draw.
       if (this.chartMode === 'lineScore') return
-      if (this.chartMode === 'winProb') {
-        if (this.hasWinProb) this.drawWinProb()
-        return
+      if (this.chartMode === 'winProb' && this.hasWinProb) {
+        this.drawWinProb()
       } else if (this.chartMode === 'lead') {
         this.drawLeadTracker()
       } else {
