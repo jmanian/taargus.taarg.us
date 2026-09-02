@@ -697,9 +697,12 @@ const GameRow = {
       const lastDataTime = data[data.length - 1].time
       const maxPeriod = Math.max(...data.map(d => d.period))
 
-      // Sports without a fixed game length (baseball) decide their own axis max.
-      if (LEAGUE.liveMaxTime) return LEAGUE.liveMaxTime(maxPeriod, lastDataTime, this.playing)
-
+      // This period/OT math is written for basketball's clock, but it's also
+      // correct for baseball as-is: MLB sets regulationPeriods: 9,
+      // periodSeconds: 1, otSeconds: 1 (see mlb/config.js), so "period" units
+      // are innings and maxPeriod is the current inning number. That makes
+      // this extend the axis to the end of the current (or extra) inning
+      // exactly like it extends to the end of a basketball quarter/OT.
       const endOfRegulation = LEAGUE.regulationPeriods * LEAGUE.periodSeconds
 
       // If game is ongoing, extend x-axis to the end of the current period (regulation or OT)
