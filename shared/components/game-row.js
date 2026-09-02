@@ -2437,7 +2437,8 @@ const GameRow = {
       return !!(LEAGUE.boxScore && LEAGUE.boxScore.generic)
     },
     chartTabs: function () {
-      const modes = LEAGUE.chartModes || ['lead', 'score', 'winProb']
+      // Every league config sets chartModes explicitly (see e.g. nba/config.js).
+      const modes = LEAGUE.chartModes
       const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.', lineScore: 'Line Score' }
       return modes
         .filter(m => m !== 'winProb' || this.hasWinProb)

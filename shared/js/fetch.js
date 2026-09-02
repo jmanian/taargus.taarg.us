@@ -18,7 +18,8 @@ const refreshTrigger = ref(0)
 // preference is namespaced per league (see also handleChartModeChange in
 // shared/js/main.js, which writes the same key) — otherwise picking a mode
 // on one sport's page could silently override another's.
-const availableChartModes = LEAGUE.chartModes || ['lead', 'score', 'winProb']
+// Every league config sets chartModes explicitly (see e.g. nba/config.js).
+const availableChartModes = LEAGUE.chartModes
 const chartModeKey = `gameFlowChartMode:${LEAGUE.slug}`
 const storedChartMode = localStorage.getItem(chartModeKey)
 const chartMode = ref(
