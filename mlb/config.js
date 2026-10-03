@@ -32,12 +32,16 @@ const LEAGUE = {
   translateTeamCode(code) {
     return code === 'TBD' ? null : code;
   },
+  // Official MLB cap logos (SVG) rather than ESPN's PNGs, matching how NBA/WNBA
+  // pull from their own league CDNs. Cap marks stay legible at the 20-40px the
+  // scoreboard renders them at; the "primary" variants are full roundels and
+  // wordmarks that turn to mush that small. teamId is the MLB Stats API id
+  // (see data/teams.js).
   teamLogoURL(tricode, mode) {
-    if (!this.teams[tricode]) return '';
-    const abbr = tricode.toLowerCase();
-    return mode === 'D'
-      ? `https://a.espncdn.com/i/teamlogos/mlb/500-dark/scoreboard/${abbr}.png`
-      : `https://a.espncdn.com/i/teamlogos/mlb/500/${abbr}.png`;
+    const id = this.teams[tricode] && this.teams[tricode].teamId;
+    if (!id) return '';
+    const variant = mode === 'D' ? 'on-dark' : 'on-light';
+    return `https://www.mlbstatic.com/team-logos/team-cap-${variant}/${id}.svg`;
   },
   scoreboardURL(dateBasic) {
     return `https://site.web.api.espn.com/apis/site/v2/sports/baseball/${this.slug}/scoreboard?region=us&lang=en&contentorigin=espn&limit=100&calendartype=offdays&dates=${dateBasic}&tz=America%2FNew_York`;
