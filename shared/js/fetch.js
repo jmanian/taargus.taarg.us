@@ -14,10 +14,24 @@ const selectedDate = ref(initialDate)
 const selectedTeams = ref(initialTeams)
 const teamDropdownOpen = ref(false)
 const refreshTrigger = ref(0)
-const chartMode = ref(localStorage.getItem('gameFlowChartMode') || 'lead')
+// localStorage is shared across all leagues on this origin, so the chart-mode
+// preference is namespaced per league (see also handleChartModeChange in
+// shared/js/main.js, which writes the same key) — otherwise picking a mode
+// on one sport's page could silently override another's.
+// Every league config sets chartModes explicitly (see e.g. nba/config.js).
+const availableChartModes = LEAGUE.chartModes
+const chartModeKey = `gameFlowChartMode:${LEAGUE.slug}`
+const storedChartMode = localStorage.getItem(chartModeKey)
+const chartMode = ref(
+  availableChartModes.includes(storedChartMode)
+    ? storedChartMode
+    : (LEAGUE.defaultChartMode || availableChartModes[0])
+)
 const viewMode = ref('games')
 const standingsData = ref(null)
 const standingsLoading = ref(false)
+// Which standings sub-view is shown (MLB only — Divisional vs Wild Card).
+const standingsTab = ref('divisional')
 let isNavigating = false
 
 function initializeDates() {
@@ -343,15 +357,20 @@ function fetchStandings() {
 
 function populatePlayoffSeeds(data) {
   for (const k of Object.keys(playoffSeeds)) delete playoffSeeds[k]
-  data.children?.forEach(conference => {
-    conference.standings?.entries?.forEach(entry => {
+  // Walk recursively: NBA/WNBA's standings response nests entries directly
+  // under each conference, while MLB's (requested with ?level=3, see
+  // mlb/config.js) nests an extra level of divisions in between.
+  const walk = (node) => {
+    node.standings?.entries?.forEach(entry => {
       const tricode = translateEspnTeamCode(entry.team.abbreviation)
       const seedStat = entry.stats?.find(s => s.name === 'playoffSeed')
       if (tricode && seedStat?.value != null) {
         playoffSeeds[tricode] = seedStat.value
       }
     })
-  })
+    node.children?.forEach(walk)
+  }
+  data.children?.forEach(walk)
 }
 
 function applySeedsToLoadedGames() {

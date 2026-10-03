@@ -77,8 +77,17 @@ function parseEvent(event) {
     homeStats: getTeamStats(homeTeam, gameStarted),
     awayStats: getTeamStats(awayTeam, gameStarted),
     homeLeaders: getTeamLeaders(homeTeam),
-    awayLeaders: getTeamLeaders(awayTeam)
+    awayLeaders: getTeamLeaders(awayTeam),
+    homeProbable: getProbable(homeTeam),
+    awayProbable: getProbable(awayTeam)
   }
+}
+
+// Probable starter (e.g. baseball's probable pitcher). No sport gets one by
+// default — a league defines LEAGUE.parseProbable to opt in.
+function getProbable(competitor) {
+  if (LEAGUE.parseProbable) return LEAGUE.parseProbable(competitor);
+  return null;
 }
 
 function getOverallRecord(competitor) {
@@ -109,6 +118,8 @@ function findNationalBroadcast(broadcasts) {
 }
 
 function getBroadcastInfo(broadcasts) {
+  if (LEAGUE.parseBroadcast) return LEAGUE.parseBroadcast(broadcasts);
+
   // First check for national broadcast
   const national = broadcasts.find(bc => bc.market.toLowerCase() === 'national')
 
@@ -139,6 +150,7 @@ function findRecap(headlines) {
 }
 
 function getTeamStats(competitor, gameStarted) {
+  if (LEAGUE.parseTeamStats) return LEAGUE.parseTeamStats(competitor, gameStarted);
   if (!competitor.statistics) return null;
 
   const stats = competitor.statistics;
@@ -147,15 +159,20 @@ function getTeamStats(competitor, gameStarted) {
     return stat?.displayValue || null;
   };
 
-  return {
+  const result = {
     fgPct: findStat('fieldGoalPct'),
     threePct: findStat('threePointFieldGoalPct'),
     rebounds: gameStarted ? findStat('rebounds') : findStat('avgRebounds'),
     assists: gameStarted ? findStat('assists') : findStat('avgAssists')
   };
+  // None of these basketball-specific fields were found on competitor.statistics
+  // (e.g. a sport with no shooting-stats concept) — nothing to show.
+  if (Object.values(result).every(v => v == null)) return null;
+  return result;
 }
 
 function getTeamLeaders(competitor) {
+  if (LEAGUE.parseLeaders) return LEAGUE.parseLeaders(competitor);
   if (!competitor.leaders) return null;
 
   const leaders = competitor.leaders;

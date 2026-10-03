@@ -1710,6 +1710,81 @@ body.dark-mode .box-score-table .totals-row {
   text-align: center;
 }
 
+.line-score-wrapper {
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Match the win-prob chart's canvas height (LEAGUE.chartHeight, see
+     drawWinProb) so toggling tabs doesn't resize the card. */
+  min-height: 260px;
+}
+
+.line-score-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  /* Bias the vertically-centered table upward: the wrapper centers this
+     margin box, so a bottom-only margin shifts the visible content up. */
+  margin-bottom: 24px;
+}
+
+.line-score-table th,
+.line-score-table td {
+  padding: 6px 9px;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.line-score-table thead th {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6c757d;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.line-score-table .line-score-team {
+  text-align: left;
+  font-weight: 600;
+  color: #212529;
+  padding-left: 12px;
+  padding-right: 16px;
+}
+
+.line-score-table .line-score-total {
+  font-weight: 600;
+  color: #212529;
+}
+
+.line-score-table .line-score-runs {
+  border-left: 1px solid #dee2e6;
+}
+
+.line-score-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+body.dark-mode .line-score-table th,
+body.dark-mode .line-score-table td {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .line-score-table thead th {
+  color: #adb5bd;
+  border-bottom-color: rgba(255, 255, 255, 0.18);
+}
+
+body.dark-mode .line-score-table .line-score-team,
+body.dark-mode .line-score-table .line-score-total {
+  color: #e9ecef;
+}
+
+body.dark-mode .line-score-table .line-score-runs {
+  border-left-color: rgba(255, 255, 255, 0.28);
+}
+
 .game-flow-loading {
   text-align: center;
   color: #6c757d;
@@ -1910,6 +1985,23 @@ body.dark-mode .game-flow-zoom-action {
   gap: 8px;
   justify-content: center;
   margin-bottom: 12px;
+}
+
+/* Sub-table heading (e.g. Batting / Pitching) for generic box scores */
+.box-score-group + .box-score-group {
+  margin-top: 14px;
+}
+
+.box-score-subhead {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #6c757d;
+  margin-bottom: 6px;
+}
+
+body.dark-mode .box-score-subhead {
+  color: #9aa0a6;
 }
 
 .box-score-tab {
@@ -2315,6 +2407,98 @@ body.dark-mode .playoffs-button {
 
 body.dark-mode .standings-loading {
   color: #adb5bd;
+}
+
+/* Divisional / Wild Card toggle, styled like .box-score-tab(s). */
+.standings-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.standings-tab {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #495057;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+@media (hover: hover) {
+  .standings-tab:hover {
+    background-color: #ffffff;
+    color: #212529;
+    border-color: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+}
+
+.standings-tab:active {
+  transform: scale(0.96);
+}
+
+.standings-tab.active {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+body.dark-mode .standings-tab {
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ced4da;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) {
+  body.dark-mode .standings-tab:hover {
+    background-color: #333333;
+    color: #e9ecef;
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+}
+
+body.dark-mode .standings-tab.active {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+  box-shadow: 0 3px 10px rgba(13, 110, 253, 0.4);
+}
+
+/* Section headings on the Wild Card tab (e.g. "AL Leaders" / "AL Wild Card"). */
+.standings-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #6c757d;
+  margin: 0 0 8px;
+}
+
+.standings-section-title + .standings-table-wrapper {
+  margin-bottom: 20px;
+}
+
+body.dark-mode .standings-section-title {
+  color: #adb5bd;
+}
+
+/* Divider under the last team still in the wild card field, matching the
+   .playin-cutoff line style used elsewhere on this table. */
+.standings-table tbody tr.wildcard-cutoff td {
+  box-shadow: inset 0 -2px 0 0 #6c757d;
+}
+
+body.dark-mode .standings-table tbody tr.wildcard-cutoff td {
+  box-shadow: inset 0 -2px 0 0 #adb5bd;
 }
 
 .conference-section {

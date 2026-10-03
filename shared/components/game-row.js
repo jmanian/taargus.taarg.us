@@ -46,31 +46,39 @@ const gameRowTemplate = `
   <transition name="expand">
     <div v-if="isExpanded" class="game-details">
       <div v-if="showGameFlow" class="game-flow-section">
-        <div class="game-flow-header-container">
+        <div class="game-flow-header-container" v-if="chartTabs.length > 1">
           <div class="game-flow-tabs">
             <button
+              v-for="tab in chartTabs"
+              :key="tab.mode"
               class="game-flow-tab"
-              :class="{'active': chartMode === 'lead'}"
-              @click.stop="setChartMode('lead')">
-              Lead
-            </button>
-            <button
-              class="game-flow-tab"
-              :class="{'active': chartMode === 'score'}"
-              @click.stop="setChartMode('score')">
-              Scores
-            </button>
-            <button
-              v-if="hasWinProb"
-              class="game-flow-tab"
-              :class="{'active': chartMode === 'winProb'}"
-              @click.stop="setChartMode('winProb')">
-              Win Prob.
+              :class="{'active': chartMode === tab.mode}"
+              @click.stop="setChartMode(tab.mode)">
+              {{ tab.label }}
             </button>
           </div>
         </div>
-        <div v-if="gameFlowLoading && !gameFlowData" class="game-flow-loading">Loading...</div>
-        <div v-if="gameFlowData" class="game-flow-chart-container">
+        <div v-if="isLineScoreMode" class="line-score-wrapper">
+          <table class="line-score-table" v-if="lineScoreData">
+            <thead>
+              <tr>
+                <th class="line-score-team"></th>
+                <th v-for="n in lineScoreData.innings" :key="n">{{ n }}</th>
+                <th v-for="col in lineScoreData.columns" :key="col.key" :class="col.class">{{ col.label }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in lineScoreData.rows" :key="row.abbr">
+                <td class="line-score-team">{{ row.abbr }}</td>
+                <td v-for="(runs, i) in row.runs" :key="i">{{ runs }}</td>
+                <td v-for="col in lineScoreData.columns" :key="col.key" :class="col.class">{{ row.totals[col.key] }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div v-else-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
+        </div>
+        <div v-if="gameFlowLoading && !gameFlowData && !isLineScoreMode" class="game-flow-loading">Loading...</div>
+        <div v-if="gameFlowData && !isLineScoreMode" class="game-flow-chart-container">
           <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousedown="handleCanvasMouseDown" @mousemove="handleCanvasHover" @mouseup="handleCanvasMouseUp" @mouseleave="handleCanvasLeave" @touchstart="handleTouchStart" @touchmove="handleCanvasTouchMove" @touchend="handleTouchEnd"></canvas>
           <button v-if="rangeTooltip" class="game-flow-zoom-action" @click.stop="applyZoomFromSelection">Zoom</button>
           <button v-else-if="isZoomed" class="game-flow-zoom-action" @click.stop="resetZoom" aria-label="Reset zoom">✕ Zoom</button>
@@ -120,7 +128,34 @@ const gameRowTemplate = `
             {{ boxScoreData.home.teamName }}
           </button>
         </div>
-        <div class="box-score-table-wrapper">
+        <template v-if="boxScoreGeneric">
+          <div v-for="table in boxScoreData[boxScoreActiveTeam].tables" :key="table.title" class="box-score-group">
+            <div class="box-score-subhead">{{ table.title }}</div>
+            <div class="box-score-table-wrapper">
+              <div class="box-score-table-scroll">
+                <table class="box-score-table">
+                  <thead>
+                    <tr>
+                      <th class="sticky-col">{{ table.playerLabel }}</th>
+                      <th v-for="(col, i) in table.columns" :key="i">{{ col }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="row in table.rows" :key="row.name">
+                      <td class="sticky-col player-name">{{ row.name }}<span v-if="row.position" class="player-position">{{ row.position }}</span></td>
+                      <td v-for="(c, i) in row.cells" :key="i">{{ c }}</td>
+                    </tr>
+                    <tr v-if="table.totals" class="totals-row">
+                      <td class="sticky-col">TEAM</td>
+                      <td v-for="(c, i) in table.totals" :key="i">{{ c }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </template>
+        <div v-else class="box-score-table-wrapper">
           <div class="box-score-table-scroll">
             <table class="box-score-table">
             <thead>
@@ -194,6 +229,21 @@ const gameRowTemplate = `
           </div>
         </div>
       </div>
+      <div v-if="hasProbables && !started" class="stats-section">
+        <div class="stats-header">PROBABLE PITCHERS</div>
+        <table class="stats-table">
+          <tbody>
+            <tr>
+              <td class="team-abbr">{{ game.awayTeam }}</td>
+              <td>{{ awayProbableText }}</td>
+            </tr>
+            <tr>
+              <td class="team-abbr">{{ game.homeTeam }}</td>
+              <td>{{ homeProbableText }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div v-if="hasStats && !started" class="stats-section">
         <div class="stats-header">TEAM STATS</div>
         <table class="stats-table">
@@ -261,6 +311,7 @@ const GameRow = {
       isExpanded: false,
       gameFlowData: null,
       gameFlowLoading: false,
+      lineScoreData: null,
       boxScoreData: null,
       boxScoreActiveTeam: 'away', // 'away' or 'home'
       teamColors: null,
@@ -641,6 +692,13 @@ const GameRow = {
 
       const lastDataTime = data[data.length - 1].time
       const maxPeriod = Math.max(...data.map(d => d.period))
+
+      // This period/OT math is written for basketball's clock, but it's also
+      // correct for baseball as-is: MLB sets regulationPeriods: 9,
+      // periodSeconds: 1, otSeconds: 1 (see mlb/config.js), so "period" units
+      // are innings and maxPeriod is the current inning number. That makes
+      // this extend the axis to the end of the current (or extra) inning
+      // exactly like it extends to the end of a basketball quarter/OT.
       const endOfRegulation = LEAGUE.regulationPeriods * LEAGUE.periodSeconds
 
       // If game is ongoing, extend x-axis to the end of the current period (regulation or OT)
@@ -1027,6 +1085,16 @@ const GameRow = {
         // Team colors are already set from scoreboard data via initializeTeamColors()
         // No need to extract them again from the event API
 
+        // Extract the runs-by-inning line score via a per-league hook — its
+        // shape (baseball's H/E columns) doesn't generalize across sports,
+        // so leagues that want a lineScore tab define this themselves. Only
+        // called when defined, so this is skipped as wasted work on a hot
+        // path (every statusDetail change and 15s poll) for leagues without it.
+        const competitors = data.header?.competitions?.[0]?.competitors
+        if (competitors && LEAGUE.processLineScore) {
+          this.lineScoreData = LEAGUE.processLineScore(competitors, this.playing, this.game.awayTeam, this.game.homeTeam)
+        }
+
         // Extract player box scores
         if (data.boxscore?.players && data.boxscore?.teams) {
           this.boxScoreData = this.processBoxScoreData(data.boxscore.players, data.boxscore.teams)
@@ -1060,20 +1128,35 @@ const GameRow = {
       // Filter to only scoring plays and collect data points
       const dataPoints = []
 
-      plays.forEach(play => {
+      // Some sports (baseball) emit a play per pitch; restrict the chart to one
+      // play per plate appearance so each step is a PA, not a pitch.
+      const chartPlays = LEAGUE.selectChartPlays ? LEAGUE.selectChartPlays(plays, winprobability) : plays
+
+      // Sports without a game clock (baseball) map plays onto the x-axis by
+      // period (inning) instead of elapsed seconds.
+      const elapsed = LEAGUE.elapsedForPlays ? LEAGUE.elapsedForPlays(chartPlays) : null
+
+      chartPlays.forEach((play, idx) => {
         if (play.awayScore !== undefined && play.homeScore !== undefined) {
           const period = play.period?.number || 1
           const clock = play.clock?.displayValue || '0:00'
-          const totalSeconds = clockToElapsedSeconds(period, clock)
+          const totalSeconds = elapsed ? elapsed[idx] : clockToElapsedSeconds(period, clock)
 
           const homeWinPct = winProbMap[play.id]
+
+          // For clockless sports show the half-inning (Top/Bot) in place of a clock.
+          let clockLabel = clock
+          if (elapsed) {
+            const half = play.period?.type
+            clockLabel = half === 'Bottom' ? 'Bot' : (half === 'Top' ? 'Top' : '')
+          }
 
           dataPoints.push({
             time: totalSeconds,
             awayScore: play.awayScore,
             homeScore: play.homeScore,
             period: period,
-            clock: clock,
+            clock: clockLabel,
             periodDisplay: play.period?.displayValue || '',
             description: play.text || '',
             homeWinPct: homeWinPct != null ? homeWinPct : null
@@ -1098,7 +1181,42 @@ const GameRow = {
       const percentage = Math.round((made / attempted) * 1000) / 10
       return { made: stat, pct: percentage.toFixed(1) }
     },
+    // Generic box score: one table per ESPN statistics group (e.g. baseball's
+    // batting & pitching), driven by the group's own labels — matches espn.com.
+    processBoxScoreByStatGroup(playersData, teamsData) {
+      const teamHomeAwayMap = {}
+      teamsData.forEach(t => { teamHomeAwayMap[t.team.id] = t.homeAway })
+
+      const playerLabels = (LEAGUE.boxScore && LEAGUE.boxScore.playerLabels) || {}
+
+      const result = { away: null, home: null }
+      playersData.forEach(teamData => {
+        const homeAway = teamHomeAwayMap[teamData.team.id]
+        const tables = (teamData.statistics || []).map(group => {
+          const title = titleCase(group.type || group.name || '')
+          return {
+            title: title,
+            playerLabel: playerLabels[title] || playerLabels.default || 'Players',
+            columns: group.labels || [],
+            rows: (group.athletes || []).map(a => ({
+              name: a.athlete.shortName || a.athlete.displayName,
+              position: (a.athlete.position && a.athlete.position.abbreviation) || '',
+              starter: a.starter || false,
+              cells: a.stats || []
+            })),
+            totals: group.totals || null
+          }
+        }).filter(t => t.columns.length && t.rows.length)
+
+        result[homeAway] = { teamName: teamData.team.name, tables: tables }
+      })
+      return result
+    },
     processBoxScoreData(playersData, teamsData) {
+      if (LEAGUE.boxScore && LEAGUE.boxScore.generic) {
+        return this.processBoxScoreByStatGroup(playersData, teamsData)
+      }
+
       const result = { away: null, home: null }
 
       // Create a map of team ID to homeAway from teamsData
@@ -1194,7 +1312,50 @@ const GameRow = {
 
       return result
     },
+    // x positions (in chart "time" units) of the vertical period gridlines.
+    // Default reproduces basketball quarter + OT boundaries; leagues may override.
+    periodGridTimes(maxPeriod, maxTime) {
+      if (LEAGUE.periodGridTimes) return LEAGUE.periodGridTimes(maxPeriod, maxTime)
+      const times = []
+      for (let q = 1; q < LEAGUE.regulationPeriods; q++) times.push(q * LEAGUE.periodSeconds)
+      if (maxPeriod > LEAGUE.regulationPeriods) {
+        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
+          times.push(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
+        }
+      }
+      return times
+    },
+    // {time, label} pairs for the period labels along the x-axis.
+    periodLabels(maxPeriod, maxTime) {
+      if (LEAGUE.periodLabels) {
+        // For leagues with half-period labels (baseball's Top/Bottom), tell
+        // the hook which half is currently in progress so it can stop
+        // labeling innings/halves that haven't happened yet while live. Uses
+        // the last real (non-synthetic) point — a synthetic trailing point's
+        // clock field is a raw scoreboard clock string, not 'Top'/'Bot'.
+        const data = this.chartData
+        const realPoints = data ? data.filter(d => !d.synthetic) : []
+        const lastPoint = realPoints.length ? realPoints[realPoints.length - 1] : null
+        return LEAGUE.periodLabels(maxPeriod, maxTime, this.playing, lastPoint && lastPoint.clock)
+      }
+      const labels = []
+      const names = ['1st', '2nd', '3rd', '4th']
+      for (let i = 0; i < LEAGUE.regulationPeriods; i++) {
+        labels.push({ time: (i + 0.5) * LEAGUE.periodSeconds, label: names[i] || String(i + 1) })
+      }
+      if (maxPeriod > LEAGUE.regulationPeriods) {
+        const numOT = maxPeriod - LEAGUE.regulationPeriods
+        for (let otNum = 1; otNum <= numOT; otNum++) {
+          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
+          const otEnd = otNum === numOT ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
+          labels.push({ time: (otStart + otEnd) / 2, label: otNum === 1 ? 'OT' : `OT${otNum}` })
+        }
+      }
+      return labels
+    },
     drawGameFlow() {
+      // The line score is a table, not a canvas chart — nothing to draw.
+      if (this.chartMode === 'lineScore') return
       if (this.chartMode === 'winProb' && this.hasWinProb) {
         this.drawWinProb()
       } else if (this.chartMode === 'lead') {
@@ -1270,28 +1431,16 @@ const GameRow = {
         ctx.stroke()
       }
 
-      // Draw quarter lines
+      // Period lines (quarters for basketball, innings for baseball)
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)'
       ctx.setLineDash([3, 3])
-      for (let quarter = 1; quarter < LEAGUE.regulationPeriods; quarter++) {
-        const x = xScale(quarter * LEAGUE.periodSeconds)
+      this.periodGridTimes(maxPeriod, maxTime).forEach(t => {
+        const x = xScale(t)
         ctx.beginPath()
         ctx.moveTo(x, padding.top)
         ctx.lineTo(x, height - padding.bottom)
         ctx.stroke()
-      }
-
-      // Draw OT lines if game went to overtime
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        // Draw line at start of each OT period
-        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
-          const x = xScale(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
-          ctx.beginPath()
-          ctx.moveTo(x, padding.top)
-          ctx.lineTo(x, height - padding.bottom)
-          ctx.stroke()
-        }
-      }
+      })
       ctx.setLineDash([])
 
       // Clip lines/fills/shading to the chart area so off-domain points don't bleed
@@ -1396,24 +1545,9 @@ const GameRow = {
       ctx.font = '12px sans-serif'
       ctx.textAlign = 'center'
 
-      // Quarter labels
-      const quarterLabels = ['1st', '2nd', '3rd', '4th']
-      quarterLabels.forEach((label, i) => {
-        const x = xScale((i + 0.5) * LEAGUE.periodSeconds)
-        ctx.fillText(label, x, height - 10)
+      this.periodLabels(maxPeriod, maxTime).forEach(({ time, label }) => {
+        ctx.fillText(label, xScale(time), height - 10)
       })
-
-      // OT labels if game went to overtime
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        const numOvertimes = maxPeriod - LEAGUE.regulationPeriods
-        for (let otNum = 1; otNum <= numOvertimes; otNum++) {
-          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
-          const otEnd = otNum === numOvertimes ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
-          const x = xScale((otStart + otEnd) / 2)
-          const label = otNum === 1 ? 'OT' : `OT${otNum}`
-          ctx.fillText(label, x, height - 10)
-        }
-      }
 
       // Score labels (y-axis) - show every 25 points, skip 0, draw inside chart
       // Labels should be below the gridline
@@ -1435,7 +1569,7 @@ const GameRow = {
       const dpr = window.devicePixelRatio || 1
 
       const width = canvas.offsetWidth
-      const height = 300
+      const height = LEAGUE.chartHeight || 300
       canvas.width = width * dpr
       canvas.height = height * dpr
       canvas.style.width = width + 'px'
@@ -1479,6 +1613,25 @@ const GameRow = {
       const zeroY = padding.top + halfHeight
       const yScale = (value) => zeroY - (value / maxBound) * halfHeight
 
+      // Shade the top half of each inning a light gray so top/bottom are easy
+      // to tell apart at a glance; bottom halves are left unshaded.
+      if (LEAGUE.elapsedForPlays) {
+        ctx.fillStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.045)'
+        for (let p = 1; p <= maxPeriod; p++) {
+          const periodPoints = data.filter(d => d.period === p)
+          const topPoints = periodPoints.filter(d => d.clock === 'Top')
+          if (topPoints.length === 0) continue
+          const botPoints = periodPoints.filter(d => d.clock === 'Bot')
+          const periodEnd = Math.min(p, xMax)
+          const splitTime = botPoints.length > 0
+            ? (Math.max(...topPoints.map(d => d.time)) + Math.min(...botPoints.map(d => d.time))) / 2
+            : periodEnd
+          const xStart = xScale(Math.max(p - 1, xMin))
+          const xEnd = xScale(Math.min(splitTime, xMax))
+          if (xEnd > xStart) ctx.fillRect(xStart, padding.top, xEnd - xStart, chartHeight)
+        }
+      }
+
       // Major gridlines at ±50 (75% favored) and ±100 (100% favored)
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)'
       ctx.lineWidth = 1
@@ -1498,39 +1651,37 @@ const GameRow = {
       ctx.lineTo(width - padding.right, zeroY)
       ctx.stroke()
 
-      // Quarter lines
+      // Period lines (quarters for basketball, innings for baseball)
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)'
       ctx.lineWidth = 1
       ctx.setLineDash([3, 3])
-      for (let quarter = 1; quarter < LEAGUE.regulationPeriods; quarter++) {
-        const x = xScale(quarter * LEAGUE.periodSeconds)
+      this.periodGridTimes(maxPeriod, maxTime).forEach(t => {
+        const x = xScale(t)
         ctx.beginPath()
         ctx.moveTo(x, padding.top)
         ctx.lineTo(x, height - padding.bottom)
         ctx.stroke()
-      }
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
-          const x = xScale(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
-          ctx.beginPath()
-          ctx.moveTo(x, padding.top)
-          ctx.lineTo(x, height - padding.bottom)
-          ctx.stroke()
-        }
-      }
+      })
       ctx.setLineDash([])
 
       // Clip lines/fills/shading to the chart area. Dots are drawn after restore.
       this.clipToChartArea(ctx, padding, chartWidth, chartHeight)
 
-      // Filled area chart (smooth line, not stepped — win prob updates between plays)
+      // Filled area chart. Basketball updates win prob continuously (smooth line);
+      // baseball changes it at discrete plays (stepped — hold then jump).
+      const stepped = !!LEAGUE.winProbStepped
       const realData = wpData.filter(p => !p.synthetic)
       if (realData.length > 0) {
         ctx.beginPath()
         ctx.moveTo(xScale(realData[0].time), zeroY)
-        realData.forEach(point => {
-          ctx.lineTo(xScale(point.time), yScale(point.value))
-        })
+        ctx.lineTo(xScale(realData[0].time), yScale(realData[0].value))
+        for (let i = 1; i < realData.length; i++) {
+          if (stepped) {
+            // hold the previous win prob across the play before jumping
+            ctx.lineTo(xScale(realData[i].time), yScale(realData[i - 1].value))
+          }
+          ctx.lineTo(xScale(realData[i].time), yScale(realData[i].value))
+        }
         ctx.lineTo(xScale(realData[realData.length - 1].time), zeroY)
         ctx.closePath()
 
@@ -1566,6 +1717,10 @@ const GameRow = {
           ctx.strokeStyle = segColor
           ctx.beginPath()
           ctx.moveTo(xScale(prev.time), yScale(prev.value))
+          if (stepped) {
+            // horizontal hold across the play, then a vertical jump at the event
+            ctx.lineTo(xScale(curr.time), yScale(prev.value))
+          }
           ctx.lineTo(xScale(curr.time), yScale(curr.value))
           ctx.stroke()
         }
@@ -1591,7 +1746,17 @@ const GameRow = {
         const point = data[i]
         if (!point || point.homeWinPct == null) return
         const value = (1 - 2 * point.homeWinPct) * 100
-        const x = xScale(point.time)
+        // The last play of a half-inning holds its win pct on the line until the
+        // next half-inning's first play — put the dot at that boundary rather
+        // than at the play's own (evenly-spread) x position.
+        let dotTime = point.time
+        if (LEAGUE.elapsedForPlays) {
+          const next = data.slice(i + 1).find(d => d.homeWinPct != null)
+          if (next && (next.period !== point.period || next.clock !== point.clock)) {
+            dotTime = (point.time + next.time) / 2
+          }
+        }
+        const x = xScale(dotTime)
         if (x < padding.left - dotRadius || x > padding.left + chartWidth + dotRadius) return
         let color
         if (value > 0) color = awayColor
@@ -1608,21 +1773,9 @@ const GameRow = {
       ctx.font = '12px sans-serif'
       ctx.textAlign = 'center'
 
-      const quarterLabels = ['1st', '2nd', '3rd', '4th']
-      quarterLabels.forEach((label, i) => {
-        const x = xScale((i + 0.5) * LEAGUE.periodSeconds)
-        ctx.fillText(label, x, height - 10)
+      this.periodLabels(maxPeriod, maxTime).forEach(({ time, label }) => {
+        ctx.fillText(label, xScale(time), height - 10)
       })
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        const numOvertimes = maxPeriod - LEAGUE.regulationPeriods
-        for (let otNum = 1; otNum <= numOvertimes; otNum++) {
-          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
-          const otEnd = otNum === numOvertimes ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
-          const x = xScale((otStart + otEnd) / 2)
-          const label = otNum === 1 ? 'OT' : `OT${otNum}`
-          ctx.fillText(label, x, height - 10)
-        }
-      }
 
       // Y-axis labels: only 50% (centerline) and 100% on each end.
       ctx.textAlign = 'left'
@@ -1729,28 +1882,17 @@ const GameRow = {
       ctx.lineTo(width - padding.right, centerY)
       ctx.stroke()
 
-      // Draw quarter lines
+      // Period lines (quarters for basketball, innings for baseball)
       ctx.strokeStyle = this.isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)'
       ctx.lineWidth = 1
       ctx.setLineDash([3, 3])
-      for (let quarter = 1; quarter < LEAGUE.regulationPeriods; quarter++) {
-        const x = xScale(quarter * LEAGUE.periodSeconds)
+      this.periodGridTimes(maxPeriod, maxTime).forEach(t => {
+        const x = xScale(t)
         ctx.beginPath()
         ctx.moveTo(x, padding.top)
         ctx.lineTo(x, height - padding.bottom)
         ctx.stroke()
-      }
-
-      // Draw OT lines if game went to overtime
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        for (let otNum = 1; otNum <= maxPeriod - LEAGUE.regulationPeriods; otNum++) {
-          const x = xScale(LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds)
-          ctx.beginPath()
-          ctx.moveTo(x, padding.top)
-          ctx.lineTo(x, height - padding.bottom)
-          ctx.stroke()
-        }
-      }
+      })
       ctx.setLineDash([])
 
       // Clip lines/fills/shading to the chart area. Dots are drawn after restore.
@@ -1933,24 +2075,9 @@ const GameRow = {
       ctx.font = '12px sans-serif'
       ctx.textAlign = 'center'
 
-      // Quarter labels
-      const quarterLabels = ['1st', '2nd', '3rd', '4th']
-      quarterLabels.forEach((label, i) => {
-        const x = xScale((i + 0.5) * LEAGUE.periodSeconds)
-        ctx.fillText(label, x, height - 10)
+      this.periodLabels(maxPeriod, maxTime).forEach(({ time, label }) => {
+        ctx.fillText(label, xScale(time), height - 10)
       })
-
-      // OT labels if game went to overtime
-      if (maxPeriod > LEAGUE.regulationPeriods) {
-        const numOvertimes = maxPeriod - LEAGUE.regulationPeriods
-        for (let otNum = 1; otNum <= numOvertimes; otNum++) {
-          const otStart = LEAGUE.regulationPeriods * LEAGUE.periodSeconds + (otNum - 1) * LEAGUE.otSeconds
-          const otEnd = otNum === numOvertimes ? maxTime : (LEAGUE.regulationPeriods * LEAGUE.periodSeconds + otNum * LEAGUE.otSeconds)
-          const x = xScale((otStart + otEnd) / 2)
-          const label = otNum === 1 ? 'OT' : `OT${otNum}`
-          ctx.fillText(label, x, height - 10)
-        }
-      }
 
       // Lead labels (y-axis) - skip 0, draw inside chart
       // Top half (positive): labels below gridline
@@ -1994,6 +2121,7 @@ const GameRow = {
       return `${this.game.awayTeam} ${fmt(awayPct)} · ${this.game.homeTeam} ${fmt(homePct)}`
     },
     formatLeaders(leaders) {
+      if (LEAGUE.formatLeaders) return LEAGUE.formatLeaders(leaders)
       if (!leaders) return []
 
       // Create a map of players and their stats
@@ -2193,18 +2321,44 @@ const GameRow = {
       return teamImageURL(this.game.homeTeam, mode)
     },
     hasExpandableContent: function () {
-      return this.game.state !== 'postponed' && !!(this.game.spreadFormatted || this.game.total || this.game.recap || this.hasStats || this.hasLeaders)
+      return this.game.state !== 'postponed' && !!(this.game.spreadFormatted || this.game.total || this.game.recap || this.hasStats || this.hasLeaders || this.hasProbables)
     },
     hasStats: function () {
       return !!(this.game.homeStats && this.game.awayStats)
     },
     hasLeaders: function () {
-      const homeHasData = this.game.homeLeaders && (this.game.homeLeaders.points || this.game.homeLeaders.rebounds || this.game.homeLeaders.assists)
-      const awayHasData = this.game.awayLeaders && (this.game.awayLeaders.points || this.game.awayLeaders.rebounds || this.game.awayLeaders.assists)
-      return homeHasData || awayHasData
+      const has = l => l && Object.values(l).some(v => v)
+      return has(this.game.homeLeaders) || has(this.game.awayLeaders)
+    },
+    hasProbables: function () {
+      return !!(this.game.homeProbable || this.game.awayProbable)
+    },
+    probableText: function () {
+      return p => p ? (p.name + (p.line ? ` (${p.line})` : '')) : 'TBD'
+    },
+    awayProbableText: function () {
+      return this.probableText(this.game.awayProbable)
+    },
+    homeProbableText: function () {
+      return this.probableText(this.game.homeProbable)
+    },
+    boxScoreGeneric: function () {
+      return !!(LEAGUE.boxScore && LEAGUE.boxScore.generic)
+    },
+    chartTabs: function () {
+      // Every league config sets chartModes explicitly (see e.g. nba/config.js).
+      const modes = LEAGUE.chartModes
+      const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.', lineScore: 'Line Score' }
+      return modes
+        .filter(m => m !== 'winProb' || this.hasWinProb)
+        .filter(m => m !== 'lineScore' || !!this.lineScoreData)
+        .map(m => ({ mode: m, label: labels[m] || m }))
+    },
+    isLineScoreMode: function () {
+      return this.chartMode === 'lineScore'
     },
     showGameFlow: function () {
-      return this.started
+      return this.started && this.chartTabs.length > 0
     },
     headlineLines: function () {
       const h = this.game.headline

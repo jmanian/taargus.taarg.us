@@ -6,6 +6,7 @@ const LEAGUE = {
   regulationPeriods: 4,
   periodSeconds: 12 * 60,
   otSeconds: 5 * 60,
+  chartModes: ['lead', 'score', 'winProb'],
   standings: {
     cutoffs: [
       { index: 5, class: 'playoff-cutoff' },

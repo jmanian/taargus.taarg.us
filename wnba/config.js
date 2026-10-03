@@ -25,6 +25,7 @@ const LEAGUE = {
   regulationPeriods: 4,
   periodSeconds: 10 * 60,
   otSeconds: 5 * 60,
+  chartModes: ['lead', 'score', 'winProb'],
   standings: {
     cutoffs: [],
     clincher: false
