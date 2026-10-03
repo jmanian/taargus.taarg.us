@@ -265,10 +265,12 @@ const app = createApp({
       })
     }
 
-    // Divisional/Wild Card standings (MLB only — see shared/js/standings.js).
-    // standingsData is grouped by division for MLB (LEAGUE's standingsURL
-    // requests ?level=3); on NBA/WNBA's ungrouped shape these just come back
-    // empty, since neither template references them.
+    // Divisional/Wild Card standings (MLB only). The helpers come from
+    // shared/js/standings.js, which every league's page loads so these
+    // computeds always resolve. standingsData is grouped by division for MLB
+    // (LEAGUE's standingsURL requests ?level=3); NBA/WNBA's response is
+    // ungrouped and has no division children, so the helpers find nothing and
+    // return empty — and those templates never reference them anyway.
     const divisionStandings = Vue.computed(() => standingsData.value ? getDivisionStandings(standingsData.value) : [])
     const wildCardStandings = Vue.computed(() => standingsData.value ? getWildCardStandings(standingsData.value) : [])
 

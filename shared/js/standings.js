@@ -2,7 +2,9 @@
 // standings response (LEAGUE.standingsURL() requesting ?level=3 for MLB):
 // data.children = conferences (AL/NL), each conference's .children =
 // divisions (East/Central/West), each division has .standings.entries.
-// Unused by NBA/WNBA, whose standingsURL() stays ungrouped.
+// Loaded by every league's page (so shared/js/main.js can reference these
+// unconditionally), but only meaningful for MLB: NBA/WNBA's standingsURL()
+// stays ungrouped, so there are no division children and both return empty.
 
 const DIVISION_ORDER = ['ALE', 'ALC', 'ALW', 'NLE', 'NLC', 'NLW'];
 
