@@ -143,7 +143,11 @@ const LEAGUE = {
     const buildRow = (comp, abbr) => {
       const ls = comp.linescores || [];
       const runs = [];
-      for (let i = 0; i < maxInnings; i++) runs.push(ls[i] ? ls[i].displayValue : '');
+      // Once the game's over, a missing inning is one that was never played
+      // (the home team leading after the top of the last inning): show a
+      // hyphen. While live, missing innings are just still to come.
+      const unplayed = playing ? '' : '-';
+      for (let i = 0; i < maxInnings; i++) runs.push(ls[i] ? ls[i].displayValue : unplayed);
       return {
         abbr: abbr,
         runs: runs,
