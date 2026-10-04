@@ -53,7 +53,16 @@ LEAGUE.scorebook = {
   },
 
   buildCard(team, plays, half, players, maxInning) {
-    const BASE = { '1B': 1, '2B': 2, '3B': 3, score: 4 };
+    const BASE = { '1B': 1, '2B': 2, '3B': 3, score: 4, '4B': 4, home: 4 };
+
+    // Inning each substitute entered (pinch hitter/runner or defensive sub).
+    const entered = {};
+    plays.forEach(play => play.playEvents.forEach(ev => {
+      const type = ev.details && ev.details.eventType;
+      if ((type === 'offensive_substitution' || type === 'defensive_substitution') && ev.player && !entered[ev.player.id]) {
+        entered[ev.player.id] = play.about.inning;
+      }
+    }));
 
     // Lineup: battingOrder is spot * 100 + substitution index ("501" is the
     // first player in for the 5th spot's starter).
@@ -74,7 +83,7 @@ LEAGUE.scorebook = {
       let name = lastName(p);
       if (counts[name] > 1 && info.useName) name = `${info.useName[0]}. ${name}`;
       const positions = (p.allPositions || [p.position]).map(pos => pos.abbreviation);
-      rows[spot - 1].players.push({ name: name, pos: positions.join('-') });
+      rows[spot - 1].players.push({ name: name, pos: positions.join('-'), entered: entered[p.person.id] || null });
       spotOf[p.person.id] = spot;
     });
 
@@ -106,7 +115,7 @@ LEAGUE.scorebook = {
       box.inning = inning;
     };
 
-    const newBox = () => ({ reached: 0, scored: false, out: null, code: '', sub: '', looking: false, hit: false, marks: {}, endsHalf: false, inProgress: false });
+    const newBox = () => ({ reached: 0, outToward: null, scored: false, out: null, code: '', sub: '', looking: false, hit: false, marks: {}, endsHalf: false, inProgress: false });
     const activeBox = {}; // runner id -> the box tracking him while he's on base
 
     plays.forEach(play => {
@@ -162,8 +171,15 @@ LEAGUE.scorebook = {
         const label = midPA ? this.runnerEventLabel(r.details.eventType, r.credits) : (rid === batterId ? '' : String(batterSpot || ''));
         if (m.isOut) {
           b.out = m.outNumber;
-          // A runner put out on the bases gets the fielders (or CS/PO) there.
-          if (rid !== batterId && BASE[m.outBase]) b.marks[BASE[m.outBase]] = (midPA && label) || this.chain([r]);
+          // A runner put out on the bases (anyone but the batter retired on
+          // his way to 1st) gets the fielders (or CS/PO) at that base.
+          const outAt = BASE[m.outBase];
+          const onBases = rid !== batterId || m.start;
+          if (onBases && outAt) b.marks[outAt] = (midPA && label) || this.chain([r]);
+          // Tagged out trying to advance (stretching, caught stealing, thrown
+          // out going first to third...) gets a stub of line toward the base.
+          // Force outs don't: the runner had nowhere else to go.
+          if (onBases && outAt > b.reached && r.details.movementReason !== 'r_force_out') b.outToward = outAt;
           delete activeBox[rid];
         } else if (m.end) {
           const to = BASE[m.end];

@@ -2268,6 +2268,21 @@ tfoot .scorebook-name {
   stroke-width: 1.5;
 }
 
+/* Tagged out advancing: a stub of base path toward the base, ending in a bar. */
+.sb-out-stub polyline,
+.sb-out-stub line {
+  fill: none;
+  stroke: #0d6efd;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+body.dark-mode .sb-out-stub polyline,
+body.dark-mode .sb-out-stub line {
+  stroke: #74c0fc;
+}
+
 /* Count: 3 ball dots over 2 strike dots, filled as they came. */
 .sb-tick {
   fill: none;

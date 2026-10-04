@@ -1,3 +1,7 @@
+// Scorebook diamond corners in each box's 56x56 viewBox: home, 1st, 2nd,
+// 3rd, home again (matches the sb-diamond polygon in the template).
+const SCOREBOOK_BASES = [[28, 49], [47, 30], [28, 11], [9, 30], [28, 49]]
+
 const gameRowTemplate = `
 <div class="game-row" :class="{'expanded': isExpanded, 'expandable': hasExpandableContent}" :style="teamColorStyles">
   <div class="game-summary" :class="{'pre-game-summary': !started}" @click="hasExpandableContent && toggleExpand()">
@@ -148,7 +152,7 @@ const gameRowTemplate = `
                       <div class="scorebook-name-inner">
                         <span class="scorebook-spot">{{ row.spot }}</span>
                         <span class="scorebook-players">
-                          <span v-for="(p, i) in row.players" :key="i" class="scorebook-player" :class="{'sub': i > 0}">{{ p.name }} <span class="scorebook-pos">{{ p.pos }}</span></span>
+                          <span v-for="(p, i) in row.players" :key="i" class="scorebook-player" :class="{'sub': i > 0}">{{ p.name }} <span class="scorebook-pos">{{ p.pos }}<template v-if="p.entered"> · {{ scorebookOrdinal(p.entered) }}</template></span></span>
                         </span>
                       </div>
                     </th>
@@ -164,6 +168,10 @@ const gameRowTemplate = `
                           <circle v-for="n in 2" :key="'s' + n" :cx="43 + n * 4.6" cy="8.6" r="1.8" class="sb-tick strike" :class="{'filled': n <= box.strikes}" />
                         </template>
                         <polyline v-if="box.reached > 0 && !box.scored" class="sb-path" :points="scorebookPath(box.reached)" />
+                        <g v-if="box.outToward" class="sb-out-stub">
+                          <polyline :points="scorebookStub(box).points" />
+                          <line v-bind="scorebookStub(box).tick" />
+                        </g>
                         <text v-if="box.code" x="28" y="33.5" class="sb-code" :class="{'long': box.code.length > 3}" :transform="box.looking ? 'translate(56,0) scale(-1,1)' : null">{{ box.code }}</text>
                         <text v-if="box.sub" x="28" :y="box.code ? 42.5 : 33" class="sb-sub">{{ box.sub }}</text>
                         <g v-if="box.out">
@@ -1239,13 +1247,39 @@ const GameRow = {
     // Base path for a scorebook box: home -> 1st -> 2nd -> 3rd -> home,
     // up to the last base reached (matches the diamond in the template).
     scorebookPath(reached) {
-      const points = ['28,49', '47,30', '28,11', '9,30', '28,49']
-      return points.slice(0, reached + 1).join(' ')
+      return SCOREBOOK_BASES.slice(0, reached + 1).map(p => p.join(',')).join(' ')
+    },
+    // A runner tagged out advancing: line from his last base, through any
+    // bases he passed, partway toward the base he was out at, capped with a
+    // short crossbar.
+    scorebookStub(box) {
+      const from = SCOREBOOK_BASES[box.outToward - 1]
+      const to = SCOREBOOK_BASES[box.outToward]
+      const end = [from[0] + (to[0] - from[0]) * 0.55, from[1] + (to[1] - from[1]) * 0.55]
+      const len = Math.hypot(to[0] - from[0], to[1] - from[1])
+      const nx = -(to[1] - from[1]) / len * 3.5
+      const ny = (to[0] - from[0]) / len * 3.5
+      const points = SCOREBOOK_BASES.slice(box.reached, box.outToward).concat([end])
+      return {
+        points: points.map(p => p.join(',')).join(' '),
+        tick: { x1: end[0] - nx, y1: end[1] - ny, x2: end[0] + nx, y2: end[1] + ny }
+      }
+    },
+    scorebookOrdinal(n) {
+      const s = ['th', 'st', 'nd', 'rd']
+      const v = n % 100
+      return n + (s[(v - 20) % 10] || s[v] || s[0])
     },
     // Where a base's advancement mark sits in the box.
     scorebookMarkPos(base) {
       // 2nd's mark sits left of the bag: the top-right corner holds the count.
-      return { 1: { x: 50, y: 44 }, 2: { x: 19, y: 9 }, 3: { x: 6, y: 44 }, 4: { x: 17, y: 54 } }[base]
+      // 1st's and 3rd's marks hug the box edges so longer chains (9-6-5) fit.
+      return {
+        1: { x: 55, y: 44, style: 'text-anchor: end' },
+        2: { x: 19, y: 9 },
+        3: { x: 1, y: 44, style: 'text-anchor: start' },
+        4: { x: 17, y: 54 }
+      }[base]
     },
     async fetchGameFlow() {
       // Keep the scorebook current too while it's the tab being shown.
