@@ -2082,6 +2082,291 @@ body.dark-mode .plays-out-dot.filled {
   border-color: #ced4da;
 }
 
+/* Scorebook tab (MLB): a traditional scorecard, one team at a time. Wider
+   than a phone, so it scrolls sideways with the lineup column pinned. */
+.scorebook-wrapper {
+  min-height: 260px;
+}
+
+.scorebook-scroll {
+  overflow-x: auto;
+}
+
+.scorebook-table {
+  border-collapse: collapse;
+  margin: 0 auto;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.scorebook-table th,
+.scorebook-table td {
+  border: 1px solid #e9ecef;
+  padding: 0;
+}
+
+.scorebook-inning {
+  padding: 4px 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6c757d;
+  text-align: center;
+}
+
+.scorebook-table .scorebook-name {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 112px;
+  max-width: 132px;
+  padding: 4px 8px 4px 4px;
+  text-align: left;
+  font-weight: 400;
+  background: #ffffff;
+  /* Keep a visible edge against cells scrolling underneath. */
+  box-shadow: inset -1px 0 0 #dee2e6;
+}
+
+.scorebook-name-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-height: 52px;
+  overflow: hidden;
+}
+
+.scorebook-spot {
+  width: 10px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
+  color: #adb5bd;
+}
+
+.scorebook-players {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.scorebook-player {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  color: #212529;
+}
+
+.scorebook-player.sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: #6c757d;
+}
+
+.scorebook-pos {
+  font-size: 10px;
+  font-weight: 400;
+  color: #868e96;
+}
+
+tfoot .scorebook-name {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6c757d;
+  text-align: right;
+}
+
+.scorebook-table tfoot td {
+  padding: 3px 0;
+  text-align: center;
+  font-weight: 600;
+  color: #212529;
+}
+
+.scorebook-table .inning-start {
+  border-left-color: #ced4da;
+}
+
+.scorebook-cell {
+  width: 52px;
+  height: 52px;
+}
+
+.scorebook-cell.at-bat {
+  background: rgba(13, 110, 253, 0.08);
+}
+
+.scorebook-box {
+  display: block;
+  width: 52px;
+  height: 52px;
+}
+
+.sb-diamond {
+  fill: none;
+  stroke: #dee2e6;
+  stroke-width: 1;
+}
+
+.sb-diamond.scored {
+  fill: rgba(13, 110, 253, 0.2);
+  stroke: #0d6efd;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.sb-path {
+  fill: none;
+  stroke: #0d6efd;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sb-code {
+  font-size: 10px;
+  font-weight: 700;
+  text-anchor: middle;
+  fill: #212529;
+}
+
+.sb-code.long {
+  font-size: 8px;
+}
+
+.sb-sub {
+  font-size: 7px;
+  font-weight: 600;
+  text-anchor: middle;
+  fill: #6c757d;
+}
+
+.sb-out {
+  fill: none;
+  stroke: #e03131;
+  stroke-width: 1;
+}
+
+.sb-out-num {
+  font-size: 7.5px;
+  font-weight: 700;
+  text-anchor: middle;
+  fill: #e03131;
+}
+
+.sb-mark {
+  font-size: 6.5px;
+  font-weight: 600;
+  text-anchor: middle;
+  fill: #6c757d;
+}
+
+.sb-end {
+  stroke: #495057;
+  stroke-width: 1.5;
+}
+
+/* Count: 3 ball dots over 2 strike dots, filled as they came. */
+.sb-tick {
+  fill: none;
+  stroke: #ced4da;
+  stroke-width: 0.7;
+}
+
+.sb-tick.filled {
+  fill: #2f9e44;
+  stroke: #2f9e44;
+}
+
+.sb-tick.strike.filled {
+  fill: #e03131;
+  stroke: #e03131;
+}
+
+body.dark-mode .scorebook-table th,
+body.dark-mode .scorebook-table td {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .scorebook-table .inning-start {
+  border-left-color: rgba(255, 255, 255, 0.22);
+}
+
+body.dark-mode .scorebook-table .scorebook-name {
+  background: #2a2a2a;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.18);
+}
+
+body.dark-mode .scorebook-player,
+body.dark-mode .scorebook-table tfoot td {
+  color: #e9ecef;
+}
+
+body.dark-mode .scorebook-player.sub,
+body.dark-mode .scorebook-inning,
+body.dark-mode tfoot .scorebook-name {
+  color: #adb5bd;
+}
+
+body.dark-mode .scorebook-spot,
+body.dark-mode .scorebook-pos {
+  color: #6c757d;
+}
+
+body.dark-mode .sb-diamond {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .sb-diamond.scored {
+  fill: rgba(116, 192, 252, 0.25);
+  stroke: #74c0fc;
+}
+
+body.dark-mode .sb-path {
+  stroke: #74c0fc;
+}
+
+body.dark-mode .sb-code {
+  fill: #e9ecef;
+}
+
+body.dark-mode .sb-sub,
+body.dark-mode .sb-mark {
+  fill: #adb5bd;
+}
+
+body.dark-mode .sb-out {
+  stroke: #ff6b6b;
+}
+
+body.dark-mode .sb-out-num {
+  fill: #ff6b6b;
+}
+
+body.dark-mode .sb-end {
+  stroke: #ced4da;
+}
+
+body.dark-mode .sb-tick {
+  stroke: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .sb-tick.filled {
+  fill: #51cf66;
+  stroke: #51cf66;
+}
+
+body.dark-mode .sb-tick.strike.filled {
+  fill: #ff6b6b;
+  stroke: #ff6b6b;
+}
+
+body.dark-mode .scorebook-cell.at-bat {
+  background: rgba(116, 192, 252, 0.12);
+}
+
 .game-flow-loading {
   text-align: center;
   color: #6c757d;
@@ -2255,6 +2540,16 @@ body.dark-mode .game-flow-zoom-action {
 @media (max-width: 768px) {
   .game-flow-section {
     padding: 12px 8px;
+  }
+
+  /* Keep three tabs (e.g. MLB's) on one line each at phone width. */
+  .game-flow-tab {
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+
+  .scorebook-table .scorebook-name {
+    min-width: 96px;
   }
 
   .tooltip-description {

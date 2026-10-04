@@ -128,6 +128,70 @@ const gameRowTemplate = `
           </template>
           <div v-else-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
         </div>
+        <div v-if="isScorebookMode" class="scorebook-wrapper">
+          <template v-if="scorebookCard">
+            <div class="box-score-tabs">
+              <button class="box-score-tab" :class="{'active': scorebookSide === 'away'}" @click.stop="scorebookTeam = 'away'">{{ game.awayTeamName }}</button>
+              <button class="box-score-tab" :class="{'active': scorebookSide === 'home'}" @click.stop="scorebookTeam = 'home'">{{ game.homeTeamName }}</button>
+            </div>
+            <div class="scorebook-scroll">
+              <table class="scorebook-table">
+                <thead>
+                  <tr>
+                    <th class="scorebook-name"></th>
+                    <th v-for="inn in scorebookCard.innings" :key="inn.inning" :colspan="inn.span" class="scorebook-inning">{{ inn.inning }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="row in scorebookCard.rows" :key="row.spot">
+                    <th class="scorebook-name" scope="row">
+                      <div class="scorebook-name-inner">
+                        <span class="scorebook-spot">{{ row.spot }}</span>
+                        <span class="scorebook-players">
+                          <span v-for="(p, i) in row.players" :key="i" class="scorebook-player" :class="{'sub': i > 0}">{{ p.name }} <span class="scorebook-pos">{{ p.pos }}</span></span>
+                        </span>
+                      </div>
+                    </th>
+                    <td
+                      v-for="(box, c) in row.cells"
+                      :key="c"
+                      class="scorebook-cell"
+                      :class="{'inning-start': scorebookCard.columns[c].firstOfInning, 'at-bat': box && box.inProgress}">
+                      <svg v-if="box" viewBox="0 0 56 56" class="scorebook-box">
+                        <polygon class="sb-diamond" :class="{'scored': box.scored}" points="28,49 47,30 28,11 9,30" />
+                        <template v-if="box.balls != null">
+                          <circle v-for="n in 3" :key="'b' + n" :cx="38.4 + n * 4.6" cy="4" r="1.8" class="sb-tick" :class="{'filled': n <= box.balls}" />
+                          <circle v-for="n in 2" :key="'s' + n" :cx="43 + n * 4.6" cy="8.6" r="1.8" class="sb-tick strike" :class="{'filled': n <= box.strikes}" />
+                        </template>
+                        <polyline v-if="box.reached > 0 && !box.scored" class="sb-path" :points="scorebookPath(box.reached)" />
+                        <text v-if="box.code" x="28" y="33.5" class="sb-code" :class="{'long': box.code.length > 3}" :transform="box.looking ? 'translate(56,0) scale(-1,1)' : null">{{ box.code }}</text>
+                        <text v-if="box.sub" x="28" :y="box.code ? 42.5 : 33" class="sb-sub">{{ box.sub }}</text>
+                        <g v-if="box.out">
+                          <circle cx="8" cy="8" r="5.5" class="sb-out" />
+                          <text x="8" y="10.5" class="sb-out-num">{{ box.out }}</text>
+                        </g>
+                        <text v-for="(mark, base) in box.marks" :key="base" v-bind="scorebookMarkPos(base)" class="sb-mark">{{ mark }}</text>
+                        <line v-if="box.endsHalf" x1="44" y1="56" x2="56" y2="44" class="sb-end" />
+                      </svg>
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th class="scorebook-name">R</th>
+                    <td v-for="inn in scorebookCard.innings" :key="inn.inning" :colspan="inn.span">{{ inn.played ? inn.runs : '' }}</td>
+                  </tr>
+                  <tr>
+                    <th class="scorebook-name">H</th>
+                    <td v-for="inn in scorebookCard.innings" :key="inn.inning" :colspan="inn.span">{{ inn.played ? inn.hits : '' }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </template>
+          <div v-else-if="scorebookError" class="game-flow-loading">{{ scorebookError }}</div>
+          <div v-else class="game-flow-loading">Loading...</div>
+        </div>
         <div v-if="gameFlowLoading && !gameFlowData && isCanvasMode" class="game-flow-loading">Loading...</div>
         <div v-if="gameFlowData && isCanvasMode" class="game-flow-chart-container">
           <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousedown="handleCanvasMouseDown" @mousemove="handleCanvasHover" @mouseup="handleCanvasMouseUp" @mouseleave="handleCanvasLeave" @touchstart="handleTouchStart" @touchmove="handleCanvasTouchMove" @touchend="handleTouchEnd"></canvas>
@@ -366,6 +430,11 @@ const GameRow = {
       playsData: null,
       playsHalf: null, // half-inning key the user picked; null follows the default
       expandedPAs: {},
+      scorebookData: null,
+      scorebookLoading: false,
+      scorebookError: null,
+      scorebookTeam: null, // 'away' | 'home' once picked; null follows the default
+      scorebookGamePk: null,
       boxScoreData: null,
       boxScoreActiveTeam: 'away', // 'away' or 'home'
       teamColors: null,
@@ -447,6 +516,10 @@ const GameRow = {
       // When chart mode changes from outside (other game cards), redraw the chart
       if (newVal !== oldVal && this.isExpanded && this.gameFlowData) {
         this.redrawChart()
+      }
+      // The scorebook comes from a separate feed, fetched only when shown.
+      if (newVal === 'scorebook' && this.isExpanded && this.started && !this.scorebookData) {
+        this.fetchScorebook()
       }
     },
   },
@@ -1144,7 +1217,39 @@ const GameRow = {
       // Colors are similar if distance is less than 80
       return this.getColorDistance(hex1, hex2) < 80
     },
+    async fetchScorebook() {
+      if (!LEAGUE.scorebook || this.scorebookLoading) return
+      this.scorebookLoading = true
+      try {
+        if (!this.scorebookGamePk) this.scorebookGamePk = await LEAGUE.scorebook.findGamePk(this.game)
+        if (!this.scorebookGamePk) {
+          this.scorebookError = 'Scorebook unavailable for this game.'
+          return
+        }
+        const response = await fetch(LEAGUE.scorebook.feedURL(this.scorebookGamePk))
+        this.scorebookData = LEAGUE.scorebook.process(await response.json())
+        this.scorebookError = null
+      } catch (error) {
+        console.error('Failed to fetch scorebook:', error)
+        if (!this.scorebookData) this.scorebookError = 'Scorebook unavailable for this game.'
+      } finally {
+        this.scorebookLoading = false
+      }
+    },
+    // Base path for a scorebook box: home -> 1st -> 2nd -> 3rd -> home,
+    // up to the last base reached (matches the diamond in the template).
+    scorebookPath(reached) {
+      const points = ['28,49', '47,30', '28,11', '9,30', '28,49']
+      return points.slice(0, reached + 1).join(' ')
+    },
+    // Where a base's advancement mark sits in the box.
+    scorebookMarkPos(base) {
+      // 2nd's mark sits left of the bag: the top-right corner holds the count.
+      return { 1: { x: 50, y: 44 }, 2: { x: 19, y: 9 }, 3: { x: 6, y: 44 }, 4: { x: 17, y: 54 } }[base]
+    },
     async fetchGameFlow() {
+      // Keep the scorebook current too while it's the tab being shown.
+      if (this.isScorebookMode) this.fetchScorebook()
       this.gameFlowLoading = true
       try {
         const url = LEAGUE.summaryURL(this.game.id)
@@ -1434,7 +1539,7 @@ const GameRow = {
       return labels
     },
     drawGameFlow() {
-      // The plays tab is HTML, not a canvas chart — nothing to draw.
+      // The plays and scorebook tabs are HTML, not canvas charts — nothing to draw.
       if (!this.isCanvasMode) return
       if (this.chartMode === 'winProb' && this.hasWinProb) {
         this.drawWinProb()
@@ -2428,18 +2533,32 @@ const GameRow = {
     chartTabs: function () {
       // Every league config sets chartModes explicitly (see e.g. nba/config.js).
       const modes = LEAGUE.chartModes
-      const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.', plays: 'Line & Plays' }
+      const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.', plays: 'Line & Plays', scorebook: 'Scorebook' }
       return modes
         .filter(m => m !== 'winProb' || this.hasWinProb)
+        .filter(m => m !== 'scorebook' || !!LEAGUE.scorebook)
         .filter(m => m !== 'plays' || !!this.playsData)
         .map(m => ({ mode: m, label: labels[m] || m }))
     },
     isPlaysMode: function () {
       return this.chartMode === 'plays'
     },
-    // Modes drawn on the canvas (everything but the HTML plays tab).
+    isScorebookMode: function () {
+      return this.chartMode === 'scorebook'
+    },
+    // Modes drawn on the canvas (everything but the HTML plays and scorebook tabs).
     isCanvasMode: function () {
-      return !this.isPlaysMode
+      return !this.isPlaysMode && !this.isScorebookMode
+    },
+    // Which team's scorecard to show: the user's pick, else the team batting
+    // in a live game, else the away team.
+    scorebookSide: function () {
+      if (this.scorebookTeam) return this.scorebookTeam
+      if (this.playing && this.playsData && this.playsData.current.startsWith('Bottom')) return 'home'
+      return 'away'
+    },
+    scorebookCard: function () {
+      return this.scorebookData ? this.scorebookData[this.scorebookSide] : null
     },
     // The half-inning shown on the plays tab: the user's pick, else the live
     // half-inning while playing, else the top of the 1st.

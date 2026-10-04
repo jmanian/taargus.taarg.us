@@ -18,9 +18,10 @@ const LEAGUE = {
     clincher: false
   },
   // Baseball gets a "Line & Plays" tab (runs-by-inning line score that picks
-  // the half-inning for a pitch-by-pitch plays list) and the win-probability
-  // chart; the clock-based lead/score flow charts don't apply.
-  chartModes: ['plays', 'winProb'],
+  // the half-inning for a pitch-by-pitch plays list), a traditional scorebook
+  // (see scorebook.js) and the win-probability chart; the clock-based
+  // lead/score flow charts don't apply.
+  chartModes: ['plays', 'scorebook', 'winProb'],
   defaultChartMode: 'plays',
   // Win expectancy changes at discrete plays, so draw the chart as steps.
   winProbStepped: true,
