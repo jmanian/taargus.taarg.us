@@ -77,8 +77,79 @@ const gameRowTemplate = `
           </table>
           <div v-else-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
         </div>
-        <div v-if="gameFlowLoading && !gameFlowData && !isLineScoreMode" class="game-flow-loading">Loading...</div>
-        <div v-if="gameFlowData && !isLineScoreMode" class="game-flow-chart-container">
+        <div v-if="isPlaysMode" class="plays-wrapper">
+          <template v-if="playsData && selectedHalf">
+            <div class="plays-half-picker">
+              <div class="plays-half-toggle">
+                <button
+                  v-for="h in playsHalfOptions"
+                  :key="h.half"
+                  class="plays-picker-btn"
+                  :class="{'active': selectedHalf.half === h.half}"
+                  :disabled="!h.available"
+                  @click.stop="selectPlaysHalf(h.key)">
+                  {{ h.label }}
+                </button>
+              </div>
+              <div class="plays-inning-picker">
+                <button
+                  v-for="inn in playsInningOptions"
+                  :key="inn.inning"
+                  class="plays-picker-btn"
+                  :class="{'active': selectedHalf.inning === inn.inning}"
+                  :disabled="!inn.key"
+                  @click.stop="selectPlaysHalf(inn.key)">
+                  {{ inn.inning }}
+                </button>
+              </div>
+            </div>
+            <ul class="plays-list">
+              <li v-for="item in selectedHalf.items" :key="item.id" :class="item.kind === 'pa' ? 'plays-pa' : 'plays-note'">
+                <template v-if="item.kind === 'note'">
+                  {{ item.text }}<span v-if="item.scoring" class="plays-score">{{ item.scoreText }}</span>
+                </template>
+                <template v-else>
+                  <button class="plays-pa-summary" :class="{'expanded': expandedPAs[item.id]}" @click.stop="togglePA(item.id)">
+                    <span class="plays-bat-order">{{ item.batOrder }}</span>
+                    <span class="plays-pa-main">
+                      <span v-if="item.result" class="plays-pa-result" :class="{'scoring': item.scoring}">{{ item.result }}</span>
+                      <span v-else class="plays-pa-result">{{ item.batter }} {{ item.inProgress ? 'at bat' : '' }}<span v-if="item.inProgress" class="plays-live-count">{{ item.count.balls }}-{{ item.count.strikes }}</span></span>
+                      <span v-if="item.scoring" class="plays-score">{{ item.scoreText }}</span>
+                      <span v-for="note in item.notes" :key="note.id" class="plays-pa-note">{{ note.text }}</span>
+                    </span>
+                    <span class="plays-pa-meta">
+                      <svg class="plays-bases" viewBox="0 0 22 14" :aria-label="basesLabel(item.bases)">
+                        <rect x="12.5" y="6.5" width="5" height="5" transform="rotate(45 15 9)" :class="{'occupied': item.bases.first}" />
+                        <rect x="8.5" y="2.5" width="5" height="5" transform="rotate(45 11 5)" :class="{'occupied': item.bases.second}" />
+                        <rect x="4.5" y="6.5" width="5" height="5" transform="rotate(45 7 9)" :class="{'occupied': item.bases.third}" />
+                      </svg>
+                      <span class="plays-outs" :aria-label="item.outs + ' out'">
+                        <span v-for="n in 3" :key="n" class="plays-out-dot" :class="{'filled': n <= item.outs}"></span>
+                      </span>
+                      <span class="plays-chevron">›</span>
+                    </span>
+                  </button>
+                  <div v-if="expandedPAs[item.id]" class="plays-pitches">
+                    <div class="plays-matchup">{{ item.matchup }}</div>
+                    <div v-for="ev in item.events" :key="ev.id" :class="ev.kind === 'pitch' ? 'plays-pitch' : 'plays-pitch-note'">
+                      <template v-if="ev.kind === 'pitch'">
+                        <span class="plays-pitch-dot" :class="ev.pitchKind">{{ ev.num }}</span>
+                        <span class="plays-pitch-call">{{ ev.call }}</span>
+                        <span class="plays-pitch-type">{{ ev.velo ? ev.velo + ' mph ' : '' }}{{ ev.pitch }}</span>
+                        <span class="plays-pitch-count">{{ ev.count }}</span>
+                      </template>
+                      <template v-else>{{ ev.text }}</template>
+                    </div>
+                    <div v-if="item.events.length === 0" class="plays-pitch-note">No pitches yet</div>
+                  </div>
+                </template>
+              </li>
+            </ul>
+          </template>
+          <div v-else-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
+        </div>
+        <div v-if="gameFlowLoading && !gameFlowData && isCanvasMode" class="game-flow-loading">Loading...</div>
+        <div v-if="gameFlowData && isCanvasMode" class="game-flow-chart-container">
           <canvas ref="gameFlowCanvas" class="game-flow-canvas" @mousedown="handleCanvasMouseDown" @mousemove="handleCanvasHover" @mouseup="handleCanvasMouseUp" @mouseleave="handleCanvasLeave" @touchstart="handleTouchStart" @touchmove="handleCanvasTouchMove" @touchend="handleTouchEnd"></canvas>
           <button v-if="rangeTooltip" class="game-flow-zoom-action" @click.stop="applyZoomFromSelection">Zoom</button>
           <button v-else-if="isZoomed" class="game-flow-zoom-action" @click.stop="resetZoom" aria-label="Reset zoom">✕ Zoom</button>
@@ -312,6 +383,9 @@ const GameRow = {
       gameFlowData: null,
       gameFlowLoading: false,
       lineScoreData: null,
+      playsData: null,
+      playsHalf: null, // half-inning key the user picked; null follows the default
+      expandedPAs: {},
       boxScoreData: null,
       boxScoreActiveTeam: 'away', // 'away' or 'home'
       teamColors: null,
@@ -595,6 +669,18 @@ const GameRow = {
       this.$nextTick(() => {
         this.drawGameFlow()
       })
+    },
+    selectPlaysHalf(key) {
+      if (!key) return
+      // Picking the live half-inning goes back to following the game.
+      this.playsHalf = (this.playing && key === this.playsData.current) ? null : key
+    },
+    basesLabel(bases) {
+      const on = ['first', 'second', 'third'].filter(b => bases[b])
+      return on.length ? `Runners on ${on.join(', ')}` : 'Bases empty'
+    },
+    togglePA(id) {
+      this.expandedPAs = { ...this.expandedPAs, [id]: !this.expandedPAs[id] }
     },
     setChartMode(mode) {
       this.$emit('chart-mode-change', mode)
@@ -1095,6 +1181,12 @@ const GameRow = {
           this.lineScoreData = LEAGUE.processLineScore(competitors, this.playing, this.game.awayTeam, this.game.homeTeam)
         }
 
+        // Plate-appearance list for the plays tab — another per-league hook
+        // (baseball only), skipped when undefined for the same reason.
+        if (data.plays && LEAGUE.processPlays) {
+          this.playsData = LEAGUE.processPlays(data.plays, this.playing, this.game.awayTeam, this.game.homeTeam)
+        }
+
         // Extract player box scores
         if (data.boxscore?.players && data.boxscore?.teams) {
           this.boxScoreData = this.processBoxScoreData(data.boxscore.players, data.boxscore.teams)
@@ -1354,8 +1446,8 @@ const GameRow = {
       return labels
     },
     drawGameFlow() {
-      // The line score is a table, not a canvas chart — nothing to draw.
-      if (this.chartMode === 'lineScore') return
+      // The line score and plays tabs are HTML, not canvas charts — nothing to draw.
+      if (!this.isCanvasMode) return
       if (this.chartMode === 'winProb' && this.hasWinProb) {
         this.drawWinProb()
       } else if (this.chartMode === 'lead') {
@@ -2348,14 +2440,55 @@ const GameRow = {
     chartTabs: function () {
       // Every league config sets chartModes explicitly (see e.g. nba/config.js).
       const modes = LEAGUE.chartModes
-      const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.', lineScore: 'Line Score' }
+      const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.', lineScore: 'Line Score', plays: 'Plays' }
       return modes
         .filter(m => m !== 'winProb' || this.hasWinProb)
         .filter(m => m !== 'lineScore' || !!this.lineScoreData)
+        .filter(m => m !== 'plays' || !!this.playsData)
         .map(m => ({ mode: m, label: labels[m] || m }))
     },
     isLineScoreMode: function () {
       return this.chartMode === 'lineScore'
+    },
+    isPlaysMode: function () {
+      return this.chartMode === 'plays'
+    },
+    // Modes drawn on the canvas (everything but the HTML line score / plays tabs).
+    isCanvasMode: function () {
+      return !this.isLineScoreMode && !this.isPlaysMode
+    },
+    // The half-inning shown on the plays tab: the user's pick, else the live
+    // half-inning while playing, else the top of the 1st.
+    selectedHalf: function () {
+      if (!this.playsData) return null
+      const halves = this.playsData.halves
+      const picked = this.playsHalf && halves.find(h => h.key === this.playsHalf)
+      if (picked) return picked
+      if (this.playing) return halves.find(h => h.key === this.playsData.current)
+      return halves[0]
+    },
+    playsInningOptions: function () {
+      if (!this.playsData) return []
+      const halves = this.playsData.halves
+      const maxInning = Math.max(LEAGUE.regulationPeriods, ...halves.map(h => h.inning))
+      const sel = this.selectedHalf
+      const options = []
+      for (let i = 1; i <= maxInning; i++) {
+        // Stay in the same half when switching innings, if it exists there.
+        const same = sel && halves.find(h => h.inning === i && h.half === sel.half)
+        const any = halves.find(h => h.inning === i)
+        options.push({ inning: i, key: (same || any || {}).key || null })
+      }
+      return options
+    },
+    playsHalfOptions: function () {
+      const sel = this.selectedHalf
+      if (!sel) return []
+      const find = half => this.playsData.halves.find(h => h.inning === sel.inning && h.half === half)
+      return [
+        { half: 'Top', label: `▲ ${this.game.awayTeam}`, available: !!find('Top'), key: (find('Top') || {}).key },
+        { half: 'Bottom', label: `▼ ${this.game.homeTeam}`, available: !!find('Bottom'), key: (find('Bottom') || {}).key }
+      ]
     },
     showGameFlow: function () {
       return this.started && this.chartTabs.length > 0

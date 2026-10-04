@@ -17,9 +17,9 @@ const LEAGUE = {
     cutoffs: [{ index: 5, class: 'playoff-cutoff' }],
     clincher: false
   },
-  // Baseball gets a runs-by-inning line score plus the win-probability chart;
-  // the clock-based lead/score flow charts don't apply.
-  chartModes: ['lineScore', 'winProb'],
+  // Baseball gets a runs-by-inning line score, a pitch-by-pitch plays list and
+  // the win-probability chart; the clock-based lead/score flow charts don't apply.
+  chartModes: ['lineScore', 'plays', 'winProb'],
   defaultChartMode: 'lineScore',
   // Win expectancy changes at discrete plays, so draw the chart as steps.
   winProbStepped: true,
@@ -163,6 +163,150 @@ const LEAGUE = {
         buildRow(home, homeAbbr)
       ]
     };
+  },
+
+  // ---- Plays: plate appearances grouped by half-inning, each expandable to
+  // its pitches. Baseball-only (no other league defines this hook, so the
+  // plays tab is skipped for NBA/WNBA). ----
+  // ESPN's summary `plays` is a flat, chronological list: every play carries
+  // the atBatId of the plate appearance it belongs to. Within one PA you get
+  // any pre-PA notes (pitching changes, pinch hitters), a start-batterpitcher
+  // play, one play per pitch (summaryType 'P'), mid-PA events (steals, wild
+  // pitches) and finally the batter's result — the only play-result that
+  // carries `bats`. Half-inning boundary plays (start/end-inning) are skipped.
+  processPlays(plays, playing, awayAbbr, homeAbbr) {
+    const halves = [];
+    const halfByKey = {};
+    let pa = null;
+
+    // Runners on base as of this play (the batter's result play carries the
+    // state after the PA; pitch plays carry the state going into the pitch).
+    const basesOf = play => ({ first: !!play.onFirst, second: !!play.onSecond, third: !!play.onThird });
+
+    // Statcast-style call buckets for the pitch dot: ball, strike, in play.
+    const pitchKind = type => {
+      if (type.startsWith('ball') || type === 'hit-by-pitch') return 'ball';
+      if (type.startsWith('strike') || type === 'foul-ball' || type === 'bunted-foul') return 'strike';
+      return 'inplay';
+    };
+
+    plays.forEach(play => {
+      const period = play.period || {};
+      const half = period.type;
+      if (half !== 'Top' && half !== 'Bottom') return;
+      const type = (play.type && play.type.type) || '';
+      if (type === 'start-inning' || type === 'end-inning' || type === 'end-batterpitcher') return;
+
+      const key = `${half}-${period.number}`;
+      let group = halfByKey[key];
+      if (!group) {
+        group = {
+          key: key,
+          inning: period.number,
+          half: half,
+          battingAbbr: half === 'Top' ? awayAbbr : homeAbbr,
+          items: []
+        };
+        halfByKey[key] = group;
+        halves.push(group);
+        pa = null;
+      }
+
+      if (type === 'start-batterpitcher') {
+        const m = /^(.*) pitches to (.*)$/.exec(play.text || '');
+        if (pa && pa.id === play.atBatId) {
+          // Pitching change mid-PA: ESPN restarts the matchup under the same
+          // atBatId, so keep the PA and just update who's pitching.
+          if (m) pa.pitcher = m[1];
+          return;
+        }
+        pa = {
+          kind: 'pa',
+          id: play.atBatId,
+          pitcher: m ? m[1] : '',
+          batter: m ? m[2] : '',
+          batOrder: play.batOrder || null,
+          matchup: play.text || '',
+          result: null,
+          scoring: false,
+          scoreText: '',
+          outs: play.outs || 0,
+          bases: basesOf(play),
+          count: { balls: 0, strikes: 0 },
+          pitches: 0,
+          events: [],
+          notes: []
+        };
+        group.items.push(pa);
+        return;
+      }
+
+      const inPA = pa && pa.id === play.atBatId;
+
+      if (play.summaryType === 'P') {
+        if (!inPA) return;
+        const kind = pitchKind(type);
+        const rc = play.resultCount || {};
+        const terminal = kind === 'inplay' || rc.balls >= 4 || rc.strikes >= 3 || type === 'hit-by-pitch';
+        const pt = play.pitchType;
+        pa.pitches++;
+        pa.bases = basesOf(play);
+        pa.count = { balls: Math.min(rc.balls || 0, 3), strikes: Math.min(rc.strikes || 0, 2) };
+        pa.events.push({
+          kind: 'pitch',
+          id: play.id,
+          num: play.atBatPitchNumber,
+          call: (play.type && play.type.text) || '',
+          pitchKind: kind,
+          pitch: pt ? pt.text : '',
+          velo: play.pitchVelocity ? `${play.pitchVelocity}` : '',
+          count: terminal ? '' : `${rc.balls || 0}-${rc.strikes || 0}`
+        });
+        return;
+      }
+
+      if (type !== 'play-result') {
+        // Steals, wild pitches, pickoffs, ... are each followed by a
+        // play-result with the same text; use that one instead.
+        return;
+      }
+
+      // The batter's own result.
+      if (inPA && play.bats) {
+        pa.result = play.text;
+        pa.outs = play.outs || 0;
+        // On the inning-ending play ESPN keeps the runners who were stranded,
+        // which is handy to see, so leave them.
+        pa.bases = basesOf(play);
+        if (play.scoringPlay) {
+          pa.scoring = true;
+          pa.scoreText = `${awayAbbr} ${play.awayScore}, ${homeAbbr} ${play.homeScore}`;
+        }
+        return;
+      }
+
+      const note = { kind: 'note', id: play.id, text: play.text, scoring: !!play.scoringPlay };
+      if (play.scoringPlay) note.scoreText = `${awayAbbr} ${play.awayScore}, ${homeAbbr} ${play.homeScore}`;
+      if (inPA) {
+        pa.bases = basesOf(play);
+        // Mid-PA event: show in the pitch sequence and under the result.
+        pa.events.push(note);
+        pa.notes.push(note);
+      } else {
+        // Before the PA's matchup starts (pitching change, pinch hitter, ...).
+        group.items.push(note);
+      }
+    });
+
+    if (halves.length === 0) return null;
+
+    // The last PA of a live game is the one in progress.
+    const lastHalf = halves[halves.length - 1];
+    const lastItems = lastHalf.items.filter(i => i.kind === 'pa');
+    const lastPA = lastItems[lastItems.length - 1];
+    if (playing && lastPA && !lastPA.result) lastPA.inProgress = true;
+
+    return { halves: halves, current: lastHalf.key };
   },
 
   // ---- Box score: batting + pitching tables, rendered generically from the
