@@ -58,50 +58,30 @@ const gameRowTemplate = `
             </button>
           </div>
         </div>
-        <div v-if="isLineScoreMode" class="line-score-wrapper">
-          <table class="line-score-table" v-if="lineScoreData">
-            <thead>
-              <tr>
-                <th class="line-score-team"></th>
-                <th v-for="n in lineScoreData.innings" :key="n">{{ n }}</th>
-                <th v-for="col in lineScoreData.columns" :key="col.key" :class="col.class">{{ col.label }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in lineScoreData.rows" :key="row.abbr">
-                <td class="line-score-team">{{ row.abbr }}</td>
-                <td v-for="(runs, i) in row.runs" :key="i">{{ runs }}</td>
-                <td v-for="col in lineScoreData.columns" :key="col.key" :class="col.class">{{ row.totals[col.key] }}</td>
-              </tr>
-            </tbody>
-          </table>
-          <div v-else-if="gameFlowLoading" class="game-flow-loading">Loading...</div>
-        </div>
         <div v-if="isPlaysMode" class="plays-wrapper">
           <template v-if="playsData && selectedHalf">
-            <div class="plays-half-picker">
-              <div class="plays-half-toggle">
-                <button
-                  v-for="h in playsHalfOptions"
-                  :key="h.half"
-                  class="plays-picker-btn"
-                  :class="{'active': selectedHalf.half === h.half}"
-                  :disabled="!h.available"
-                  @click.stop="selectPlaysHalf(h.key)">
-                  {{ h.label }}
-                </button>
-              </div>
-              <div class="plays-inning-picker">
-                <button
-                  v-for="inn in playsInningOptions"
-                  :key="inn.inning"
-                  class="plays-picker-btn"
-                  :class="{'active': selectedHalf.inning === inn.inning}"
-                  :disabled="!inn.key"
-                  @click.stop="selectPlaysHalf(inn.key)">
-                  {{ inn.inning }}
-                </button>
-              </div>
+            <!-- The line score doubles as the half-inning picker. -->
+            <div v-if="lineScoreData" class="plays-line-score">
+              <table class="line-score-table">
+                <thead>
+                  <tr>
+                    <th class="line-score-team"></th>
+                    <th v-for="n in lineScoreData.innings" :key="n">{{ n }}</th>
+                    <th v-for="col in lineScoreData.columns" :key="col.key" :class="col.class">{{ col.label }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, r) in lineScoreData.rows" :key="row.abbr">
+                    <td class="line-score-team">{{ row.abbr }}</td>
+                    <td
+                      v-for="(runs, i) in row.runs"
+                      :key="i"
+                      :class="{'line-score-link': lineScoreHalfKey(r, i), 'line-score-selected': lineScoreHalfKey(r, i) === selectedHalf.key}"
+                      @click.stop="selectPlaysHalf(lineScoreHalfKey(r, i))">{{ runs }}</td>
+                    <td v-for="col in lineScoreData.columns" :key="col.key" :class="col.class">{{ row.totals[col.key] }}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
             <ul class="plays-list">
               <li v-for="item in selectedHalf.items" :key="item.id" :class="item.kind === 'pa' ? 'plays-pa' : 'plays-note'">
@@ -679,6 +659,13 @@ const GameRow = {
       const on = ['first', 'second', 'third'].filter(b => bases[b])
       return on.length ? `Runners on ${on.join(', ')}` : 'Bases empty'
     },
+    // Plays key for a line-score cell (away row = top half, home row =
+    // bottom), or null when there's no such half-inning (yet).
+    lineScoreHalfKey(rowIndex, inningIndex) {
+      if (!this.playsData) return null
+      const key = `${rowIndex === 0 ? 'Top' : 'Bottom'}-${inningIndex + 1}`
+      return this.playsData.halves.some(h => h.key === key) ? key : null
+    },
     togglePA(id) {
       this.expandedPAs = { ...this.expandedPAs, [id]: !this.expandedPAs[id] }
     },
@@ -1171,9 +1158,10 @@ const GameRow = {
         // Team colors are already set from scoreboard data via initializeTeamColors()
         // No need to extract them again from the event API
 
-        // Extract the runs-by-inning line score via a per-league hook — its
-        // shape (baseball's H/E columns) doesn't generalize across sports,
-        // so leagues that want a lineScore tab define this themselves. Only
+        // Extract the runs-by-inning line score (shown atop the plays tab) via a
+        // per-league hook — its shape (baseball's H/E columns) doesn't
+        // generalize across sports, so leagues that want it define this
+        // themselves. Only
         // called when defined, so this is skipped as wasted work on a hot
         // path (every statusDetail change and 15s poll) for leagues without it.
         const competitors = data.header?.competitions?.[0]?.competitors
@@ -1446,7 +1434,7 @@ const GameRow = {
       return labels
     },
     drawGameFlow() {
-      // The line score and plays tabs are HTML, not canvas charts — nothing to draw.
+      // The plays tab is HTML, not a canvas chart — nothing to draw.
       if (!this.isCanvasMode) return
       if (this.chartMode === 'winProb' && this.hasWinProb) {
         this.drawWinProb()
@@ -2440,22 +2428,18 @@ const GameRow = {
     chartTabs: function () {
       // Every league config sets chartModes explicitly (see e.g. nba/config.js).
       const modes = LEAGUE.chartModes
-      const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.', lineScore: 'Line Score', plays: 'Plays' }
+      const labels = { lead: 'Lead', score: 'Scores', winProb: 'Win Prob.', plays: 'Line & Plays' }
       return modes
         .filter(m => m !== 'winProb' || this.hasWinProb)
-        .filter(m => m !== 'lineScore' || !!this.lineScoreData)
         .filter(m => m !== 'plays' || !!this.playsData)
         .map(m => ({ mode: m, label: labels[m] || m }))
-    },
-    isLineScoreMode: function () {
-      return this.chartMode === 'lineScore'
     },
     isPlaysMode: function () {
       return this.chartMode === 'plays'
     },
-    // Modes drawn on the canvas (everything but the HTML line score / plays tabs).
+    // Modes drawn on the canvas (everything but the HTML plays tab).
     isCanvasMode: function () {
-      return !this.isLineScoreMode && !this.isPlaysMode
+      return !this.isPlaysMode
     },
     // The half-inning shown on the plays tab: the user's pick, else the live
     // half-inning while playing, else the top of the 1st.
@@ -2466,29 +2450,6 @@ const GameRow = {
       if (picked) return picked
       if (this.playing) return halves.find(h => h.key === this.playsData.current)
       return halves[0]
-    },
-    playsInningOptions: function () {
-      if (!this.playsData) return []
-      const halves = this.playsData.halves
-      const maxInning = Math.max(LEAGUE.regulationPeriods, ...halves.map(h => h.inning))
-      const sel = this.selectedHalf
-      const options = []
-      for (let i = 1; i <= maxInning; i++) {
-        // Stay in the same half when switching innings, if it exists there.
-        const same = sel && halves.find(h => h.inning === i && h.half === sel.half)
-        const any = halves.find(h => h.inning === i)
-        options.push({ inning: i, key: (same || any || {}).key || null })
-      }
-      return options
-    },
-    playsHalfOptions: function () {
-      const sel = this.selectedHalf
-      if (!sel) return []
-      const find = half => this.playsData.halves.find(h => h.inning === sel.inning && h.half === half)
-      return [
-        { half: 'Top', label: `▲ ${this.game.awayTeam}`, available: !!find('Top'), key: (find('Top') || {}).key },
-        { half: 'Bottom', label: `▼ ${this.game.homeTeam}`, available: !!find('Bottom'), key: (find('Bottom') || {}).key }
-      ]
     },
     showGameFlow: function () {
       return this.started && this.chartTabs.length > 0

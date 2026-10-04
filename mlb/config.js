@@ -17,15 +17,16 @@ const LEAGUE = {
     cutoffs: [{ index: 5, class: 'playoff-cutoff' }],
     clincher: false
   },
-  // Baseball gets a runs-by-inning line score, a pitch-by-pitch plays list and
-  // the win-probability chart; the clock-based lead/score flow charts don't apply.
-  chartModes: ['lineScore', 'plays', 'winProb'],
-  defaultChartMode: 'lineScore',
+  // Baseball gets a "Line & Plays" tab (runs-by-inning line score that picks
+  // the half-inning for a pitch-by-pitch plays list) and the win-probability
+  // chart; the clock-based lead/score flow charts don't apply.
+  chartModes: ['plays', 'winProb'],
+  defaultChartMode: 'plays',
   // Win expectancy changes at discrete plays, so draw the chart as steps.
   winProbStepped: true,
-  // Shrink the win-prob chart to match the line-score tab's height
-  // (.line-score-wrapper's min-height, in shared/index.css) so switching
-  // between MLB's two tabs doesn't resize the card.
+  // Shrink the win-prob chart to match the plays tab's minimum height
+  // (.plays-wrapper's min-height, in shared/index.css) so switching
+  // between MLB's two tabs doesn't resize short half-innings.
   chartHeight: 260,
   // ESPN's scoreboard, standings and teams endpoints all use the same MLB
   // abbreviations, so no remapping is needed.
@@ -109,9 +110,9 @@ const LEAGUE = {
     return labels;
   },
 
-  // ---- Line score: runs-by-inning table with R/H/E totals. Baseball-only
-  // shape (no other league defines this hook, so the lineScore tab and its
-  // fetch-time parsing are both skipped for NBA/WNBA). ----
+  // ---- Line score: runs-by-inning table with R/H/E totals, shown atop the
+  // plays tab as its half-inning picker. Baseball-only shape (no other league
+  // defines this hook, so its fetch-time parsing is skipped for NBA/WNBA). ----
   // competitors is the summary endpoint's header.competitions[0].competitors
   // (each has a per-inning linescores array plus score/hits/errors totals).
   processLineScore(competitors, playing, awayAbbr, homeAbbr) {

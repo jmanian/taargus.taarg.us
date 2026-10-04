@@ -1710,24 +1710,11 @@ body.dark-mode .box-score-table .totals-row {
   text-align: center;
 }
 
-.line-score-wrapper {
-  overflow-x: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* Match the win-prob chart's canvas height (LEAGUE.chartHeight, see
-     drawWinProb) so toggling tabs doesn't resize the card. */
-  min-height: 260px;
-}
-
 .line-score-table {
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
-  /* Bias the vertically-centered table upward: the wrapper centers this
-     margin box, so a bottom-only margin shifts the visible content up. */
-  margin-bottom: 24px;
 }
 
 .line-score-table th,
@@ -1766,6 +1753,52 @@ body.dark-mode .box-score-table .totals-row {
   border-bottom: none;
 }
 
+.line-score-table td.line-score-link {
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+@media (hover: hover) {
+  .line-score-table td.line-score-link:not(.line-score-selected):hover {
+    background: #f1f3f5;
+  }
+
+  body.dark-mode .line-score-table td.line-score-link:not(.line-score-selected):hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* The line score sits atop the plays tab as its half-inning picker. It's
+   centered with auto margins rather than flex so a too-wide table scrolls
+   from its left edge instead of being clipped on both sides. */
+.plays-line-score {
+  overflow-x: auto;
+  margin-bottom: 10px;
+}
+
+.plays-line-score .line-score-table {
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .plays-line-score .line-score-table th,
+  .plays-line-score .line-score-table td {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .plays-line-score .line-score-table .line-score-team {
+    padding-left: 4px;
+    padding-right: 8px;
+  }
+}
+
+.line-score-table td.line-score-selected,
+body.dark-mode .line-score-table td.line-score-selected {
+  color: white;
+  background: #0d6efd;
+}
+
 body.dark-mode .line-score-table th,
 body.dark-mode .line-score-table td {
   border-bottom-color: rgba(255, 255, 255, 0.08);
@@ -1785,63 +1818,15 @@ body.dark-mode .line-score-table .line-score-runs {
   border-left-color: rgba(255, 255, 255, 0.28);
 }
 
-/* Plays tab (MLB): plate appearances for one half-inning, each expandable to
-   its pitches. No inner scroll — the card grows with the list — but it's at
-   least as tall as the other tabs so short half-innings don't shrink the card. */
+/* Plays tab (MLB's "Line & Plays"): plate appearances for one half-inning,
+   each expandable to its pitches. No inner scroll — the card grows with the
+   list — but it's at least as tall as the win-prob chart so short
+   half-innings don't shrink the card when switching tabs. */
 .plays-wrapper {
   min-height: 260px;
   max-width: 560px;
   margin: 0 auto;
   font-size: 13px;
-}
-
-.plays-half-picker {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px 12px;
-  margin-bottom: 10px;
-}
-
-.plays-half-toggle,
-.plays-inning-picker {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2px;
-}
-
-.plays-picker-btn {
-  min-width: 26px;
-  padding: 4px 6px;
-  font-size: 12px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: #495057;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.plays-half-toggle .plays-picker-btn {
-  padding: 4px 8px;
-}
-
-@media (hover: hover) {
-  .plays-picker-btn:not(:disabled):not(.active):hover {
-    background: #f1f3f5;
-  }
-}
-
-.plays-picker-btn.active {
-  color: white;
-  background: #0d6efd;
-}
-
-.plays-picker-btn:disabled {
-  color: #ced4da;
-  cursor: default;
 }
 
 .plays-list {
@@ -2040,26 +2025,10 @@ body.dark-mode .line-score-table .line-score-runs {
   color: #6c757d;
 }
 
-body.dark-mode .plays-picker-btn {
-  color: #ced4da;
-}
-
 @media (hover: hover) {
-  body.dark-mode .plays-picker-btn:not(:disabled):not(.active):hover {
-    background: rgba(255, 255, 255, 0.08);
-  }
-
   body.dark-mode .plays-pa-summary:hover {
     background: rgba(255, 255, 255, 0.05);
   }
-}
-
-body.dark-mode .plays-picker-btn.active {
-  color: white;
-}
-
-body.dark-mode .plays-picker-btn:disabled {
-  color: #495057;
 }
 
 body.dark-mode .plays-list > li {
