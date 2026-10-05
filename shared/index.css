@@ -1938,9 +1938,11 @@ body.dark-mode .line-score-table .line-score-runs {
   stroke-width: 1;
 }
 
+/* Bases are 6-unit squares spaced exactly one side apart, so neighbors
+   share a single border line. Occupied bases fill with color but keep the
+   same border, so two runners side by side still read as two bases. */
 .plays-bases rect.occupied {
-  fill: #6c757d;
-  stroke: #6c757d;
+  fill: #f59f00;
 }
 
 .plays-outs {
@@ -2069,8 +2071,7 @@ body.dark-mode .plays-bases rect {
 }
 
 body.dark-mode .plays-bases rect.occupied {
-  fill: #ced4da;
-  stroke: #ced4da;
+  fill: #fcc419;
 }
 
 body.dark-mode .plays-out-dot {

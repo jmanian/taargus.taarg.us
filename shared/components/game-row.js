@@ -18,9 +18,9 @@ const gameRowTemplate = `
       <span class="game-time" :class="{'live-time': playing, 'pre-game': !started}">{{ timeLabel }}</span>
       <div v-if="showSituation" class="live-situation" :aria-label="situationLabel">
         <svg class="plays-bases" viewBox="0 0 22 14" aria-hidden="true">
-          <rect x="12.5" y="6.5" width="5" height="5" transform="rotate(45 15 9)" :class="{'occupied': game.situation.first}" />
-          <rect x="8.5" y="2.5" width="5" height="5" transform="rotate(45 11 5)" :class="{'occupied': game.situation.second}" />
-          <rect x="4.5" y="6.5" width="5" height="5" transform="rotate(45 7 9)" :class="{'occupied': game.situation.third}" />
+          <rect x="-3" y="-3" width="6" height="6" transform="translate(15.24 9.09) rotate(45)" :class="{'occupied': game.situation.first}" />
+          <rect x="-3" y="-3" width="6" height="6" transform="translate(11 4.85) rotate(45)" :class="{'occupied': game.situation.second}" />
+          <rect x="-3" y="-3" width="6" height="6" transform="translate(6.76 9.09) rotate(45)" :class="{'occupied': game.situation.third}" />
         </svg>
         <span class="plays-outs" aria-hidden="true">
           <span v-for="n in 3" :key="n" class="plays-out-dot" :class="{'filled': n <= game.situation.outs}"></span>
@@ -114,9 +114,9 @@ const gameRowTemplate = `
                     </span>
                     <span class="plays-pa-meta">
                       <svg class="plays-bases" viewBox="0 0 22 14" :aria-label="basesLabel(item.bases)">
-                        <rect x="12.5" y="6.5" width="5" height="5" transform="rotate(45 15 9)" :class="{'occupied': item.bases.first}" />
-                        <rect x="8.5" y="2.5" width="5" height="5" transform="rotate(45 11 5)" :class="{'occupied': item.bases.second}" />
-                        <rect x="4.5" y="6.5" width="5" height="5" transform="rotate(45 7 9)" :class="{'occupied': item.bases.third}" />
+                        <rect x="-3" y="-3" width="6" height="6" transform="translate(15.24 9.09) rotate(45)" :class="{'occupied': item.bases.first}" />
+                        <rect x="-3" y="-3" width="6" height="6" transform="translate(11 4.85) rotate(45)" :class="{'occupied': item.bases.second}" />
+                        <rect x="-3" y="-3" width="6" height="6" transform="translate(6.76 9.09) rotate(45)" :class="{'occupied': item.bases.third}" />
                       </svg>
                       <span class="plays-outs" :aria-label="item.outs + ' out'">
                         <span v-for="n in 3" :key="n" class="plays-out-dot" :class="{'filled': n <= item.outs}"></span>
