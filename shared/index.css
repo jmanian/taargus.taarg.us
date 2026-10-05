@@ -2096,8 +2096,8 @@ body.dark-mode .plays-out-dot.filled {
 }
 
 .live-situation .plays-bases {
-  width: 20px;
-  height: 13px;
+  width: 26px;
+  height: 16.5px;
 }
 
 .live-situation .plays-outs {
@@ -2105,15 +2105,36 @@ body.dark-mode .plays-out-dot.filled {
 }
 
 .live-situation .plays-out-dot {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 .live-situation-count {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: #6c757d;
+}
+
+/* Desktop's center column is 120px (vs 80px on phones), so go bigger. */
+@media (min-width: 769px) {
+  .live-situation {
+    gap: 6px;
+  }
+
+  .live-situation .plays-bases {
+    width: 33px;
+    height: 21px;
+  }
+
+  .live-situation .plays-out-dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .live-situation-count {
+    font-size: 12px;
+  }
 }
 
 /* The headline row normally tucks up under the team names (see
