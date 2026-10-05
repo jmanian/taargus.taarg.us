@@ -1951,12 +1951,12 @@ body.dark-mode .line-score-table .line-score-runs {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  border: 1px solid #adb5bd;
+  /* Same fills as the base diamonds: faint when empty, solid for an out. */
+  background: rgba(0, 0, 0, 0.12);
 }
 
 .plays-out-dot.filled {
-  background: #6c757d;
-  border-color: #6c757d;
+  background: #495057;
 }
 
 .plays-chevron {
@@ -2072,12 +2072,11 @@ body.dark-mode .plays-bases rect.occupied {
 }
 
 body.dark-mode .plays-out-dot {
-  border-color: #6c757d;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 body.dark-mode .plays-out-dot.filled {
-  background: #ced4da;
-  border-color: #ced4da;
+  background: #f8f9fa;
 }
 
 /* Live situation under the inning on an in-progress MLB card: bases, outs,
