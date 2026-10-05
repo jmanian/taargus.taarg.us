@@ -2093,6 +2093,9 @@ body.dark-mode .plays-out-dot.filled {
 }
 
 .scorebook-table {
+  /* Lay out at full natural width and let .scorebook-scroll scroll it,
+     rather than shrinking columns to fit. */
+  width: max-content;
   border-collapse: collapse;
   margin: 0 auto;
   font-size: 12px;
@@ -2190,7 +2193,11 @@ tfoot .scorebook-name {
 }
 
 .scorebook-cell {
+  /* Fixed width even when empty: an auto-layout table squeezed into the
+     narrow scroll container otherwise collapses innings with no boxes yet
+     down to the width of their header number. */
   width: 52px;
+  min-width: 52px;
   height: 52px;
 }
 
