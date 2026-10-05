@@ -2082,6 +2082,50 @@ body.dark-mode .plays-out-dot.filled {
   border-color: #ced4da;
 }
 
+/* Live situation under the inning on an in-progress MLB card: bases, outs,
+   count. Reuses the plays tab's diamond and out-dot styles. */
+.live-situation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 1px 0 2px;
+  /* Fits the 80px center column on phones. */
+  white-space: nowrap;
+}
+
+.live-situation .plays-bases {
+  width: 20px;
+  height: 13px;
+}
+
+.live-situation .plays-outs {
+  gap: 2px;
+}
+
+.live-situation .plays-out-dot {
+  width: 5px;
+  height: 5px;
+}
+
+.live-situation-count {
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #6c757d;
+}
+
+/* The headline row normally tucks up under the team names (see
+   .game-summary > .headline); with the extra situation line the center
+   column is taller, so tuck it up less to keep them from overlapping. */
+.game-summary:has(.live-situation) > .headline {
+  margin-top: -6px;
+}
+
+body.dark-mode .live-situation-count {
+  color: #adb5bd;
+}
+
 /* Scorebook tab (MLB): a traditional scorecard, one team at a time. Wider
    than a phone, so it scrolls sideways with the lineup column pinned. */
 .scorebook-wrapper {

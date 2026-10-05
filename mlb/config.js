@@ -346,6 +346,23 @@ const LEAGUE = {
   // specific fields are present on competitor.statistics, which is always
   // true for baseball. ----
 
+  // ---- Live situation: runners on base, outs and the count, shown on the
+  // card under the inning while the game is in progress. ----
+  parseSituation(competition) {
+    const s = competition.situation;
+    if (!s) return null;
+    return {
+      first: !!s.onFirst,
+      second: !!s.onSecond,
+      third: !!s.onThird,
+      outs: s.outs || 0,
+      // Right after a walk or strikeout ESPN briefly reports 4 balls or 3
+      // strikes before the next batter's 0-0; cap at a real count.
+      balls: Math.min(s.balls || 0, 3),
+      strikes: Math.min(s.strikes || 0, 2)
+    };
+  },
+
   // ---- Probable starting pitcher, shown pre-game in place of team stats. ----
   parseProbable(competitor) {
     const probables = competitor.probables;

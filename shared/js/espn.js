@@ -79,8 +79,17 @@ function parseEvent(event) {
     homeLeaders: getTeamLeaders(homeTeam),
     awayLeaders: getTeamLeaders(awayTeam),
     homeProbable: getProbable(homeTeam),
-    awayProbable: getProbable(awayTeam)
+    awayProbable: getProbable(awayTeam),
+    situation: gameState === 'in' ? getSituation(competition) : null
   }
+}
+
+// Live in-game situation (e.g. baseball's runners, outs and count), shown on
+// the card under the inning. No sport gets one by default — a league defines
+// LEAGUE.parseSituation to opt in.
+function getSituation(competition) {
+  if (LEAGUE.parseSituation) return LEAGUE.parseSituation(competition);
+  return null;
 }
 
 // Probable starter (e.g. baseball's probable pitcher). No sport gets one by

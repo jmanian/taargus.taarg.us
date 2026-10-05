@@ -16,6 +16,17 @@ const gameRowTemplate = `
 
     <div class="game-center">
       <span class="game-time" :class="{'live-time': playing, 'pre-game': !started}">{{ timeLabel }}</span>
+      <div v-if="showSituation" class="live-situation" :aria-label="situationLabel">
+        <svg class="plays-bases" viewBox="0 0 22 14" aria-hidden="true">
+          <rect x="12.5" y="6.5" width="5" height="5" transform="rotate(45 15 9)" :class="{'occupied': game.situation.first}" />
+          <rect x="8.5" y="2.5" width="5" height="5" transform="rotate(45 11 5)" :class="{'occupied': game.situation.second}" />
+          <rect x="4.5" y="6.5" width="5" height="5" transform="rotate(45 7 9)" :class="{'occupied': game.situation.third}" />
+        </svg>
+        <span class="plays-outs" aria-hidden="true">
+          <span v-for="n in 3" :key="n" class="plays-out-dot" :class="{'filled': n <= game.situation.outs}"></span>
+        </span>
+        <span class="live-situation-count">{{ game.situation.balls }}-{{ game.situation.strikes }}</span>
+      </div>
       <div class="network">
         <span class="network-primary">
           <span v-if="game.network">{{ game.network.primary }}</span>
@@ -2608,6 +2619,17 @@ const GameRow = {
     },
     hasProbables: function () {
       return !!(this.game.homeProbable || this.game.awayProbable)
+    },
+    // Runners/outs/count line under the inning for a live game — hidden
+    // between halves (Mid/End of an inning), when there's no live situation.
+    showSituation: function () {
+      return this.playing && !!this.game.situation && !/^(Mid|End)/.test(this.game.statusDetail || '')
+    },
+    situationLabel: function () {
+      const s = this.game.situation
+      if (!s) return ''
+      const on = ['first', 'second', 'third'].filter(b => s[b])
+      return `${on.length ? 'Runners on ' + on.join(', ') : 'Bases empty'}, ${s.outs} out, ${s.balls}-${s.strikes} count`
     },
     probableText: function () {
       return p => p ? (p.name + (p.line ? ` (${p.line})` : '')) : 'TBD'
