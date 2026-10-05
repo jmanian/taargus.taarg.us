@@ -1933,16 +1933,13 @@ body.dark-mode .line-score-table .line-score-runs {
 }
 
 .plays-bases rect {
-  fill: none;
-  stroke: #adb5bd;
-  stroke-width: 1;
+  fill: rgba(0, 0, 0, 0.12);
 }
 
-/* Bases are 6-unit squares spaced exactly one side apart, so neighbors
-   share a single border line. Occupied bases fill with color but keep the
-   same border, so two runners side by side still read as two bases. */
+/* Bases are borderless rounded squares with a small gap between them:
+   faint when empty, solid with a runner on. */
 .plays-bases rect.occupied {
-  fill: #f59f00;
+  fill: #495057;
 }
 
 .plays-outs {
@@ -2067,11 +2064,11 @@ body.dark-mode .plays-bat-order {
 }
 
 body.dark-mode .plays-bases rect {
-  stroke: #6c757d;
+  fill: rgba(255, 255, 255, 0.15);
 }
 
 body.dark-mode .plays-bases rect.occupied {
-  fill: #fcc419;
+  fill: #f8f9fa;
 }
 
 body.dark-mode .plays-out-dot {
