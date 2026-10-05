@@ -476,8 +476,20 @@ const GameRow = {
     document.removeEventListener('close-local-tooltips', this.handleCloseTooltip)
     document.removeEventListener('mousemove', this.handleDocumentMouseMove)
     document.removeEventListener('mouseup', this.handleDocumentMouseUp)
+    if (this.scorebookTimers) this.scorebookTimers.forEach(clearTimeout)
   },
   watch: {
+    playing(newVal, oldVal) {
+      // Polling stops once a game is no longer live, but MLB's feed can still
+      // be missing the final play at the moment ESPN marks it final. Re-fetch
+      // the scorebook a couple of times afterward if it's what's showing (if
+      // not, switching to it fetches fresh anyway).
+      if (oldVal && !newVal) {
+        this.scorebookTimers = [20000, 60000].map(ms => setTimeout(() => {
+          if (this.isExpanded && this.isScorebookMode) this.fetchScorebook()
+        }, ms))
+      }
+    },
     gameFlowData(newVal) {
       if (newVal && newVal.length > 0) {
         this.$nextTick(() => {
@@ -525,8 +537,9 @@ const GameRow = {
       if (newVal !== oldVal && this.isExpanded && this.gameFlowData) {
         this.redrawChart()
       }
-      // The scorebook comes from a separate feed, fetched only when shown.
-      if (newVal === 'scorebook' && this.isExpanded && this.started && !this.scorebookData) {
+      // The scorebook comes from a separate feed, fetched only while shown —
+      // so refresh it on switching to it, not just on the next poll.
+      if (newVal === 'scorebook' && this.isExpanded && this.started) {
         this.fetchScorebook()
       }
     },
@@ -1234,7 +1247,14 @@ const GameRow = {
           this.scorebookError = 'Scorebook unavailable for this game.'
           return
         }
-        const response = await fetch(LEAGUE.scorebook.feedURL(this.scorebookGamePk))
+        // MLB's feed allows a stale copy to be served while a fresh one loads
+        // in the background (stale-while-revalidate), which left every poll
+        // one fetch behind. Always revalidate instead. The timeout keeps a
+        // hung request from blocking later polls via scorebookLoading.
+        const response = await fetch(LEAGUE.scorebook.feedURL(this.scorebookGamePk), {
+          cache: 'no-cache',
+          signal: AbortSignal.timeout(12000)
+        })
         this.scorebookData = LEAGUE.scorebook.process(await response.json())
         this.scorebookError = null
       } catch (error) {
