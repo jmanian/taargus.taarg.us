@@ -73,6 +73,8 @@ LEAGUE.scorebook = {
       .filter(p => p.battingOrder)
       .sort((a, b) => Number(a.battingOrder) - Number(b.battingOrder));
     const lastName = p => (players['ID' + p.person.id] || {}).lastName || p.person.fullName;
+    const lastNameOf = id => (players['ID' + id] || {}).lastName || '';
+    const fullName = id => (players['ID' + id] || {}).fullName || '';
     // Last names alone, plus a first initial when two players share one.
     const counts = {};
     lineup.forEach(p => { counts[lastName(p)] = (counts[lastName(p)] || 0) + 1; });
@@ -115,7 +117,7 @@ LEAGUE.scorebook = {
       box.inning = inning;
     };
 
-    const newBox = () => ({ reached: 0, outToward: null, scored: false, out: null, code: '', sub: '', looking: false, hit: false, marks: {}, endsHalf: false, inProgress: false });
+    const newBox = () => ({ batter: '', pitcher: '', description: '', log: [], reached: 0, outToward: null, scored: false, out: null, code: '', sub: '', looking: false, hit: false, marks: {}, endsHalf: false, inProgress: false });
     const activeBox = {}; // runner id -> the box tracking him while he's on base
 
     plays.forEach(play => {
@@ -135,6 +137,8 @@ LEAGUE.scorebook = {
           const placed = newBox();
           placed.reached = ev.base || 2;
           placed.sub = 'ER';
+          placed.batter = fullName(ev.player.id);
+          placed.description = ev.details.description || 'Placed on 2nd to start the inning.';
           placeBox(inning, spotOf[ev.player.id], placed);
           activeBox[ev.player.id] = placed;
         }
@@ -142,6 +146,9 @@ LEAGUE.scorebook = {
 
       const box = newBox();
       box.inProgress = !play.about.isComplete;
+      box.batter = play.matchup.batter.fullName;
+      box.pitcher = play.matchup.pitcher.fullName;
+      box.description = play.result.description || '';
       // Balls and strikes before the deciding pitch (or so far, while live):
       // the 3 ball and 2 strike ticks a scorecard has room for.
       if (play.count) {
@@ -165,10 +172,21 @@ LEAGUE.scorebook = {
           b.reached = BASE[m.start] || 0;
           b.code = '';
           b.sub = 'ER';
+          b.batter = r.details.runner.fullName;
           placeBox(inning, spot, b);
         }
         const midPA = r.details.event !== play.result.event;
         const label = midPA ? this.runnerEventLabel(r.details.eventType, r.credits) : (rid === batterId ? '' : String(batterSpot || ''));
+        // Everything after the batter's own trip to his first base goes in
+        // the box's running log, shown in the tap-to-expand detail.
+        // One line per play: a runner who moves twice on the same play (to
+        // 3rd, then home on the throw) keeps just the last.
+        if (rid !== batterId || m.start) {
+          const entry = this.runnerLogEntry(play, r, midPA, rid === batterId, lastNameOf(batterId));
+          const last = b.log[b.log.length - 1];
+          if (entry && last && last.key === entry.key) b.log[b.log.length - 1] = entry;
+          else if (entry) b.log.push(entry);
+        }
         if (m.isOut) {
           b.out = m.outNumber;
           // A runner put out on the bases (anyone but the batter retired on
@@ -232,6 +250,41 @@ LEAGUE.scorebook = {
         if (positions[positions.length - 1] !== pos) positions.push(pos);
       }));
     return positions.join('-');
+  },
+
+  // One line of a box's runner log ({ key, text }), e.g. "Kyle Tucker steals
+  // (1) 2nd base.", "To 3rd on Acuña's single", "Scored on Hernández's home
+  // run", "Out at 3rd on the play (9-6-5)". The key groups movements from the
+  // same play/event so a runner's two hops on one play collapse to one line.
+  runnerLogEntry(play, r, midPA, isBatter, batterLast) {
+    const ev = midPA && play.playEvents.find(e => e.index === r.details.playIndex);
+    // Steals, wild pitches, pickoffs...: MLB's own sentence for the event.
+    // (A runner thrown out on the batter's own hit also counts as a separate
+    // event, but its playIndex is the pitch, so it's described below.)
+    if (ev && ev.type === 'action' && ev.details && ev.details.description) {
+      return { key: `${play.about.atBatIndex}-${r.details.playIndex}`, text: ev.details.description };
+    }
+    const text = this.runnerResultText(play, r, isBatter, batterLast);
+    return text ? { key: String(play.about.atBatIndex), text: text } : null;
+  },
+
+  runnerResultText(play, r, isBatter, batterLast) {
+    const BASE_NAME = { '1B': '1st', '2B': '2nd', '3B': '3rd', score: 'home', '4B': 'home', home: 'home' };
+    const m = r.movement;
+    const NOUN = {
+      grounded_into_double_play: 'double play', double_play: 'double play', triple_play: 'triple play',
+      fielders_choice: "fielder's choice", fielders_choice_out: "fielder's choice", field_error: 'error',
+      intent_walk: 'intentional walk', sac_fly: 'sac fly', sac_bunt: 'sac bunt', catcher_interf: 'catcher interference'
+    };
+    const event = NOUN[play.result.eventType] || (play.result.event || '').toLowerCase();
+    const on = isBatter ? 'on the play' : `on ${batterLast}'s ${event}`;
+    if (m.isOut) {
+      const chain = this.chain([r]);
+      return `Out at ${BASE_NAME[m.outBase] || m.outBase} ${on}` + (chain ? ` (${chain})` : '');
+    }
+    if (m.end === 'score') return `Scored ${on}`;
+    if (m.end && m.end !== m.start) return `To ${BASE_NAME[m.end]} ${on}`;
+    return '';
   },
 
   // Small mark for how a runner advanced or was put out between pitches.

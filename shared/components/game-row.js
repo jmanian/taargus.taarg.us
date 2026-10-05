@@ -147,7 +147,7 @@ const gameRowTemplate = `
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="row in scorebookCard.rows" :key="row.spot">
+                  <tr v-for="(row, ri) in scorebookCard.rows" :key="row.spot">
                     <th class="scorebook-name" scope="row">
                       <div class="scorebook-name-inner">
                         <span class="scorebook-spot">{{ row.spot }}</span>
@@ -160,7 +160,8 @@ const gameRowTemplate = `
                       v-for="(box, c) in row.cells"
                       :key="c"
                       class="scorebook-cell"
-                      :class="{'inning-start': scorebookCard.columns[c].firstOfInning, 'at-bat': box && box.inProgress}">
+                      :class="{'inning-start': scorebookCard.columns[c].firstOfInning, 'at-bat': box && box.inProgress, 'selectable': box, 'selected': box && box === scorebookSelectedBox}"
+                      @click.stop="box && toggleScorebookBox(ri, c)">
                       <svg v-if="box" viewBox="0 0 56 56" class="scorebook-box">
                         <polygon class="sb-diamond" :class="{'scored': box.scored}" points="28,49 47,30 28,11 9,30" />
                         <template v-if="box.balls != null">
@@ -195,6 +196,21 @@ const gameRowTemplate = `
                   </tr>
                 </tfoot>
               </table>
+            </div>
+            <div v-if="scorebookSelectedBox" ref="scorebookDetail" class="scorebook-detail">
+              <div class="scorebook-detail-head">
+                <span class="scorebook-detail-title">
+                  {{ scorebookSelectedBox.batter }}<span v-if="scorebookSelectedBox.pitcher" class="scorebook-detail-vs"> vs. {{ scorebookSelectedBox.pitcher }}</span>
+                </span>
+                <button class="scorebook-detail-close" @click.stop="scorebookSelected = null" aria-label="Close">✕</button>
+              </div>
+              <div class="scorebook-detail-desc">{{ scorebookSelectedBox.inProgress ? 'At bat' : scorebookSelectedBox.description }}</div>
+              <ul v-if="scorebookSelectedBox.log.length" class="scorebook-detail-log">
+                <li v-for="(entry, i) in scorebookSelectedBox.log" :key="i">{{ entry.text }}</li>
+              </ul>
+              <button class="scorebook-detail-link" @click.stop="openPlaysFromScorebook">
+                {{ scorebookSide === 'away' ? 'Top' : 'Bottom' }} of the {{ scorebookOrdinal(scorebookSelectedBox.inning) }} in Line &amp; Plays →
+              </button>
             </div>
           </template>
           <div v-else-if="scorebookError" class="game-flow-loading">{{ scorebookError }}</div>
@@ -443,6 +459,7 @@ const GameRow = {
       scorebookError: null,
       scorebookTeam: null, // 'away' | 'home' once picked; null follows the default
       scorebookGamePk: null,
+      scorebookSelected: null, // { side, row, col } of the tapped box
       boxScoreData: null,
       boxScoreActiveTeam: 'away', // 'away' or 'home'
       teamColors: null,
@@ -1284,6 +1301,26 @@ const GameRow = {
         points: points.map(p => p.join(',')).join(' '),
         tick: { x1: end[0] - nx, y1: end[1] - ny, x2: end[0] + nx, y2: end[1] + ny }
       }
+    },
+    // Tap a box for its detail panel (tap again to close).
+    toggleScorebookBox(row, col) {
+      const s = this.scorebookSelected
+      if (s && s.side === this.scorebookSide && s.row === row && s.col === col) {
+        this.scorebookSelected = null
+        return
+      }
+      this.scorebookSelected = { side: this.scorebookSide, row: row, col: col }
+      this.$nextTick(() => {
+        const el = this.$refs.scorebookDetail
+        if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+      })
+    },
+    // Jump from the selected box to its half-inning on the plays tab.
+    openPlaysFromScorebook() {
+      const box = this.scorebookSelectedBox
+      if (!box) return
+      this.selectPlaysHalf(`${this.scorebookSide === 'away' ? 'Top' : 'Bottom'}-${box.inning}`)
+      this.setChartMode('plays')
     },
     scorebookOrdinal(n) {
       const s = ['th', 'st', 'nd', 'rd']
@@ -2613,6 +2650,14 @@ const GameRow = {
     },
     scorebookCard: function () {
       return this.scorebookData ? this.scorebookData[this.scorebookSide] : null
+    },
+    // The tapped box, looked up fresh so it follows live refreshes; none when
+    // the other team's card is showing.
+    scorebookSelectedBox: function () {
+      const s = this.scorebookSelected
+      if (!s || !this.scorebookCard || s.side !== this.scorebookSide) return null
+      const row = this.scorebookCard.rows[s.row]
+      return (row && row.cells[s.col]) || null
     },
     // The half-inning shown on the plays tab: the user's pick, else the live
     // half-inning while playing, else the top of the 1st.

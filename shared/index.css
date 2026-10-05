@@ -2205,6 +2205,81 @@ tfoot .scorebook-name {
   background: rgba(13, 110, 253, 0.08);
 }
 
+.scorebook-cell.selectable {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .scorebook-cell.selectable:not(.selected):hover {
+    background: #f8f9fa;
+  }
+}
+
+.scorebook-table .scorebook-cell.selected {
+  background: rgba(13, 110, 253, 0.12);
+  box-shadow: inset 0 0 0 2px #0d6efd;
+}
+
+/* Detail for a tapped box: the play, then what happened to the runner. */
+.scorebook-detail {
+  max-width: 560px;
+  margin: 12px auto 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #212529;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.scorebook-detail-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.scorebook-detail-title {
+  flex: 1;
+  font-weight: 600;
+}
+
+.scorebook-detail-vs {
+  font-weight: 400;
+  color: #6c757d;
+}
+
+.scorebook-detail-close {
+  padding: 0 2px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #6c757d;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.scorebook-detail-log {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: #495057;
+}
+
+.scorebook-detail-log li + li {
+  margin-top: 2px;
+}
+
+.scorebook-detail-link {
+  margin-top: 8px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0d6efd;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
 .scorebook-box {
   display: block;
   width: 52px;
@@ -2387,6 +2462,35 @@ body.dark-mode .sb-tick.strike.filled {
 
 body.dark-mode .scorebook-cell.at-bat {
   background: rgba(116, 192, 252, 0.12);
+}
+
+@media (hover: hover) {
+  body.dark-mode .scorebook-cell.selectable:not(.selected):hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+body.dark-mode .scorebook-table .scorebook-cell.selected {
+  background: rgba(116, 192, 252, 0.16);
+  box-shadow: inset 0 0 0 2px #74c0fc;
+}
+
+body.dark-mode .scorebook-detail {
+  color: #e9ecef;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .scorebook-detail-vs,
+body.dark-mode .scorebook-detail-close {
+  color: #adb5bd;
+}
+
+body.dark-mode .scorebook-detail-log {
+  color: #ced4da;
+}
+
+body.dark-mode .scorebook-detail-link {
+  color: #74c0fc;
 }
 
 .game-flow-loading {
