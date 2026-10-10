@@ -98,6 +98,11 @@ const gameRowTemplate = `
                 </tbody>
               </table>
             </div>
+            <div class="plays-half-nav">
+              <button class="plays-half-step" :disabled="!playsPrevHalf" @click.stop="selectPlaysHalf(playsPrevHalf.key)" aria-label="Previous half-inning">‹</button>
+              <span class="plays-half-label">{{ playsHalfLabel(selectedHalf) }}</span>
+              <button class="plays-half-step" :disabled="!playsNextHalf" @click.stop="selectPlaysHalf(playsNextHalf.key)" aria-label="Next half-inning">›</button>
+            </div>
             <ul class="plays-list">
               <li v-for="item in selectedHalf.items" :key="item.id" :class="item.kind === 'pa' ? 'plays-pa' : 'plays-note'">
                 <template v-if="item.kind === 'note'">
@@ -776,6 +781,9 @@ const GameRow = {
       if (!key) return
       // Picking the live half-inning goes back to following the game.
       this.playsHalf = (this.playing && key === this.playsData.current) ? null : key
+    },
+    playsHalfLabel(half) {
+      return `${half.half === 'Top' ? 'Top' : 'Bottom'} ${this.scorebookOrdinal(half.inning)} · ${half.battingAbbr}`
     },
     basesLabel(bases) {
       const on = ['first', 'second', 'third'].filter(b => bases[b])
@@ -2680,6 +2688,18 @@ const GameRow = {
       if (!s || !this.scorebookCard || s.side !== this.scorebookSide) return null
       const row = this.scorebookCard.rows[s.row]
       return (row && row.cells[s.col]) || null
+    },
+    // Neighbors of the shown half-inning, in game order (only halves that
+    // have started — the live half is the last one).
+    playsPrevHalf: function () {
+      if (!this.selectedHalf) return null
+      const halves = this.playsData.halves
+      return halves[halves.indexOf(this.selectedHalf) - 1] || null
+    },
+    playsNextHalf: function () {
+      if (!this.selectedHalf) return null
+      const halves = this.playsData.halves
+      return halves[halves.indexOf(this.selectedHalf) + 1] || null
     },
     // The half-inning shown on the plays tab: the user's pick, else the live
     // half-inning while playing, else the top of the 1st.
